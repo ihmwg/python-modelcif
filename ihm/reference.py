@@ -103,6 +103,24 @@ class UniProtSequence(Sequence):
             return cls(code, accession, seq, details)
 
 
+class PDBSequence(Sequence):
+    """Point to the sequence of an :class:`ihm.Entity` in PDB.
+
+       These objects are typically passed to the :class:`ihm.Entity`
+       constructor.
+
+       :param str db_code: The PDB code (e.g. 1abc)
+
+       See :class:`Sequence` for a description of the remaining parameters.
+    """
+
+    _db_name = 'PDB'
+
+    def __init__(self, db_code, sequence, details=None):
+        super(PDBSequence, self).__init__(
+            self._db_name, db_code, db_code, sequence, details)
+
+
 class Alignment(object):
     """A sequence range that aligns between the database and the entity.
        This describes part of the sequence in the sequence database
