@@ -576,30 +576,34 @@ class _EntityPolySeqDumper(Dumper):
                     lp.write(entity_id=entity._id, num=num + 1, mon_id=comp.id)
 
 
+def _assign_range_ids(system, ranges_by_id):
+    seen_ranges = {}
+    # Need to assign ranges for all starting models too
+    for sm in system._all_starting_models():
+        rng = sm.asym_unit
+        util._remove_id(rng, attr='_range_id')
+
+    for rng in system._all_entity_ranges():
+        util._remove_id(rng, attr='_range_id')
+    for rng in itertools.chain(system._all_entity_ranges(),
+                               (sm.asym_unit
+                                for sm in system._all_starting_models())):
+        entity = rng.entity if hasattr(rng, 'entity') else rng
+        if entity.is_polymeric():
+            util._assign_id(rng, seen_ranges, ranges_by_id,
+                            attr='_range_id',
+                            # Two ranges are considered the same if they
+                            # have the same entity ID and refer to
+                            # the same residue range
+                            seen_obj=(entity._id, rng.seq_id_range))
+        else:
+            rng._range_id = None
+
+
 class _EntityPolySegmentDumper(Dumper):
     def finalize(self, system):
-        seen_ranges = {}
         self._ranges_by_id = []
-        # Need to assign ranges for all starting models too
-        for sm in system._all_starting_models():
-            rng = sm.asym_unit
-            util._remove_id(rng, attr='_range_id')
-
-        for rng in system._all_entity_ranges():
-            util._remove_id(rng, attr='_range_id')
-        for rng in itertools.chain(system._all_entity_ranges(),
-                                   (sm.asym_unit
-                                    for sm in system._all_starting_models())):
-            entity = rng.entity if hasattr(rng, 'entity') else rng
-            if entity.is_polymeric():
-                util._assign_id(rng, seen_ranges, self._ranges_by_id,
-                                attr='_range_id',
-                                # Two ranges are considered the same if they
-                                # have the same entity ID and refer to
-                                # the same residue range
-                                seen_obj=(entity._id, rng.seq_id_range))
-            else:
-                rng._range_id = None
+        _assign_range_ids(system, self._ranges_by_id)
 
     def dump(self, system, writer):
         with writer.loop("_ihm_entity_poly_segment",
@@ -613,6 +617,24 @@ class _EntityPolySegmentDumper(Dumper):
                     seq_id_end=rng.seq_id_range[1],
                     comp_id_begin=entity.sequence[rng.seq_id_range[0] - 1].id,
                     comp_id_end=entity.sequence[rng.seq_id_range[1] - 1].id)
+
+
+class _MATemplatePolySegmentDumper(Dumper):
+    def finalize(self, system):
+        self._ranges_by_id = []
+        _assign_range_ids(system, self._ranges_by_id)
+
+    def dump(self, system, writer):
+        # todo: only output this info for templates
+        with writer.loop("_ma_template_poly_segment",
+                         ["id", "template_id", "residue_number_begin",
+                          "residue_number_end"]) as lp:
+            for rng in self._ranges_by_id:
+                entity = rng.entity if hasattr(rng, 'entity') else rng
+                lp.write(
+                    id=rng._range_id, template_id=entity._id,
+                    residue_number_begin=rng.seq_id_range[0],
+                    residue_number_end=rng.seq_id_range[1])
 
 
 class _PolySeqSchemeDumper(Dumper):
@@ -708,7 +730,7 @@ class _StructAsymDumper(Dumper):
                          details=asym.details)
 
 
-class _AssemblyDumper(Dumper):
+class _AssemblyDumperBase(Dumper):
     def finalize(self, system):
         # Sort each assembly by entity id/asym id/range
         def component_key(comp):
@@ -746,6 +768,8 @@ class _AssemblyDumper(Dumper):
         for a in all_assemblies:
             a.description = description_by_id[a._id]
 
+
+class _IHMAssemblyDumper(_AssemblyDumperBase):
     def dump(self, system, writer):
         self.dump_summary(system, writer)
         self.dump_details(system, writer)
@@ -773,6 +797,23 @@ class _AssemblyDumper(Dumper):
                         entity_id=entity._id,
                         asym_id=comp._id if hasattr(comp, 'entity') else None,
                         entity_poly_segment_id=comp._range_id)
+
+
+class _MAAssemblyDumper(_AssemblyDumperBase):
+    def dump(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_struct_assembly",
+                         ["ordinal_id", "assembly_id", "entity_id", "asym_id",
+                          "seq_id_begin", "seq_id_end"]) as lp:
+            for a in self._assembly_by_id:
+                for comp in a:
+                    entity = comp.entity if hasattr(comp, 'entity') else comp
+                    lp.write(
+                        ordinal_id=next(ordinal), assembly_id=a._id,
+                        entity_id=entity._id,
+                        asym_id=comp._id if hasattr(comp, 'entity') else None,
+                        seq_id_begin=comp.seq_id_range[0],
+                        seq_id_end=comp.seq_id_range[1])
 
 
 class _ExternalReferenceDumper(Dumper):
@@ -1545,7 +1586,8 @@ class _MAModelDumper(_ModelDumperBase):
             for group, model in system._all_models():
                 lp.write(ordinal_id=next(ordinal), model_id=model._id,
                          model_group_id=group._id, model_name=model.name,
-                         model_group_name=group.name)
+                         model_group_name=group.name,
+                         assembly_id=model.assembly._id)
 
 
 class _EnsembleDumper(Dumper):
@@ -3151,7 +3193,7 @@ class ModelArchiveVariant(Variant):
         _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
         _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
         _StructAsymDumper, _PolySeqSchemeDumper, _NonPolySchemeDumper,
-        _MAModelDumper]
+        _MATemplatePolySegmentDumper, _MAAssemblyDumper, _MAModelDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
@@ -3166,7 +3208,7 @@ class IHMVariant(Variant):
         _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
         _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
         _EntityPolySegmentDumper, _StructAsymDumper, _PolySeqSchemeDumper,
-        _NonPolySchemeDumper, _AssemblyDumper, _ExternalReferenceDumper,
+        _NonPolySchemeDumper, _IHMAssemblyDumper, _ExternalReferenceDumper,
         _DatasetDumper, _ModelRepresentationDumper, _StartingModelDumper,
         _ProtocolDumper, _PostProcessDumper, _PseudoSiteDumper,
         _GeometricObjectDumper, _FeatureDumper, _CrossLinkDumper,
