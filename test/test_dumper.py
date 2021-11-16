@@ -940,7 +940,7 @@ _ihm_entity_poly_segment.comp_id_end
 #
 """)
 
-        d = ihm.dumper._AssemblyDumper()
+        d = ihm.dumper._IHMAssemblyDumper()
         d.finalize(system)
         self.assertEqual(system.complete_assembly._id, 1)
         self.assertEqual([asmb._id for asmb in system.orphan_assemblies],
@@ -1007,7 +1007,7 @@ _ihm_entity_poly_segment.comp_id_end
 #
 """)
 
-        d = ihm.dumper._AssemblyDumper()
+        d = ihm.dumper._IHMAssemblyDumper()
         d.finalize(system)
         out = _get_dumper_output(d, system)
         self.assertEqual(out, """#
@@ -1723,7 +1723,7 @@ _ihm_modeling_post_process.details
         group2 = ihm.model.ModelGroup([model3], name='Group 2')
         state.append(group2)
 
-        dumper = ihm.dumper._ModelDumper()
+        dumper = ihm.dumper._IHMModelDumper()
         dumper.finalize(system)  # assign model/group IDs
 
         out = _get_dumper_output(dumper, system)
@@ -2071,7 +2071,7 @@ _ihm_model_group_link.model_id
                                            seq_id_range=(4, 4), x=4.0,
                                            y=5.0, z=6.0, radius=1.0, rmsf=8.0)]
 
-        dumper = ihm.dumper._ModelDumper()
+        dumper = ihm.dumper._IHMModelDumper()
         dumper.finalize(system)  # assign model/group IDs
 
         out = _get_dumper_output(dumper, system)
@@ -2134,7 +2134,7 @@ _ihm_sphere_obj_site.model_id
                                        type_symbol='N', x=4.0, y=5.0, z=6.0,
                                        biso=42.0, occupancy=0.2)]
 
-        dumper = ihm.dumper._ModelDumper()
+        dumper = ihm.dumper._IHMModelDumper()
         dumper.finalize(system)  # assign model/group IDs
 
         # With auth_seq_id == seq_id
@@ -2403,7 +2403,7 @@ _ihm_entity_poly_segment.comp_id_end
         state3.append(ihm.model.ModelGroup(name="group4"))
         sg2.append(state3)
 
-        dumper = ihm.dumper._ModelDumper()
+        dumper = ihm.dumper._IHMModelDumper()
         dumper.finalize(system)  # assign model group IDs
 
         dumper = ihm.dumper._MultiStateDumper()
@@ -2448,7 +2448,7 @@ _ihm_multi_state_model_group_link.model_group_id
                                 precision=4.2)
         system.ensembles.append(e1)
 
-        dumper = ihm.dumper._ModelDumper()
+        dumper = ihm.dumper._IHMModelDumper()
         self.assertRaises(ValueError, dumper.finalize, system)
 
     def test_ordered(self):
