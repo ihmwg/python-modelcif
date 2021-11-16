@@ -1532,9 +1532,20 @@ class _IHMModelDumper(_ModelDumperBase):
 
 class _MAModelDumper(_ModelDumperBase):
     def dump(self, system, writer):
+        self.dump_model_list(system, writer)
         seen_types = self.dump_atoms(system, writer, add_ihm=False)
         self.dump_atom_type(seen_types, system, writer)
 
+    def dump_model_list(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_model_list",
+                         ["ordinal_id", "model_id", "model_group_id",
+                          "model_name", "model_group_name", "assembly_id",
+                          "data_id", "model_type"]) as lp:
+            for group, model in system._all_models():
+                lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                         model_group_id=group._id, model_name=model.name,
+                         model_group_name=group.name)
 
 
 class _EnsembleDumper(Dumper):
