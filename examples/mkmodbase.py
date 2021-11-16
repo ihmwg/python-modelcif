@@ -81,4 +81,4 @@ system.state_groups.append(ihm.model.StateGroup([state]))
 
 # Once the system is complete, we can write it out to an mmCIF file:
 with open('output.cif', 'w') as fh:
-    ihm.dumper.write(fh, [system])
+    ihm.dumper.write(fh, [system], variant=ihm.dumper.ModelArchiveVariant)

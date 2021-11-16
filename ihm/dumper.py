@@ -3105,7 +3105,61 @@ def _check_restraint_groups(system):
                 "can be grouped." % g)
 
 
-def write(fh, systems, format='mmCIF', dumpers=[]):
+_flr_dumpers = [_FLRExperimentDumper, _FLRInstSettingDumper,
+               _FLR_ExpConditionDumper, _FLRInstrumentDumper,
+               _FLREntityAssemblyDumper, _FLRSampleConditionDumper,
+               _FLRSampleDumper, _FLRProbeDumper, _FLRSampleProbeDetailsDumper,
+               _FLRPolyProbePositionDumper, _FLRConjugateDumper,
+               _FLRForsterRadiusDumper, _FLRCalibrationParametersDumper,
+               _FLRLifetimeFitModelDumper, _FLRRefMeasurementDumper,
+               _FLRAnalysisDumper, _FLRPeakAssignmentDumper,
+               _FLRDistanceRestraintDumper, _FLRModelQualityDumper,
+               _FLRModelDistanceDumper, _FLRFPSModelingDumper,
+               _FLRFPSAVModelingDumper, _FLRFPSMPPModelingDumper]
+
+
+class Variant(object):
+    def get_dumpers(self):
+        pass
+
+
+class ModelArchiveVariant(Variant):
+    _dumpers = [
+        _EntryDumper,  # must be first
+        _StructDumper, _CommentDumper, _AuditConformDumper, _CitationDumper,
+        _SoftwareDumper, _AuditAuthorDumper, _GrantDumper, _ChemCompDumper,
+        _ChemDescriptorDumper, _EntityDumper, _EntitySrcGenDumper,
+        _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
+        _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
+        _StructAsymDumper, _PolySeqSchemeDumper, _NonPolySchemeDumper]
+
+    def get_dumpers(self):
+        return [d() for d in self._dumpers]
+
+
+class IHMVariant(Variant):
+    _dumpers = [
+        _EntryDumper,  # must be first
+        _StructDumper, _CommentDumper, _AuditConformDumper, _CitationDumper,
+        _SoftwareDumper, _AuditAuthorDumper, _GrantDumper, _ChemCompDumper,
+        _ChemDescriptorDumper, _EntityDumper, _EntitySrcGenDumper,
+        _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
+        _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
+        _EntityPolySegmentDumper, _StructAsymDumper, _PolySeqSchemeDumper,
+        _NonPolySchemeDumper, _AssemblyDumper, _ExternalReferenceDumper,
+        _DatasetDumper, _ModelRepresentationDumper, _StartingModelDumper,
+        _ProtocolDumper, _PostProcessDumper, _PseudoSiteDumper,
+        _GeometricObjectDumper, _FeatureDumper, _CrossLinkDumper,
+        _GeometricRestraintDumper, _DerivedDistanceRestraintDumper,
+        _PredictedContactRestraintDumper, _EM3DDumper, _EM2DDumper, _SASDumper,
+        _ModelDumper, _EnsembleDumper, _DensityDumper, _MultiStateDumper,
+        _OrderedDumper]
+
+    def get_dumpers(self):
+        return [d() for d in self._dumpers + _flr_dumpers]
+
+
+def write(fh, systems, format='mmCIF', dumpers=[], variant=IHMVariant):
     """Write out all `systems` to the file handle `fh`.
        Files can be written in either the text-based mmCIF format or the
        BinaryCIF format. The BinaryCIF writer needs the msgpack Python
@@ -3125,52 +3179,16 @@ def write(fh, systems, format='mmCIF', dumpers=[]):
               default) for the (text-based) mmCIF format or 'BCIF' for
               BinaryCIF.
        :param list dumpers: A list of :class:`Dumper` classes (not objects).
-              These can be used to add extra categories to the file."""
-    dumpers = [_EntryDumper(),  # must be first
-               _StructDumper(), _CommentDumper(),
-               _AuditConformDumper(), _CitationDumper(), _SoftwareDumper(),
-               _AuditAuthorDumper(), _GrantDumper(),
-               _ChemCompDumper(), _ChemDescriptorDumper(),
-               _EntityDumper(), _EntitySrcGenDumper(), _EntitySrcNatDumper(),
-               _EntitySrcSynDumper(), _StructRefDumper(),
-               _EntityPolyDumper(),
-               _EntityNonPolyDumper(),
-               _EntityPolySeqDumper(), _EntityPolySegmentDumper(),
-               _StructAsymDumper(),
-               _PolySeqSchemeDumper(),
-               _NonPolySchemeDumper(),
-               _AssemblyDumper(),
-               _ExternalReferenceDumper(),
-               _DatasetDumper(),
-               _ModelRepresentationDumper(),
-               _StartingModelDumper(),
-               _ProtocolDumper(),
-               _PostProcessDumper(),
-               _PseudoSiteDumper(),
-               _GeometricObjectDumper(), _FeatureDumper(),
-               _CrossLinkDumper(), _GeometricRestraintDumper(),
-               _DerivedDistanceRestraintDumper(),
-               _PredictedContactRestraintDumper(),
-               _EM3DDumper(),
-               _EM2DDumper(),
-               _SASDumper(),
-               _ModelDumper(),
-               _EnsembleDumper(),
-               _DensityDumper(),
-               _MultiStateDumper(), _OrderedDumper(),
-               _FLRExperimentDumper(), _FLRInstSettingDumper(),
-               _FLR_ExpConditionDumper(),
-               _FLRInstrumentDumper(), _FLREntityAssemblyDumper(),
-               _FLRSampleConditionDumper(), _FLRSampleDumper(),
-               _FLRProbeDumper(), _FLRSampleProbeDetailsDumper(),
-               _FLRPolyProbePositionDumper(), _FLRConjugateDumper(),
-               _FLRForsterRadiusDumper(), _FLRCalibrationParametersDumper(),
-               _FLRLifetimeFitModelDumper(), _FLRRefMeasurementDumper(),
-               _FLRAnalysisDumper(), _FLRPeakAssignmentDumper(),
-               _FLRDistanceRestraintDumper(), _FLRModelQualityDumper(),
-               _FLRModelDistanceDumper(), _FLRFPSModelingDumper(),
-               _FLRFPSAVModelingDumper(),
-               _FLRFPSMPPModelingDumper()] + [d() for d in dumpers]
+              These can be used to add extra categories to the file.
+       :param variant: A class or object that selects the type of file to
+              output, for example :class:`IHMVariant` or
+              :class:`ModelArchiveVariant`. This primarily controls the set
+              of tables that are written to the file.
+       :type variant: :class:`Variant`
+    """
+    if isinstance(variant, type):
+        variant = variant()
+    dumpers = variant.get_dumpers() + [d() for d in dumpers]
     writer_map = {'mmCIF': ihm.format.CifWriter,
                   'BCIF': ihm.format_bcif.BinaryCifWriter}
 
