@@ -1402,7 +1402,7 @@ class _RangeChecker(object):
                              for x in self.repr_asym_ids[asym._id])))
 
 
-class _ModelDumper(Dumper):
+class _ModelDumperBase(Dumper):
 
     def finalize(self, system):
         # Remove any existing ID
@@ -1426,41 +1426,6 @@ class _ModelDumper(Dumper):
                                  "OrderedProcess. ModelGroups should be "
                                  "stored in State objects." % g)
 
-    def dump(self, system, writer):
-        self.dump_model_list(system, writer)
-        self.dump_model_groups(system, writer)
-        seen_types = self.dump_atoms(system, writer)
-        self.dump_spheres(system, writer)
-        self.dump_atom_type(seen_types, system, writer)
-
-    def dump_model_list(self, system, writer):
-        with writer.loop("_ihm_model_list",
-                         ["model_id", "model_name", "assembly_id",
-                          "protocol_id", "representation_id"]) as lp:
-            for group, model in system._all_models():
-                lp.write(model_id=model._id,
-                         model_name=model.name,
-                         assembly_id=model.assembly._id,
-                         protocol_id=model.protocol._id
-                         if model.protocol else None,
-                         representation_id=model.representation._id)
-
-    def dump_model_groups(self, system, writer):
-        self.dump_model_group_summary(system, writer)
-        self.dump_model_group_link(system, writer)
-
-    def dump_model_group_summary(self, system, writer):
-        with writer.loop("_ihm_model_group", ["id", "name", "details"]) as lp:
-            for group in system._all_model_groups():
-                lp.write(id=group._id, name=group.name)
-
-    def dump_model_group_link(self, system, writer):
-        with writer.loop("_ihm_model_group_link",
-                         ["group_id", "model_id"]) as lp:
-            for group in system._all_model_groups():
-                for model_id in sorted(set(model._id for model in group)):
-                    lp.write(model_id=model_id, group_id=group._id)
-
     def dump_atom_type(self, seen_types, system, writer):
         """Output the atom_type table with a list of elements used in atom_site.
            This table is needed by atom_site. Note that we output it *after*
@@ -1471,18 +1436,17 @@ class _ModelDumper(Dumper):
             for element in elements:
                 lp.write(symbol=element)
 
-    def dump_atoms(self, system, writer):
+    def dump_atoms(self, system, writer, add_ihm=True):
         seen_types = {}
         ordinal = itertools.count(1)
-        with writer.loop("_atom_site",
-                         ["group_PDB", "id", "type_symbol",
-                          "label_atom_id", "label_alt_id", "label_comp_id",
-                          "label_seq_id", "auth_seq_id",
-                          "label_asym_id", "Cartn_x",
-                          "Cartn_y", "Cartn_z", "occupancy", "label_entity_id",
-                          "auth_asym_id",
-                          "B_iso_or_equiv", "pdbx_PDB_model_num",
-                          "ihm_model_id"]) as lp:
+        it = ["group_PDB", "id", "type_symbol", "label_atom_id",
+              "label_alt_id", "label_comp_id", "label_seq_id", "auth_seq_id",
+              "label_asym_id", "Cartn_x", "Cartn_y", "Cartn_z", "occupancy",
+              "label_entity_id", "auth_asym_id", "B_iso_or_equiv",
+              "pdbx_PDB_model_num"]
+        if add_ihm:
+            it.append("ihm_model_id")
+        with writer.loop("_atom_site", it) as lp:
             for group, model in system._all_models():
                 rngcheck = _RangeChecker(model)
                 for atom in model.get_atoms():
@@ -1508,6 +1472,43 @@ class _ModelDumper(Dumper):
                              ihm_model_id=model._id)
         return seen_types
 
+
+class _IHMModelDumper(_ModelDumperBase):
+    def dump(self, system, writer):
+        self.dump_model_list(system, writer)
+        self.dump_model_groups(system, writer)
+        seen_types = self.dump_atoms(system, writer)
+        self.dump_spheres(system, writer)
+        self.dump_atom_type(seen_types, system, writer)
+
+    def dump_model_groups(self, system, writer):
+        self.dump_model_group_summary(system, writer)
+        self.dump_model_group_link(system, writer)
+
+    def dump_model_list(self, system, writer):
+        with writer.loop("_ihm_model_list",
+                         ["model_id", "model_name", "assembly_id",
+                          "protocol_id", "representation_id"]) as lp:
+            for group, model in system._all_models():
+                lp.write(model_id=model._id,
+                         model_name=model.name,
+                         assembly_id=model.assembly._id,
+                         protocol_id=model.protocol._id
+                         if model.protocol else None,
+                         representation_id=model.representation._id)
+
+    def dump_model_group_summary(self, system, writer):
+        with writer.loop("_ihm_model_group", ["id", "name", "details"]) as lp:
+            for group in system._all_model_groups():
+                lp.write(id=group._id, name=group.name)
+
+    def dump_model_group_link(self, system, writer):
+        with writer.loop("_ihm_model_group_link",
+                         ["group_id", "model_id"]) as lp:
+            for group in system._all_model_groups():
+                for model_id in sorted(set(model._id for model in group)):
+                    lp.write(model_id=model_id, group_id=group._id)
+
     def dump_spheres(self, system, writer):
         ordinal = itertools.count(1)
         with writer.loop("_ihm_sphere_obj_site",
@@ -1527,6 +1528,13 @@ class _ModelDumper(Dumper):
                              Cartn_x=sphere.x, Cartn_y=sphere.y,
                              Cartn_z=sphere.z, object_radius=sphere.radius,
                              rmsf=sphere.rmsf, model_id=model._id)
+
+
+class _MAModelDumper(_ModelDumperBase):
+    def dump(self, system, writer):
+        seen_types = self.dump_atoms(system, writer, add_ihm=False)
+        self.dump_atom_type(seen_types, system, writer)
+
 
 
 class _EnsembleDumper(Dumper):
@@ -3131,7 +3139,8 @@ class ModelArchiveVariant(Variant):
         _ChemDescriptorDumper, _EntityDumper, _EntitySrcGenDumper,
         _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
         _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
-        _StructAsymDumper, _PolySeqSchemeDumper, _NonPolySchemeDumper]
+        _StructAsymDumper, _PolySeqSchemeDumper, _NonPolySchemeDumper,
+        _MAModelDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
@@ -3152,7 +3161,7 @@ class IHMVariant(Variant):
         _GeometricObjectDumper, _FeatureDumper, _CrossLinkDumper,
         _GeometricRestraintDumper, _DerivedDistanceRestraintDumper,
         _PredictedContactRestraintDumper, _EM3DDumper, _EM2DDumper, _SASDumper,
-        _ModelDumper, _EnsembleDumper, _DensityDumper, _MultiStateDumper,
+        _IHMModelDumper, _EnsembleDumper, _DensityDumper, _MultiStateDumper,
         _OrderedDumper]
 
     def get_dumpers(self):
