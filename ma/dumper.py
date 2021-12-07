@@ -3,6 +3,17 @@ import ihm.dumper
 from ihm.dumper import Dumper, Variant, _assign_range_ids
 
 
+class _AuditConformDumper(Dumper):
+    URL = ("https://raw.githubusercontent.com/" +
+           "ihmwg/MA-dictionary/%s/mmcif_ma.dic")
+
+    def dump(self, system, writer):
+        with writer.category("_audit_conform") as lp:
+            # Update to match the version of the MA dictionary we support:
+            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
+                     dict_location=self.URL % "8b46f31")
+
+
 class _TemplatePolySegmentDumper(Dumper):
     def finalize(self, system):
         self._ranges_by_id = []
@@ -61,7 +72,7 @@ class ModelArchiveVariant(Variant):
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
-        ihm.dumper._AuditConformDumper, ihm.dumper._CitationDumper,
+        _AuditConformDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, ihm.dumper._AuditAuthorDumper,
         ihm.dumper._GrantDumper, ihm.dumper._ChemCompDumper,
         ihm.dumper._EntityDumper,
