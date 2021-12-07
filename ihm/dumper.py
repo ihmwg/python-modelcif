@@ -619,24 +619,6 @@ class _EntityPolySegmentDumper(Dumper):
                     comp_id_end=entity.sequence[rng.seq_id_range[1] - 1].id)
 
 
-class _MATemplatePolySegmentDumper(Dumper):
-    def finalize(self, system):
-        self._ranges_by_id = []
-        _assign_range_ids(system, self._ranges_by_id)
-
-    def dump(self, system, writer):
-        # todo: only output this info for templates
-        with writer.loop("_ma_template_poly_segment",
-                         ["id", "template_id", "residue_number_begin",
-                          "residue_number_end"]) as lp:
-            for rng in self._ranges_by_id:
-                entity = rng.entity if hasattr(rng, 'entity') else rng
-                lp.write(
-                    id=rng._range_id, template_id=entity._id,
-                    residue_number_begin=rng.seq_id_range[0],
-                    residue_number_end=rng.seq_id_range[1])
-
-
 class _PolySeqSchemeDumper(Dumper):
     """Output the _pdbx_poly_seq_scheme table.
        This is needed because it is a parent category of atom_site.
@@ -797,23 +779,6 @@ class _IHMAssemblyDumper(_AssemblyDumperBase):
                         entity_id=entity._id,
                         asym_id=comp._id if hasattr(comp, 'entity') else None,
                         entity_poly_segment_id=comp._range_id)
-
-
-class _MAAssemblyDumper(_AssemblyDumperBase):
-    def dump(self, system, writer):
-        ordinal = itertools.count(1)
-        with writer.loop("_ma_struct_assembly",
-                         ["ordinal_id", "assembly_id", "entity_id", "asym_id",
-                          "seq_id_begin", "seq_id_end"]) as lp:
-            for a in self._assembly_by_id:
-                for comp in a:
-                    entity = comp.entity if hasattr(comp, 'entity') else comp
-                    lp.write(
-                        ordinal_id=next(ordinal), assembly_id=a._id,
-                        entity_id=entity._id,
-                        asym_id=comp._id if hasattr(comp, 'entity') else None,
-                        seq_id_begin=comp.seq_id_range[0],
-                        seq_id_end=comp.seq_id_range[1])
 
 
 class _ExternalReferenceDumper(Dumper):
@@ -1569,25 +1534,6 @@ class _IHMModelDumper(_ModelDumperBase):
                              Cartn_x=sphere.x, Cartn_y=sphere.y,
                              Cartn_z=sphere.z, object_radius=sphere.radius,
                              rmsf=sphere.rmsf, model_id=model._id)
-
-
-class _MAModelDumper(_ModelDumperBase):
-    def dump(self, system, writer):
-        self.dump_model_list(system, writer)
-        seen_types = self.dump_atoms(system, writer, add_ihm=False)
-        self.dump_atom_type(seen_types, system, writer)
-
-    def dump_model_list(self, system, writer):
-        ordinal = itertools.count(1)
-        with writer.loop("_ma_model_list",
-                         ["ordinal_id", "model_id", "model_group_id",
-                          "model_name", "model_group_name", "assembly_id",
-                          "data_id", "model_type"]) as lp:
-            for group, model in system._all_models():
-                lp.write(ordinal_id=next(ordinal), model_id=model._id,
-                         model_group_id=group._id, model_name=model.name,
-                         model_group_name=group.name,
-                         assembly_id=model.assembly._id)
 
 
 class _EnsembleDumper(Dumper):
@@ -3147,25 +3093,6 @@ class _FLRFPSMPPModelingDumper(Dumper):
                     mpp_atom_position_group_id=x.mpp_atom_position_group._id)
 
 
-def _init_restraint_groups(system):
-    """Initialize all RestraintGroups by removing any assigned ID"""
-    for g in system.restraint_groups:
-        util._remove_id(g)
-
-
-def _check_restraint_groups(system):
-    """Check that all RestraintGroups were successfully dumped"""
-    for g in system.restraint_groups:
-        if len(g) > 0 and not hasattr(g, '_id'):
-            raise TypeError(
-                "RestraintGroup(%s) contains an unsupported combination of "
-                "Restraints. Due to limitations of the underlying dictionary, "
-                "all objects in a RestraintGroup must be of the same type, "
-                "and only certain types (currently only "
-                "DerivedDistanceRestraint or PredictedContactRestraint) "
-                "can be grouped." % g)
-
-
 _flr_dumpers = [_FLRExperimentDumper, _FLRInstSettingDumper,
                _FLR_ExpConditionDumper, _FLRInstrumentDumper,
                _FLREntityAssemblyDumper, _FLRSampleConditionDumper,
@@ -3182,21 +3109,6 @@ _flr_dumpers = [_FLRExperimentDumper, _FLRInstSettingDumper,
 class Variant(object):
     def get_dumpers(self):
         pass
-
-
-class ModelArchiveVariant(Variant):
-    _dumpers = [
-        _EntryDumper,  # must be first
-        _StructDumper, _CommentDumper, _AuditConformDumper, _CitationDumper,
-        _SoftwareDumper, _AuditAuthorDumper, _GrantDumper, _ChemCompDumper,
-        _ChemDescriptorDumper, _EntityDumper, _EntitySrcGenDumper,
-        _EntitySrcNatDumper, _EntitySrcSynDumper, _StructRefDumper,
-        _EntityPolyDumper, _EntityNonPolyDumper, _EntityPolySeqDumper,
-        _StructAsymDumper, _PolySeqSchemeDumper, _NonPolySchemeDumper,
-        _MATemplatePolySegmentDumper, _MAAssemblyDumper, _MAModelDumper]
-
-    def get_dumpers(self):
-        return [d() for d in self._dumpers]
 
 
 class IHMVariant(Variant):
@@ -3243,9 +3155,9 @@ def write(fh, systems, format='mmCIF', dumpers=[], variant=IHMVariant):
        :param list dumpers: A list of :class:`Dumper` classes (not objects).
               These can be used to add extra categories to the file.
        :param variant: A class or object that selects the type of file to
-              output, for example :class:`IHMVariant` or
-              :class:`ModelArchiveVariant`. This primarily controls the set
-              of tables that are written to the file.
+              output. This primarily controls the set of tables that are
+              written to the file. In most cases the default
+              :class:`IHMVariant` should be used.
        :type variant: :class:`Variant`
     """
     if isinstance(variant, type):
@@ -3256,13 +3168,13 @@ def write(fh, systems, format='mmCIF', dumpers=[], variant=IHMVariant):
 
     writer = writer_map[format](fh)
     for system in systems:
-        _init_restraint_groups(system)
+        system._before_write()
         # Fill in complete assembly
         system._make_complete_assembly()
 
         for d in dumpers:
             d.finalize(system)
-        _check_restraint_groups(system)
+        system._check_after_write()
         for d in dumpers:
             d.dump(system, writer)
     writer.flush()

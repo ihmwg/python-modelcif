@@ -18,6 +18,7 @@ try:
 except ImportError:
     import urllib2
 import json
+from . import util
 
 __version__ = '0.23'
 
@@ -66,13 +67,7 @@ def _remove_identical(gen):
         yield obj
 
 
-class System(object):
-    """Top-level class representing a complete modeled system.
-
-       :param str title: Title (longer text description) of the system.
-       :param str id: Unique identifier for this system in the mmCIF file.
-    """
-
+class _SystemBase(object):
     def __init__(self, title=None, id='model'):
         self.id = id
         self.title = title
@@ -127,6 +122,36 @@ class System(object):
         #: See :class:`~ihm.location.Location`.
         self.locations = []
 
+    def _make_complete_assembly(self):
+        """Fill in the complete assembly with all asym units"""
+        # Clear out any existing components
+        self.complete_assembly[:] = []
+
+        # Include all asym units
+        for asym in self.asym_units:
+            self.complete_assembly.append(asym)
+
+    def _all_models(self):
+        """Iterate over all Models in the system"""
+        # todo: raise an error if a model is present in multiple groups
+        for group in self._all_model_groups():
+            seen_models = {}
+            for model in group:
+                if model in seen_models:
+                    continue
+                seen_models[model] = None
+                yield group, model
+
+
+
+class System(_SystemBase):
+    """Top-level class representing a complete modeled system.
+
+       :param str title: Title (longer text description) of the system.
+       :param str id: Unique identifier for this system in the mmCIF file.
+    """
+    def __init__(self, title=None, id='model'):
+        _SystemBase.__init__(self, title, id)
         #: All orphaned datasets.
         #: This can be used to keep track of all datasets that are not
         #: otherwise used - normally a dataset is assigned to a
@@ -282,17 +307,6 @@ class System(object):
                     for edge in step:
                         yield edge.group_begin
                         yield edge.group_end
-
-    def _all_models(self):
-        """Iterate over all Models in the system"""
-        # todo: raise an error if a model is present in multiple groups
-        for group in self._all_model_groups():
-            seen_models = {}
-            for model in group:
-                if model in seen_models:
-                    continue
-                seen_models[model] = None
-                yield group, model
 
     def _all_representations(self):
         """Iterate over all Representations in the system.
@@ -529,14 +543,24 @@ class System(object):
                 for comp in f._all_entities_or_asyms()),
             (d.asym_unit for d in self._all_densities())))
 
-    def _make_complete_assembly(self):
-        """Fill in the complete assembly with all asym units"""
-        # Clear out any existing components
-        self.complete_assembly[:] = []
+    def _before_write(self):
+        """Do any setup necessary before writing out to a file"""
+        # Here, we initialize all RestraintGroups by removing any assigned ID
+        for g in self.restraint_groups:
+            util._remove_id(g)
 
-        # Include all asym units
-        for asym in self.asym_units:
-            self.complete_assembly.append(asym)
+    def _check_after_write(self):
+        """Make sure everything was successfully written"""
+        # Here, we check that all RestraintGroups were successfully dumped"""
+        for g in self.restraint_groups:
+            if len(g) > 0 and not hasattr(g, '_id'):
+                raise TypeError(
+                    "RestraintGroup(%s) contains an unsupported combination "
+                    "of Restraints. Due to limitations of the underlying "
+                    "dictionary, all objects in a RestraintGroup must be of "
+                    "the same type, and only certain types (currently only "
+                    "DerivedDistanceRestraint or PredictedContactRestraint) "
+                    "can be grouped." % g)
 
 
 class Software(object):
