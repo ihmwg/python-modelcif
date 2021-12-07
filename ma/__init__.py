@@ -31,6 +31,10 @@ class System(ihm._SystemBase):
             (software.citation for software in self._all_software()
              if software.citation)))
 
+    def _all_target_entities(self):
+        return _remove_identical(itertools.chain(
+            asym.entity for asmb in self._all_assemblies() for asym in asmb))
+
     def _all_software(self):
         """Iterate over all Software in the system.
            This includes all Software referenced from other objects, plus

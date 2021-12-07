@@ -1,4 +1,5 @@
 import itertools
+import operator
 import ihm.dumper
 from ihm import util
 from ihm.dumper import Dumper, Variant, _assign_range_ids
@@ -13,6 +14,25 @@ class _AuditConformDumper(Dumper):
             # Update to match the version of the MA dictionary we support:
             lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
                      dict_location=self.URL % "8b46f31")
+
+
+class _TargetRefDBDumper(Dumper):
+    def dump(self, system, writer):
+        entities = sorted(system._all_target_entities(),
+                          key=operator.attrgetter('_id'))
+        with writer.loop(
+                "_ma_target_ref_db_details",
+                ["target_entity_id", "db_name", "db_name_other_details",
+                 "db_code", "db_accession", "seq_db_isoform",
+                 "seq_db_align_begin", "seq_db_align_end"]) as lp:
+            for e in entities:
+                for r in e.references:
+                    db_begin = min(a.db_begin for a in r._get_alignments())
+                    db_end = max(a.db_end for a in r._get_alignments())
+                    lp.write(target_entity_id=e._id, db_name=r.db_name,
+                             db_code=r.db_code, db_accession=r.accession,
+                             seq_db_align_begin=db_begin,
+                             seq_db_align_end=db_end)
 
 
 class _DataDumper(Dumper):
@@ -126,7 +146,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._GrantDumper, ihm.dumper._ChemCompDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
-        ihm.dumper._EntitySrcSynDumper, ihm.dumper._StructRefDumper,
+        ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
