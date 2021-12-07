@@ -6,14 +6,24 @@ import ma.protocol
 import ma.model
 import ma.dumper
 import ma.reference
+import ma.citations
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
+
+system.authors.extend(('Pieper U', 'Webb B', 'Narayanan E', 'Sali A'))
 
 modpipe_software = ma.Software(
     name='ModPipe', classification='comparative modeling',
     location='https://salilab.org/modpipe/', type='program',
     version='SVN.r1703', description='Comparative modeling pipeline')
 system.software.append(modpipe_software)
+
+modeller_software = ma.Software(
+    name='MODELLER', classification='comparative modeling',
+    location='https://salilab.org/modeller/', type='program',
+    version='SVN', citation=ma.citations.modeller,
+    description='Comparative modeling by satisfaction of spatial restraints')
+system.software.append(modeller_software)
 
 s = ma.reference.PDBSequence(db_code='3nc1', sequence='DMACDTFIK')
 template_e = ma.Entity('DMACDTFIK', description='Template subunit',
