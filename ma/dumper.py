@@ -49,6 +49,31 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
                         seq_id_end=comp.seq_id_range[1])
 
 
+class _ProtocolDumper(Dumper):
+    def finalize(self, system):
+        # Assign IDs to protocols and steps
+        for np, p in enumerate(system.protocols):
+            p._id = np + 1
+            for ns, s in enumerate(p.steps):
+                s._id = ns + 1
+
+    def dump(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_protocol_step",
+                ['ordinal_id', 'protocol_id', 'step_id', 'method_type',
+                 'step_name', 'details', 'software_group_id',
+                 'input_data_group_id', 'output_data_group_id']) as lp:
+            for p in system.protocols:
+                for s in p.steps:
+                    lp.write(ordinal_id=next(ordinal), protocol_id=p._id,
+                             step_id=s._id, method_type=s.method_type,
+                             step_name=s.name, details=s.details,
+                             # todo: should be group id, not software id
+                             software_group_id=s.software._id if s.software
+                             else None)
+
+
 class _ModelDumper(ihm.dumper._ModelDumperBase):
     def dump(self, system, writer):
         self.dump_model_list(system, writer)
@@ -81,7 +106,8 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _TemplatePolySegmentDumper, _AssemblyDumper, _ModelDumper]
+        _TemplatePolySegmentDumper, _AssemblyDumper, _ProtocolDumper,
+        _ModelDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]

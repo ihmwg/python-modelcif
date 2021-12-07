@@ -3,8 +3,8 @@ from ihm.model import Atom, ModelGroup
 
 
 class Model(object):
-    def __init__(self, assembly, protocol, name=None):
-        self.assembly, self.protocol = assembly, protocol
+    def __init__(self, assembly, name=None):
+        self.assembly = assembly
         # Assume everything is atomic for MA models
         self.representation = ihm.representation.Representation(
             [ihm.representation.AtomicSegment(seg, rigid=False)

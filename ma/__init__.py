@@ -11,6 +11,10 @@ class System(ihm._SystemBase):
         #: See :class:`~ma.model.ModelGroup`.
         self.model_groups = []
 
+        #: All modeling protocols.
+        #: See :class:`~ma.protocol.Protocol`.
+        self.protocols = []
+
     def _before_write(self):
         pass
 
