@@ -1,15 +1,18 @@
 import ihm.representation
 from ihm.model import Atom, ModelGroup
+import ma.data
 
 
-class Model(object):
+class Model(ma.data.Data):
+    data_content_type = 'model coordinates'
+
     def __init__(self, assembly, name=None):
+        ma.data.Data.__init__(self, name)
         self.assembly = assembly
         # Assume everything is atomic for MA models
         self.representation = ihm.representation.Representation(
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
-        self.name = name
         self._atoms = []
 
     def get_atoms(self):

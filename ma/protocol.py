@@ -6,7 +6,9 @@ class Step(object):
     """A single step in a :class:`Protocol`."""
     method_type = "other"
 
-    def __init__(self, name=None, details=None, software=None): # , input_data, output_data)
+    def __init__(self, input_data, output_data, name=None, details=None,
+                 software=None):
+        self.input_data, self.output_data = input_data, output_data
         self.name, self.details, self.software = name, details, software
 
 

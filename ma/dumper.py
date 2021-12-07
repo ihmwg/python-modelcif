@@ -1,5 +1,6 @@
 import itertools
 import ihm.dumper
+from ihm import util
 from ihm.dumper import Dumper, Variant, _assign_range_ids
 
 
@@ -12,6 +13,26 @@ class _AuditConformDumper(Dumper):
             # Update to match the version of the MA dictionary we support:
             lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
                      dict_location=self.URL % "8b46f31")
+
+
+class _DataDumper(Dumper):
+    def finalize(self, system):
+        seen_data = {}
+        self._data_by_id = []
+        for d in system._all_data():
+            util._remove_id(d, attr='_data_id')
+        for d in system._all_data():
+            util._assign_id(d, seen_data, self._data_by_id, attr='_data_id')
+
+    def dump(self, system, writer):
+        with writer.loop(
+                "_ma_data",
+                ["id", "name", "content_type",
+                 "content_type_other_details"]) as lp:
+            for d in self._data_by_id:
+                lp.write(id=d._data_id, name=d.name,
+                         content_type=d.data_content_type,
+                         content_type_other_details=d.data_other_details)
 
 
 class _TemplatePolySegmentDumper(Dumper):
@@ -71,7 +92,9 @@ class _ProtocolDumper(Dumper):
                              step_name=s.name, details=s.details,
                              # todo: should be group id, not software id
                              software_group_id=s.software._id if s.software
-                             else None)
+                             else None,
+                             input_data_group_id=s.input_data._data_id,
+                             output_data_group_id=s.output_data._data_id)
 
 
 class _ModelDumper(ihm.dumper._ModelDumperBase):
@@ -90,7 +113,8 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                 lp.write(ordinal_id=next(ordinal), model_id=model._id,
                          model_group_id=group._id, model_name=model.name,
                          model_group_name=group.name,
-                         assembly_id=model.assembly._id)
+                         assembly_id=model.assembly._id,
+                         data_id=model._data_id)
 
 
 class ModelArchiveVariant(Variant):
@@ -106,6 +130,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
+        _DataDumper,
         _TemplatePolySegmentDumper, _AssemblyDumper, _ProtocolDumper,
         _ModelDumper]
 

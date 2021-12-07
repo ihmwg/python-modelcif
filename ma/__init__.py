@@ -66,3 +66,6 @@ class System(ihm._SystemBase):
     def _all_model_groups(self, only_in_states=True):
         return self.model_groups
 
+    def _all_data(self):
+        return itertools.chain(
+            (model for group, model in self._all_models()))

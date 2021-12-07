@@ -41,15 +41,6 @@ system.asym_units.append(asymA)
 
 modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 
-protocol = ma.protocol.Protocol()
-protocol.steps.append(ma.protocol.TemplateSearchStep(
-    name='ModPipe Seq-Prf (0001)', software=modpipe_software))
-#   input_data=y, output_data=z))
-protocol.steps.append(ma.protocol.ModelingStep(software=modeller_software))
-protocol.steps.append(ma.protocol.ModelSelectionStep(
-    software=modpipe_software))
-system.protocols.append(protocol)
-
 atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
          ('A', 2, 'C', 'CA', 4., 5., 6.),
          ('A', 3, 'C', 'CA', 7., 8., 9.)]
@@ -72,6 +63,16 @@ class MyModel(ma.model.Model):
 
 
 model = MyModel(assembly=modeled_assembly, name='Best scoring model')
+
+protocol = ma.protocol.Protocol()
+protocol.steps.append(ma.protocol.TemplateSearchStep(
+    name='ModPipe Seq-Prf (0001)', software=modpipe_software,
+    input_data=model, output_data=model))
+protocol.steps.append(ma.protocol.ModelingStep(software=modeller_software,
+    input_data=model, output_data=model))
+protocol.steps.append(ma.protocol.ModelSelectionStep(
+    software=modpipe_software, input_data=model, output_data=model))
+system.protocols.append(protocol)
 
 # Quality scores, todo
 
