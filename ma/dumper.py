@@ -3,6 +3,7 @@ import operator
 import ihm.dumper
 from ihm import util
 from ihm.dumper import Dumper, Variant, _assign_range_ids
+import ma.qa_metric
 
 
 class _AuditConformDumper(Dumper):
@@ -137,6 +138,49 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                          data_id=model._data_id)
 
 
+class _QAMetricDumper(Dumper):
+    def finalize(self, system):
+        # Get all metric classes used by all systems
+        seen_metric_classes = set()
+        self._metric_classes_by_id = []
+        metric_id = itertools.count(1)
+        for group, model in system._all_models():
+            for m in model.qa_metrics:
+                cls = type(m)
+                if cls not in seen_metric_classes:
+                    seen_metric_classes.add(cls)
+                    cls._id = next(metric_id)
+                    self._metric_classes_by_id.append(cls)
+
+    def dump(self, system, writer):
+        self.dump_metric_types(system, writer)
+        self.dump_metric_global(system, writer)
+
+    def dump_metric_types(self, system, writer):
+        with writer.loop(
+                "_ma_qa_metric",
+                ["id", "name", "description", "type", "mode",
+                 "type_other_details", "software_group_id"]) as lp:
+            for m in self._metric_classes_by_id:
+                lp.write(id=m._id, name=m.name, description=m.description,
+                         type=m.type, mode=m.mode,
+                         type_other_details=m.other_details,
+                         software_group_id=m.software._id if m.software
+                         else None)
+
+    def dump_metric_global(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_global",
+                ["ordinal_id", "model_id", "metric_id", "metric_value"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, ma.qa_metric.Global):
+                        pass
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             metric_id=m._id, metric_value=m.value)
+
+
 class ModelArchiveVariant(Variant):
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
@@ -152,7 +196,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper,
         _TemplatePolySegmentDumper, _AssemblyDumper, _ProtocolDumper,
-        _ModelDumper]
+        _ModelDumper, _QAMetricDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]

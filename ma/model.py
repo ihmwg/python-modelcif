@@ -14,6 +14,8 @@ class Model(ma.data.Data):
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
+        #: QA metrics
+        self.qa_metrics = []
 
     def get_atoms(self):
         for a in self._atoms:

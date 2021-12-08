@@ -7,6 +7,7 @@ import ma.model
 import ma.dumper
 import ma.reference
 import ma.citations
+import ma.qa_metric
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
@@ -74,7 +75,31 @@ protocol.steps.append(ma.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
 system.protocols.append(protocol)
 
-# Quality scores, todo
+# Define the quality scores used by ModPipe
+class MPQSMetricType(ma.qa_metric.MetricType):
+    other_details = "composite score, values >1.1 are considered reliable"
+
+class MPQS(ma.qa_metric.Global, MPQSMetricType):
+    name = "MPQS"
+    description = "ModPipe Quality Score"
+    software = modpipe_software
+
+class zDOPE(ma.qa_metric.Global, ma.qa_metric.ZScore):
+    name = "zDOPE"
+    description = "Normalized DOPE"
+    software = modeller_software
+
+class TSVModRMSD(ma.qa_metric.Global, ma.qa_metric.Distance):
+    name = "TSVMod RMSD"
+    description = "TSVMod predicted RMSD (MSALL)"
+
+class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
+    name = "TSVMod NO35"
+    description = "TSVMod predicted native overlap (MSALL)"
+
+# Add qa metrics to the model
+model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),
+                         TSVModNO35(0.143)))
 
 # Similar models can be grouped together. Here we only have a single model
 # in the group
