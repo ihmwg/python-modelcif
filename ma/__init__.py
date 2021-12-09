@@ -78,7 +78,13 @@ class System(ihm._SystemBase):
             self.alignments,
             (model for group, model in self._all_models()))
 
-    def _all_software_groups(self):
+    def _all_data_groups(self):
+        """Return all DataGroup (or singleton Data) objects"""
+        return itertools.chain(
+            (step.input_data for p in self.protocols for step in p.steps),
+            (step.output_data for p in self.protocols for step in p.steps))
+
+    def _all_software_and_groups(self):
         """Return all SoftwareGroup (or singleton Software) objects"""
         return itertools.chain(
             (aln.software for aln in self.alignments if aln.software),
@@ -88,6 +94,5 @@ class System(ihm._SystemBase):
              for metric in model.qa_metrics if metric.software))
 
 
-class SoftwareGroup(list):
-    def __init__(self, elements=()):
-        super(SoftwareGroup, self).__init__(elements)
+class SoftwareGroup(tuple):
+    pass

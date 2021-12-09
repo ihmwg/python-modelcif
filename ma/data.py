@@ -5,3 +5,6 @@ class Data(object):
     def __init__(self, name, details=None):
         self.name = name
         self.data_other_details = details
+
+class DataGroup(tuple):
+    pass

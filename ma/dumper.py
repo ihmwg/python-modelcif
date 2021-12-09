@@ -4,6 +4,7 @@ import ihm.dumper
 from ihm import util
 from ihm.dumper import Dumper, Variant, _assign_range_ids
 import ma.qa_metric
+import ma.data
 
 
 class _AuditConformDumper(Dumper):
@@ -42,9 +43,9 @@ class _SoftwareGroupDumper(Dumper):
         self._group_by_id = []
         # Use _group_id rather than _id as the "group" might be a singleton
         # Software, which already has its own id
-        for g in system._all_software_groups():
+        for g in system._all_software_and_groups():
             util._remove_id(g, attr='_group_id')
-        for g in system._all_software_groups():
+        for g in system._all_software_and_groups():
             util._assign_id(g, seen_groups, self._group_by_id,
                             attr='_group_id')
 
@@ -55,15 +56,15 @@ class _SoftwareGroupDumper(Dumper):
                 ["ordinal_id", "group_id", "software_id",
                  "parameter_group_id"]) as lp:
             for g in self._group_by_id:
-                if isinstance(g, ma.SoftwareGroup):
-                    for s in g:
-                        lp.write(ordinal_id=next(ordinal),
-                                 group_id=g._group_id, software_id=s._id)
-                else:
+                if isinstance(g, ma.Software):
                     # If a singleton Software, write a group containing one
                     # member
                     lp.write(ordinal_id=next(ordinal), group_id=g._group_id,
                              software_id=g._id)
+                else:
+                    for s in g:
+                        lp.write(ordinal_id=next(ordinal),
+                                 group_id=g._group_id, software_id=s._id)
 
 
 class _DataDumper(Dumper):
@@ -84,6 +85,35 @@ class _DataDumper(Dumper):
                 lp.write(id=d._data_id, name=d.name,
                          content_type=d.data_content_type,
                          content_type_other_details=d.data_other_details)
+
+
+class _DataGroupDumper(Dumper):
+    def finalize(self, system):
+        seen_groups = {}
+        self._group_by_id = []
+        # Use _data_group_id rather than _id as the "group" might be a
+        # singleton Data, which already has its own id
+        for g in system._all_data_groups():
+            util._remove_id(g, attr='_data_group_id')
+        for g in system._all_data_groups():
+            util._assign_id(g, seen_groups, self._group_by_id,
+                            attr='_data_group_id')
+
+    def dump(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_data_group",
+                ["ordinal_id", "group_id", "data_id"]) as lp:
+            for g in self._group_by_id:
+                if isinstance(g, ma.data.Data):
+                    # If a singleton Data, write a group containing one
+                    # member
+                    lp.write(ordinal_id=next(ordinal),
+                             group_id=g._data_group_id, data_id=g._data_id)
+                else:
+                    for d in g:
+                        lp.write(ordinal_id=next(ordinal),
+                                 group_id=g._data_group_id, data_id=d._data_id)
 
 
 class _TemplatePolySegmentDumper(Dumper):
@@ -197,8 +227,8 @@ class _ProtocolDumper(Dumper):
                              step_name=s.name, details=s.details,
                              software_group_id=s.software._group_id
                              if s.software else None,
-                             input_data_group_id=s.input_data._data_id,
-                             output_data_group_id=s.output_data._data_id)
+                             input_data_group_id=s.input_data._data_group_id,
+                             output_data_group_id=s.output_data._data_group_id)
 
 
 class _ModelDumper(ihm.dumper._ModelDumperBase):
@@ -278,7 +308,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _DataDumper,
+        _DataDumper, _DataGroupDumper,
         _TemplatePolySegmentDumper, _AssemblyDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _QAMetricDumper]
 
