@@ -8,6 +8,7 @@ import ma.dumper
 import ma.reference
 import ma.citations
 import ma.qa_metric
+import ma.alignment
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
@@ -42,6 +43,13 @@ system.asym_units.append(asymA)
 
 modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 
+# Alignment used in modeling
+class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
+    pass
+
+aln = Alignment(name="Modeling alignment", software=modpipe_software)
+system.alignments.append(aln)
+
 atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
          ('A', 2, 'C', 'CA', 4., 5., 6.),
          ('A', 3, 'C', 'CA', 7., 8., 9.)]
@@ -68,9 +76,9 @@ model = MyModel(assembly=modeled_assembly, name='Best scoring model')
 protocol = ma.protocol.Protocol()
 protocol.steps.append(ma.protocol.TemplateSearchStep(
     name='ModPipe Seq-Prf (0001)', software=modpipe_software,
-    input_data=model, output_data=model))
+    input_data=model, output_data=aln))
 protocol.steps.append(ma.protocol.ModelingStep(software=modeller_software,
-    input_data=model, output_data=model))
+    input_data=aln, output_data=model))
 protocol.steps.append(ma.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
 system.protocols.append(protocol)
@@ -92,10 +100,12 @@ class zDOPE(ma.qa_metric.Global, ma.qa_metric.ZScore):
 class TSVModRMSD(ma.qa_metric.Global, ma.qa_metric.Distance):
     name = "TSVMod RMSD"
     description = "TSVMod predicted RMSD (MSALL)"
+    software = None
 
 class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
     name = "TSVMod NO35"
     description = "TSVMod predicted native overlap (MSALL)"
+    software = None
 
 # Add qa metrics to the model
 model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),

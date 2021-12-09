@@ -15,6 +15,9 @@ class System(ihm._SystemBase):
         #: See :class:`~ma.protocol.Protocol`.
         self.protocols = []
 
+        #: All modeling alignments.
+        self.alignments = []
+
     def _before_write(self):
         pass
 
@@ -72,4 +75,5 @@ class System(ihm._SystemBase):
 
     def _all_data(self):
         return itertools.chain(
+            self.alignments,
             (model for group, model in self._all_models()))

@@ -91,6 +91,28 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
                         seq_id_end=comp.seq_id_range[1])
 
 
+class _AlignmentDumper(Dumper):
+    def finalize(self, system):
+        for n, aln in enumerate(system.alignments):
+            aln._id = n + 1
+
+    def dump(self, system, writer):
+        self.dump_info(system, writer)
+
+    def dump_info(self, system, writer):
+        with writer.loop(
+                "_ma_alignment_info",
+                ["alignment_id", "data_id", "software_group_id",
+                 "alignment_length", "alignment_type",
+                 "alignment_mode"]) as lp:
+            for a in system.alignments:
+                lp.write(alignment_id=a._id, data_id=a._data_id,
+                         software_group_id=a.software._id if a.software
+                         else None,
+                         alignment_type=a.type, alignment_mode=a.mode,
+                         alignment_type_other_details=a.other_details)
+
+
 class _ProtocolDumper(Dumper):
     def finalize(self, system):
         # Assign IDs to protocols and steps
@@ -195,8 +217,8 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper,
-        _TemplatePolySegmentDumper, _AssemblyDumper, _ProtocolDumper,
-        _ModelDumper, _QAMetricDumper]
+        _TemplatePolySegmentDumper, _AssemblyDumper, _AlignmentDumper,
+        _ProtocolDumper, _ModelDumper, _QAMetricDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
