@@ -1,5 +1,5 @@
 class MetricMode(object):
-    software = None
+    pass
 
 
 class Global(MetricMode):

@@ -98,6 +98,8 @@ class _AlignmentDumper(Dumper):
 
     def dump(self, system, writer):
         self.dump_info(system, writer)
+        self.dump_details(system, writer)
+        self.dump_sequences(system, writer)
 
     def dump_info(self, system, writer):
         with writer.loop(
@@ -111,6 +113,36 @@ class _AlignmentDumper(Dumper):
                          else None,
                          alignment_type=a.type, alignment_mode=a.mode,
                          alignment_type_other_details=a.other_details)
+
+    def dump_details(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_alignment_details",
+                ["ordinal_id", "alignment_id", "template_segment_id",
+                 "target_asym_id", "score_type",
+                 "score_type_other_details", "score_value",
+                 "percent_sequence_identity",
+                 "sequence_identity_denominator"]) as lp:
+            for a in system.alignments:
+                for s in a.segments:
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             score_type=s.score.type,
+                             score_type_other_details=s.score.other_details,
+                             score_value=s.score.value)
+
+    def dump_sequences(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_alignment",
+                ["ordinal_id", "alignment_id", "target_template_flag",
+                 "sequence"]) as lp:
+            for a in system.alignments:
+                for s in a.segments:
+                    for obj, seq in s.gapped_sequences:
+                        # 1=target, 2=template
+                        f = 1 if isinstance(obj, ma.AsymUnit) else 2
+                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                                 target_template_flag=f, sequence=seq)
 
 
 class _ProtocolDumper(Dumper):

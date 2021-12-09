@@ -48,6 +48,11 @@ class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
     pass
 
 aln = Alignment(name="Modeling alignment", software=modpipe_software)
+seg = ma.alignment.Segment(
+    [(template_e, "DMACDTFIK"),
+     (asymA,      "DSYV-ETLD")],
+    score=ma.alignment.BLASTEValue("1e-15"))
+aln.segments.append(seg)
 system.alignments.append(aln)
 
 atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
