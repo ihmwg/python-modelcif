@@ -36,6 +36,36 @@ class _TargetRefDBDumper(Dumper):
                              seq_db_align_end=db_end)
 
 
+class _SoftwareGroupDumper(Dumper):
+    def finalize(self, system):
+        seen_groups = {}
+        self._group_by_id = []
+        # Use _group_id rather than _id as the "group" might be a singleton
+        # Software, which already has its own id
+        for g in system._all_software_groups():
+            util._remove_id(g, attr='_group_id')
+        for g in system._all_software_groups():
+            util._assign_id(g, seen_groups, self._group_by_id,
+                            attr='_group_id')
+
+    def dump(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_software_group",
+                ["ordinal_id", "group_id", "software_id",
+                 "parameter_group_id"]) as lp:
+            for g in self._group_by_id:
+                if isinstance(g, ma.SoftwareGroup):
+                    for s in g:
+                        lp.write(ordinal_id=next(ordinal),
+                                 group_id=g._group_id, software_id=s._id)
+                else:
+                    # If a singleton Software, write a group containing one
+                    # member
+                    lp.write(ordinal_id=next(ordinal), group_id=g._group_id,
+                             software_id=g._id)
+
+
 class _DataDumper(Dumper):
     def finalize(self, system):
         seen_data = {}
@@ -109,7 +139,7 @@ class _AlignmentDumper(Dumper):
                  "alignment_mode"]) as lp:
             for a in system.alignments:
                 lp.write(alignment_id=a._id, data_id=a._data_id,
-                         software_group_id=a.software._id if a.software
+                         software_group_id=a.software._group_id if a.software
                          else None,
                          alignment_type=a.type, alignment_mode=a.mode,
                          alignment_type_other_details=a.other_details)
@@ -165,9 +195,8 @@ class _ProtocolDumper(Dumper):
                     lp.write(ordinal_id=next(ordinal), protocol_id=p._id,
                              step_id=s._id, method_type=s.method_type,
                              step_name=s.name, details=s.details,
-                             # todo: should be group id, not software id
-                             software_group_id=s.software._id if s.software
-                             else None,
+                             software_group_id=s.software._group_id
+                             if s.software else None,
                              input_data_group_id=s.input_data._data_id,
                              output_data_group_id=s.output_data._data_id)
 
@@ -219,7 +248,7 @@ class _QAMetricDumper(Dumper):
                 lp.write(id=m._id, name=m.name, description=m.description,
                          type=m.type, mode=m.mode,
                          type_other_details=m.other_details,
-                         software_group_id=m.software._id if m.software
+                         software_group_id=m.software._group_id if m.software
                          else None)
 
     def dump_metric_global(self, system, writer):
@@ -240,7 +269,8 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntryDumper,  # must be first
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
         _AuditConformDumper, ihm.dumper._CitationDumper,
-        ihm.dumper._SoftwareDumper, ihm.dumper._AuditAuthorDumper,
+        ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
+        ihm.dumper._AuditAuthorDumper,
         ihm.dumper._GrantDumper, ihm.dumper._ChemCompDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
