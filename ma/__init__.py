@@ -22,10 +22,23 @@ class System(ihm._SystemBase):
         self.templates = []
 
     def _before_write(self):
-        pass
+        # Populate flat lists to contain all referenced objects only once
+        # We must populate these in the correct order to get all objects
+        self.alignments = list(_remove_identical(self.alignments))
+        self.templates = list(_remove_identical(self._all_templates()))
 
     def _check_after_write(self):
         pass
+
+    def _all_templates(self):
+        def _get_alignment_templates():
+            for aln in self.alignments:
+                for s in aln.segments:
+                    for obj, seq in s.gapped_sequences:
+                        if isinstance(obj, Template):
+                            yield obj
+        return itertools.chain(
+            self.templates, _get_alignment_templates())
 
     def _all_citations(self):
         """Iterate over all Citations in the system.

@@ -153,18 +153,10 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
 
 class _AlignmentDumper(Dumper):
     def finalize(self, system):
-        seen_templates = set()
-        template_id = itertools.count(1)
-        self.templates_by_id = []
+        for n, tmpl in enumerate(system.templates):
+            tmpl._id = n + 1
         for n, aln in enumerate(system.alignments):
             aln._id = n + 1
-            for s in aln.segments:
-                for obj, seq in s.gapped_sequences:
-                    if (isinstance(obj, ma.Template)
-                            and id(obj) not in seen_templates):
-                        seen_templates.add(id(obj))
-                        obj._id = next(template_id)
-                        self.templates_by_id.append(obj)
 
     def dump(self, system, writer):
         self.dump_template_details(system, writer)
@@ -216,7 +208,7 @@ class _AlignmentDumper(Dumper):
                 "_ma_template_poly",
                 ["template_id", "seq_one_letter_code",
                  "seq_one_letter_code_can"]) as lp:
-            for tmpl in self.templates_by_id:
+            for tmpl in system.templates:
                 entity = tmpl.entity
                 lp.write(template_id=tmpl._id,
                          seq_one_letter_code=self._get_sequence(entity),

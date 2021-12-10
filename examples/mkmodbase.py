@@ -46,7 +46,6 @@ modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 # Alignment used in modeling
 template = ma.Template(entity=template_e, asym_id='A', model_num=1,
                        name="Template Structure")
-system.templates.append(template)
 
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
     pass
