@@ -1,6 +1,6 @@
 import itertools
 import ihm
-from ihm import Entity, Software, AsymUnit, Assembly, _remove_identical
+from ihm import Entity, Software, Assembly, _remove_identical
 import ma.data
 
 
@@ -92,6 +92,7 @@ class System(ihm._SystemBase):
     def _all_data(self):
         return itertools.chain(
             self.templates,
+            self.asym_units,
             self.alignments,
             (model for group, model in self._all_models()))
 
@@ -109,6 +110,16 @@ class System(ihm._SystemBase):
              if step.software),
             (metric.software for group, model in self._all_models()
              for metric in model.qa_metrics if metric.software))
+
+
+class AsymUnit(ihm.AsymUnit, ma.data.Data):
+    data_content_type = "target"
+
+    def __init__(self, entity, details=None, auth_seq_id_map=0, id=None,
+                 name=None):
+        ihm.AsymUnit.__init__(self, entity=entity, details=details,
+                              auth_seq_id_map=auth_seq_id_map, id=id)
+        ma.data.Data.__init__(self, name=name)
 
 
 class SoftwareGroup(tuple):
