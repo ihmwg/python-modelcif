@@ -1,6 +1,7 @@
 import itertools
 import ihm
 from ihm import Entity, Software, AsymUnit, Assembly, _remove_identical
+import ma.data
 
 
 class System(ihm._SystemBase):
@@ -17,6 +18,8 @@ class System(ihm._SystemBase):
 
         #: All modeling alignments.
         self.alignments = []
+
+        self.templates = []
 
     def _before_write(self):
         pass
@@ -75,6 +78,7 @@ class System(ihm._SystemBase):
 
     def _all_data(self):
         return itertools.chain(
+            self.templates,
             self.alignments,
             (model for group, model in self._all_models()))
 
@@ -96,3 +100,12 @@ class System(ihm._SystemBase):
 
 class SoftwareGroup(tuple):
     pass
+
+
+class Template(ma.data.Data):
+    data_content_type = "template structure"
+
+    def __init__(self, entity, asym_id, model_num, name=None):
+        super(Template, self).__init__(name)
+        self.entity = entity
+        self.asym_id, self.model_num = asym_id, model_num

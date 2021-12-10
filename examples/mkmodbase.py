@@ -38,19 +38,23 @@ model_e = ma.Entity('DSYVETLD', description='Model subunit',
                     references=[s])
 system.entities.append(model_e)
 
-asymA = ma.AsymUnit(model_e, details='Model subunit A')
+asymA = ma.AsymUnit(model_e, details='Model subunit A', id='A')
 system.asym_units.append(asymA)
 
 modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 
 # Alignment used in modeling
+template = ma.Template(entity=template_e, asym_id='A', model_num=1,
+                       name="Template Structure")
+system.templates.append(template)
+
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
     pass
 
 aln = Alignment(name="Modeling alignment", software=modpipe_software)
 seg = ma.alignment.Segment(
-    [(template_e, "DMACDTFIK"),
-     (asymA,      "DSYV-ETLD")],
+    [(template, "DMACDTFIK"),
+     (asymA,    "DSYV-ETLD")],
     score=ma.alignment.BLASTEValue("1e-15"))
 aln.segments.append(seg)
 system.alignments.append(aln)

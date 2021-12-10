@@ -2,7 +2,7 @@ import itertools
 import operator
 import ihm.dumper
 from ihm import util
-from ihm.dumper import Dumper, Variant, _assign_range_ids
+from ihm.dumper import Dumper, Variant, _assign_range_ids, _prettyprint_seq
 import ma.qa_metric
 import ma.data
 
@@ -153,13 +153,74 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
 
 class _AlignmentDumper(Dumper):
     def finalize(self, system):
+        seen_templates = set()
+        template_id = itertools.count(1)
+        self.templates_by_id = []
         for n, aln in enumerate(system.alignments):
             aln._id = n + 1
+            for s in aln.segments:
+                for obj, seq in s.gapped_sequences:
+                    if (isinstance(obj, ma.Template)
+                            and id(obj) not in seen_templates):
+                        seen_templates.add(id(obj))
+                        obj._id = next(template_id)
+                        self.templates_by_id.append(obj)
 
     def dump(self, system, writer):
+        self.dump_template_details(system, writer)
+        self.dump_template_poly(system, writer)
         self.dump_info(system, writer)
         self.dump_details(system, writer)
         self.dump_sequences(system, writer)
+
+    def dump_template_details(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_template_details",
+                ["ordinal_id", "template_id", "template_origin",
+                 "template_entity_type", "template_trans_matrix_id",
+                 "template_data_id", "target_asym_id",
+                 "template_label_asym_id",
+                 "template_label_entity_id", "template_model_num"]) as lp:
+            for a in system.alignments:
+                for s in a.segments:
+                    target, = [gs[0] for gs in s.gapped_sequences
+                               if isinstance(gs[0], ma.AsymUnit)]
+                    for tmpl, seq in s.gapped_sequences:
+                        if not isinstance(tmpl, ma.Template):
+                            continue
+                        lp.write(ordinal_id=next(ordinal),
+                                 template_id=tmpl._id,
+                                 template_data_id=tmpl._data_id,
+                                 target_asym_id=target._id,
+                                 template_label_asym_id=tmpl.asym_id,
+                                 template_label_entity_id=tmpl.entity._id,
+                                 template_model_num=tmpl.model_num)
+
+    def _get_sequence(self, entity):
+        """Get the sequence for an entity as a string"""
+        # Split into lines to get tidier CIF output
+        return "\n".join(_prettyprint_seq((comp.code if len(comp.code) == 1
+                                           else '(%s)' % comp.code
+                                           for comp in entity.sequence), 70))
+
+    def _get_canon(self, entity):
+        """Get the canonical sequence for an entity as a string"""
+        # Split into lines to get tidier CIF output
+        seq = "\n".join(_prettyprint_seq(
+            (comp.code_canonical for comp in entity.sequence), 70))
+        return seq
+
+    def dump_template_poly(self, system, writer):
+        with writer.loop(
+                "_ma_template_poly",
+                ["template_id", "seq_one_letter_code",
+                 "seq_one_letter_code_can"]) as lp:
+            for tmpl in self.templates_by_id:
+                entity = tmpl.entity
+                lp.write(template_id=tmpl._id,
+                         seq_one_letter_code=self._get_sequence(entity),
+                         seq_one_letter_code_can=self._get_canon(entity))
 
     def dump_info(self, system, writer):
         with writer.loop(
