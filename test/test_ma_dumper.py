@@ -11,6 +11,7 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 import ma.dumper
 import ma.protocol
+import ma.model
 import ihm.format
 
 
@@ -130,6 +131,64 @@ _ma_data_group.data_id
 1 1 1
 2 1 2
 3 2 3
+#
+""")
+
+    def test_qa_metric_dumper(self):
+        """Test QAMetricDumper"""
+        system = ma.System()
+        s1 = ma.Software(
+                name='s1', classification='test code',
+                description='Some test program',
+                version=1, location='http://test.org')
+        s1._group_id = 1
+
+        class MockObject(object):
+            pass
+
+        class CustomMetricType(ma.qa_metric.MetricType):
+            other_details = "my custom type"
+
+        class DistanceScore(ma.qa_metric.Global, ma.qa_metric.Distance):
+            name = "test score"
+            description = "test description"
+            software = s1
+
+        class CustomScore(ma.qa_metric.Global, CustomMetricType):
+            name = "custom score"
+            description = "custom description"
+            software = None
+
+        m1 = DistanceScore(42.)
+        m2 = CustomScore(99.)
+        model = MockObject()
+        model._id = 18
+        model.qa_metrics = [m1, m2]
+        mg = ma.model.ModelGroup((model,))
+        system.model_groups.append(mg)
+        dumper = ma.dumper._QAMetricDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test score' 'test description' distance global . 1
+2 'custom score' 'custom description' other global 'my custom type' .
+#
+#
+loop_
+_ma_qa_metric_global.ordinal_id
+_ma_qa_metric_global.model_id
+_ma_qa_metric_global.metric_id
+_ma_qa_metric_global.metric_value
+1 18 1 42.000
+2 18 2 99.000
 #
 """)
 
