@@ -138,9 +138,9 @@ _ma_data_group.data_id
         """Test QAMetricDumper"""
         system = ma.System()
         s1 = ma.Software(
-                name='s1', classification='test code',
-                description='Some test program',
-                version=1, location='http://test.org')
+            name='s1', classification='test code',
+            description='Some test program',
+            version=1, location='http://test.org')
         s1._group_id = 1
 
         class MockObject(object):
