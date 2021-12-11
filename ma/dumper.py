@@ -2,7 +2,7 @@ import itertools
 import operator
 import ihm.dumper
 from ihm import util
-from ihm.dumper import Dumper, Variant, _assign_range_ids, _prettyprint_seq
+from ihm.dumper import Dumper, Variant, _prettyprint_seq
 import ma.qa_metric
 import ma.data
 
@@ -116,24 +116,6 @@ class _DataGroupDumper(Dumper):
                                  group_id=g._data_group_id, data_id=d._data_id)
 
 
-class _TemplatePolySegmentDumper(Dumper):
-    def finalize(self, system):
-        self._ranges_by_id = []
-        _assign_range_ids(system, self._ranges_by_id)
-
-    def dump(self, system, writer):
-        # todo: only output this info for templates
-        with writer.loop("_ma_template_poly_segment",
-                         ["id", "template_id", "residue_number_begin",
-                          "residue_number_end"]) as lp:
-            for rng in self._ranges_by_id:
-                entity = rng.entity if hasattr(rng, 'entity') else rng
-                lp.write(
-                    id=rng._range_id, template_id=entity._id,
-                    residue_number_begin=rng.seq_id_range[0],
-                    residue_number_end=rng.seq_id_range[1])
-
-
 class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
     def dump(self, system, writer):
         ordinal = itertools.count(1)
@@ -155,12 +137,17 @@ class _AlignmentDumper(Dumper):
     def finalize(self, system):
         for n, tmpl in enumerate(system.templates):
             tmpl._id = n + 1
+        for n, segment in enumerate(system.template_segments):
+            # Cannot use _id since segment might also be a complete template
+            # (with _id = template id)
+            segment._segment_id = n + 1
         for n, aln in enumerate(system.alignments):
             aln._id = n + 1
 
     def dump(self, system, writer):
         self.dump_template_details(system, writer)
         self.dump_template_poly(system, writer)
+        self.dump_template_poly_segment(system, writer)
         self.dump_info(system, writer)
         self.dump_details(system, writer)
         self.dump_sequences(system, writer)
@@ -213,6 +200,16 @@ class _AlignmentDumper(Dumper):
                 lp.write(template_id=tmpl._id,
                          seq_one_letter_code=self._get_sequence(entity),
                          seq_one_letter_code_can=self._get_canon(entity))
+
+    def dump_template_poly_segment(self, system, writer):
+        with writer.loop("_ma_template_poly_segment",
+                         ["id", "template_id", "residue_number_begin",
+                          "residue_number_end"]) as lp:
+            for s in system.template_segments:
+                lp.write(
+                    id=s._segment_id, template_id=s.template._id,
+                    residue_number_begin=s.seq_id_range[0],
+                    residue_number_end=s.seq_id_range[1])
 
     def dump_info(self, system, writer):
         with writer.loop(
@@ -361,8 +358,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _DataDumper, _DataGroupDumper,
-        _TemplatePolySegmentDumper, _AssemblyDumper, _AlignmentDumper,
+        _DataDumper, _DataGroupDumper, _AssemblyDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _QAMetricDumper]
 
     def get_dumpers(self):

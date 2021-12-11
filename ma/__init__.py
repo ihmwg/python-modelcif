@@ -20,25 +20,33 @@ class System(ihm._SystemBase):
         self.alignments = []
 
         self.templates = []
+        self.template_segments = []
 
     def _before_write(self):
         # Populate flat lists to contain all referenced objects only once
         # We must populate these in the correct order to get all objects
         self.alignments = list(_remove_identical(self.alignments))
+        self.template_segments = list(
+            _remove_identical(self._all_template_segments()))
         self.templates = list(_remove_identical(self._all_templates()))
 
     def _check_after_write(self):
         pass
 
+    def _all_template_segments(self):
+        for s in self.template_segments:
+            yield s
+        for aln in self.alignments:
+            for s in aln.segments:
+                for obj, seq in s.gapped_sequences:
+                    if isinstance(obj, (Template, TemplateSegment)):
+                        yield obj
+
     def _all_templates(self):
-        def _get_alignment_templates():
-            for aln in self.alignments:
-                for s in aln.segments:
-                    for obj, seq in s.gapped_sequences:
-                        if isinstance(obj, Template):
-                            yield obj
         return itertools.chain(
-            self.templates, _get_alignment_templates())
+            self.templates,
+            (x.template if isinstance(x, TemplateSegment) else x
+             for x in self.template_segments))
 
     def _all_citations(self):
         """Iterate over all Citations in the system.
@@ -126,6 +134,12 @@ class SoftwareGroup(tuple):
     pass
 
 
+class TemplateSegment(object):
+    def __init__(self, template, seq_id_begin, seq_id_end):
+        self.template = template
+        self.seq_id_range = (seq_id_begin, seq_id_end)
+
+
 class Template(ma.data.Data):
     data_content_type = "template structure"
 
@@ -133,3 +147,10 @@ class Template(ma.data.Data):
         super(Template, self).__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
+
+    def __call__(self, seq_id_begin, seq_id_end):
+        return TemplateSegment(self, seq_id_begin, seq_id_end)
+
+    seq_id_range = property(lambda self: self.entity.seq_id_range,
+                            doc="Sequence range")
+    template = property(lambda self: self)

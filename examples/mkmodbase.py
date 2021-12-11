@@ -27,8 +27,8 @@ modeller_software = ma.Software(
     description='Comparative modeling by satisfaction of spatial restraints')
 system.software.append(modeller_software)
 
-s = ma.reference.PDBSequence(db_code='3nc1', sequence='DMACDTFIK')
-template_e = ma.Entity('DMACDTFIK', description='Template subunit',
+s = ma.reference.PDBSequence(db_code='3nc1', sequence='DMACDTFIKCC')
+template_e = ma.Entity('DMACDTFIKCC', description='Template subunit',
                         references=[s])
 system.entities.append(template_e)
 
@@ -52,8 +52,8 @@ class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
 
 aln = Alignment(name="Modeling alignment", software=modpipe_software)
 seg = ma.alignment.Segment(
-    [(template, "DMACDTFIK"),
-     (asymA,    "DSYV-ETLD")],
+    [(template(1,9), "DMACDTFIK"),
+     (asymA,         "DSYV-ETLD")],
     score=ma.alignment.BLASTEValue("1e-15"))
 aln.segments.append(seg)
 system.alignments.append(aln)
