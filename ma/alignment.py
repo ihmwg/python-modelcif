@@ -1,13 +1,18 @@
 import ma.data
 
 
+class Pair(object):
+    def __init__(self, template, target, score):
+        self.template, self.target, self.score = template, target, score
+
+
 class AlignmentMode(ma.data.Data):
     data_content_type = 'target-template alignment'
 
-    def __init__(self, name, software=None):
+    def __init__(self, name, pairs, software=None):
         ma.data.Data.__init__(self, name)
+        self.pairs = pairs
         self.software = software
-        self.segments = []
 
 
 class Global(AlignmentMode):
@@ -24,9 +29,10 @@ class Pairwise(AlignmentType):
 
 
 class Segment(object):
-    def __init__(self, gapped_sequences, score=None):
-        self.gapped_sequences = gapped_sequences
-        self.score = score
+    def __init__(self, template, template_seq, target, target_seq, scores=[]):
+        self.template, self.template_seq = template, template_seq
+        self.target, self.target_seq = target, target, seq
+        self.scores = scores
 
 
 class Score(object):

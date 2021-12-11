@@ -34,19 +34,14 @@ class System(ihm._SystemBase):
         pass
 
     def _all_template_segments(self):
-        for s in self.template_segments:
-            yield s
-        for aln in self.alignments:
-            for s in aln.segments:
-                for obj, seq in s.gapped_sequences:
-                    if isinstance(obj, (Template, TemplateSegment)):
-                        yield obj
+        return itertools.chain(
+            self.template_segments,
+            (p.template for aln in self.alignments for p in aln.pairs))
 
     def _all_templates(self):
         return itertools.chain(
             self.templates,
-            (x.template if isinstance(x, TemplateSegment) else x
-             for x in self.template_segments))
+            (x.template for x in self.template_segments))
 
     def _all_citations(self):
         """Iterate over all Citations in the system.
@@ -120,6 +115,13 @@ class System(ihm._SystemBase):
              for metric in model.qa_metrics if metric.software))
 
 
+class TargetSegment(object):
+    def __init__(self, asym, gapped_sequence, seq_id_begin, seq_id_end):
+        self.asym = asym
+        self.gapped_sequence = gapped_sequence
+        self.seq_id_range = (seq_id_begin, seq_id_end)
+
+
 class AsymUnit(ihm.AsymUnit, ma.data.Data):
     data_content_type = "target"
 
@@ -129,14 +131,19 @@ class AsymUnit(ihm.AsymUnit, ma.data.Data):
                               auth_seq_id_map=auth_seq_id_map, id=id)
         ma.data.Data.__init__(self, name=name)
 
+    def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
+        # todo: cache so we return the same object for same parameters
+        return TargetSegment(self, gapped_sequence, seq_id_begin, seq_id_end)
+
 
 class SoftwareGroup(tuple):
     pass
 
 
 class TemplateSegment(object):
-    def __init__(self, template, seq_id_begin, seq_id_end):
+    def __init__(self, template, gapped_sequence, seq_id_begin, seq_id_end):
         self.template = template
+        self.gapped_sequence = gapped_sequence
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
 
@@ -148,8 +155,9 @@ class Template(ma.data.Data):
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
 
-    def __call__(self, seq_id_begin, seq_id_end):
-        return TemplateSegment(self, seq_id_begin, seq_id_end)
+    def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
+        # todo: cache so we return the same object for same parameters
+        return TemplateSegment(self, gapped_sequence, seq_id_begin, seq_id_end)
 
     seq_id_range = property(lambda self: self.entity.seq_id_range,
                             doc="Sequence range")

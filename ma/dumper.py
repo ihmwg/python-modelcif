@@ -148,6 +148,7 @@ class _AlignmentDumper(Dumper):
         self.dump_template_details(system, writer)
         self.dump_template_poly(system, writer)
         self.dump_template_poly_segment(system, writer)
+        self.dump_target_template_poly_mapping(system, writer)
         self.dump_info(system, writer)
         self.dump_details(system, writer)
         self.dump_sequences(system, writer)
@@ -162,19 +163,16 @@ class _AlignmentDumper(Dumper):
                  "template_label_asym_id",
                  "template_label_entity_id", "template_model_num"]) as lp:
             for a in system.alignments:
-                for s in a.segments:
-                    target, = [gs[0] for gs in s.gapped_sequences
-                               if isinstance(gs[0], ma.AsymUnit)]
-                    for tmpl, seq in s.gapped_sequences:
-                        if not isinstance(tmpl, ma.Template):
-                            continue
-                        lp.write(ordinal_id=next(ordinal),
-                                 template_id=tmpl._id,
-                                 template_data_id=tmpl._data_id,
-                                 target_asym_id=target._id,
-                                 template_label_asym_id=tmpl.asym_id,
-                                 template_label_entity_id=tmpl.entity._id,
-                                 template_model_num=tmpl.model_num)
+                for s in a.pairs:
+                    # get Template from TemplateSegment
+                    tmpl = s.template.template
+                    lp.write(ordinal_id=next(ordinal),
+                             template_id=tmpl._id,
+                             template_data_id=tmpl._data_id,
+                             target_asym_id=s.target.asym._id,
+                             template_label_asym_id=tmpl.asym_id,
+                             template_label_entity_id=tmpl.entity._id,
+                             template_model_num=tmpl.model_num)
 
     def _get_sequence(self, entity):
         """Get the sequence for an entity as a string"""
@@ -211,6 +209,20 @@ class _AlignmentDumper(Dumper):
                     residue_number_begin=s.seq_id_range[0],
                     residue_number_end=s.seq_id_range[1])
 
+    def dump_target_template_poly_mapping(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_target_template_poly_mapping",
+                         ["id", "template_segment_id", "target_asym_id",
+                          "target_seq_id_begin", "target_seq_id_end"]) as lp:
+            for a in system.alignments:
+                for p in a.pairs:
+                    lp.write(
+                        id=next(ordinal),
+                        template_segment_id=p.template._segment_id,
+                        target_asym_id=p.target.asym._id,
+                        target_seq_id_begin=p.target.seq_id_range[0],
+                        target_seq_id_end=p.target.seq_id_range[1])
+
     def dump_info(self, system, writer):
         with writer.loop(
                 "_ma_alignment_info",
@@ -234,8 +246,10 @@ class _AlignmentDumper(Dumper):
                  "percent_sequence_identity",
                  "sequence_identity_denominator"]) as lp:
             for a in system.alignments:
-                for s in a.segments:
+                for s in a.pairs:
                     lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             template_segment_id=s.template._segment_id,
+                             target_asym_id=s.target.asym._id,
                              score_type=s.score.type,
                              score_type_other_details=s.score.other_details,
                              score_value=s.score.value)
@@ -247,12 +261,15 @@ class _AlignmentDumper(Dumper):
                 ["ordinal_id", "alignment_id", "target_template_flag",
                  "sequence"]) as lp:
             for a in system.alignments:
-                for s in a.segments:
-                    for obj, seq in s.gapped_sequences:
-                        # 1=target, 2=template
-                        f = 1 if isinstance(obj, ma.AsymUnit) else 2
-                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
-                                 target_template_flag=f, sequence=seq)
+                # todo: don't duplicate sequences
+                for s in a.pairs:
+                    # 1=target, 2=template
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=1,
+                             sequence=s.target.gapped_sequence)
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=2,
+                             sequence=s.template.gapped_sequence)
 
 
 class _ProtocolDumper(Dumper):

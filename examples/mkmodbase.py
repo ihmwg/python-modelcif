@@ -33,8 +33,8 @@ template_e = ma.Entity('DMACDTFIKCC', description='Template subunit',
 system.entities.append(template_e)
 
 s = ma.reference.UniProtSequence(db_code='MED1_YEAST', accession='Q12321',
-                                 sequence='DSYVETLD')
-model_e = ma.Entity('DSYVETLD', description='Model subunit',
+                                 sequence='DSYVETLDCC')
+model_e = ma.Entity('DSYVETLDCC', description='Model subunit',
                     references=[s])
 system.entities.append(model_e)
 
@@ -50,12 +50,12 @@ template = ma.Template(entity=template_e, asym_id='A', model_num=1,
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
     pass
 
-aln = Alignment(name="Modeling alignment", software=modpipe_software)
-seg = ma.alignment.Segment(
-    [(template(1,9), "DMACDTFIK"),
-     (asymA,         "DSYV-ETLD")],
+p = ma.alignment.Pair(
+    template=template.segment("DMACDTFIK", 1, 9),
+    target=asymA.segment("DSYV-ETLD", 1, 8),
     score=ma.alignment.BLASTEValue("1e-15"))
-aln.segments.append(seg)
+aln = Alignment(name="Modeling alignment", software=modpipe_software,
+                pairs=[p])
 system.alignments.append(aln)
 
 atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
