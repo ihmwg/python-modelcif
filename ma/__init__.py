@@ -1,6 +1,6 @@
 import itertools
 import ihm
-from ihm import Entity, Software, Assembly, _remove_identical
+from ihm import Entity, Software, Assembly, _remove_identical  # noqa: F401
 import ma.data
 
 

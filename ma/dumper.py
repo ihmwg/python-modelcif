@@ -382,5 +382,6 @@ class ModelArchiveVariant(Variant):
         return [d() for d in self._dumpers]
 
 
-def write(fh, systems, format='mmCIF', dumpers=[], variant=ModelArchiveVariant):
+def write(fh, systems, format='mmCIF', dumpers=[],
+          variant=ModelArchiveVariant):
     return ihm.dumper.write(fh, systems, format, dumpers, variant)

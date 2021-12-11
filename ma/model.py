@@ -1,5 +1,5 @@
 import ihm.representation
-from ihm.model import Atom, ModelGroup
+from ihm.model import Atom, ModelGroup  # noqa: F401
 import ma.data
 
 

@@ -143,7 +143,6 @@ class _SystemBase(object):
                 yield group, model
 
 
-
 class System(_SystemBase):
     """Top-level class representing a complete modeled system.
 

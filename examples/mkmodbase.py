@@ -29,7 +29,7 @@ system.software.append(modeller_software)
 
 s = ma.reference.PDBSequence(db_code='3nc1', sequence='DMACDTFIKCC')
 template_e = ma.Entity('DMACDTFIKCC', description='Template subunit',
-                        references=[s])
+                       references=[s])
 system.entities.append(template_e)
 
 s = ma.reference.UniProtSequence(db_code='MED1_YEAST', accession='Q12321',
@@ -47,8 +47,10 @@ modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 template = ma.Template(entity=template_e, asym_id='A', model_num=1,
                        name="Template Structure")
 
+
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
     pass
+
 
 p = ma.alignment.Pair(
     template=template.segment("DMACDTFIK", 1, 9),
@@ -85,35 +87,41 @@ protocol = ma.protocol.Protocol()
 protocol.steps.append(ma.protocol.TemplateSearchStep(
     name='ModPipe Seq-Prf (0001)', software=modpipe_software,
     input_data=model, output_data=aln))
-protocol.steps.append(ma.protocol.ModelingStep(software=modeller_software,
-    input_data=aln, output_data=model))
+protocol.steps.append(ma.protocol.ModelingStep(
+    software=modeller_software, input_data=aln, output_data=model))
 protocol.steps.append(ma.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
 system.protocols.append(protocol)
 
+
 # Define the quality scores used by ModPipe
 class MPQSMetricType(ma.qa_metric.MetricType):
     other_details = "composite score, values >1.1 are considered reliable"
+
 
 class MPQS(ma.qa_metric.Global, MPQSMetricType):
     name = "MPQS"
     description = "ModPipe Quality Score"
     software = modpipe_software
 
+
 class zDOPE(ma.qa_metric.Global, ma.qa_metric.ZScore):
     name = "zDOPE"
     description = "Normalized DOPE"
     software = modeller_software
+
 
 class TSVModRMSD(ma.qa_metric.Global, ma.qa_metric.Distance):
     name = "TSVMod RMSD"
     description = "TSVMod predicted RMSD (MSALL)"
     software = None
 
+
 class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
     name = "TSVMod NO35"
     description = "TSVMod predicted native overlap (MSALL)"
     software = None
+
 
 # Add qa metrics to the model
 model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),

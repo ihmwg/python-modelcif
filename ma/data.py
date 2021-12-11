@@ -6,5 +6,6 @@ class Data(object):
         self.name = name
         self.data_other_details = details
 
+
 class DataGroup(tuple):
     pass

@@ -31,7 +31,7 @@ class Pairwise(AlignmentType):
 class Segment(object):
     def __init__(self, template, template_seq, target, target_seq, scores=[]):
         self.template, self.template_seq = template, template_seq
-        self.target, self.target_seq = target, target, seq
+        self.target, self.target_seq = target, target_seq
         self.scores = scores
 
 

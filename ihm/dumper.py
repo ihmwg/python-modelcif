@@ -3094,16 +3094,17 @@ class _FLRFPSMPPModelingDumper(Dumper):
 
 
 _flr_dumpers = [_FLRExperimentDumper, _FLRInstSettingDumper,
-               _FLR_ExpConditionDumper, _FLRInstrumentDumper,
-               _FLREntityAssemblyDumper, _FLRSampleConditionDumper,
-               _FLRSampleDumper, _FLRProbeDumper, _FLRSampleProbeDetailsDumper,
-               _FLRPolyProbePositionDumper, _FLRConjugateDumper,
-               _FLRForsterRadiusDumper, _FLRCalibrationParametersDumper,
-               _FLRLifetimeFitModelDumper, _FLRRefMeasurementDumper,
-               _FLRAnalysisDumper, _FLRPeakAssignmentDumper,
-               _FLRDistanceRestraintDumper, _FLRModelQualityDumper,
-               _FLRModelDistanceDumper, _FLRFPSModelingDumper,
-               _FLRFPSAVModelingDumper, _FLRFPSMPPModelingDumper]
+                _FLR_ExpConditionDumper, _FLRInstrumentDumper,
+                _FLREntityAssemblyDumper, _FLRSampleConditionDumper,
+                _FLRSampleDumper, _FLRProbeDumper,
+                _FLRSampleProbeDetailsDumper, _FLRPolyProbePositionDumper,
+                _FLRConjugateDumper, _FLRForsterRadiusDumper,
+                _FLRCalibrationParametersDumper, _FLRLifetimeFitModelDumper,
+                _FLRRefMeasurementDumper, _FLRAnalysisDumper,
+                _FLRPeakAssignmentDumper, _FLRDistanceRestraintDumper,
+                _FLRModelQualityDumper, _FLRModelDistanceDumper,
+                _FLRFPSModelingDumper, _FLRFPSAVModelingDumper,
+                _FLRFPSMPPModelingDumper]
 
 
 class Variant(object):
