@@ -9,6 +9,7 @@ import ma.reference
 import ma.citations
 import ma.qa_metric
 import ma.alignment
+from ma.alignment import IdentityShorterSequence as SequenceIdentity
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
@@ -55,7 +56,8 @@ class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
 p = ma.alignment.Pair(
     template=template.segment("DMACDTFIK", 1, 9),
     target=asymA.segment("DSYV-ETLD", 1, 8),
-    score=ma.alignment.BLASTEValue("1e-15"))
+    score=ma.alignment.BLASTEValue("1e-15"),
+    identity=SequenceIdentity(45.0))
 aln = Alignment(name="Modeling alignment", software=modpipe_software,
                 pairs=[p])
 system.alignments.append(aln)

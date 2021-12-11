@@ -1,9 +1,25 @@
 import ma.data
 
 
+class Identity(object):
+    def __init__(self, value):
+        self.value = value
+
+
+class IdentityShorterSequence(Identity):
+    other_details = None
+    denominator = "Length of the shorter sequence"
+
+
+class IdentityAlignedPositions(Identity):
+    other_details = None
+    denominator = "Number of aligned positions (including gaps)"
+
+
 class Pair(object):
-    def __init__(self, template, target, score):
+    def __init__(self, template, target, identity, score):
         self.template, self.target, self.score = template, target, score
+        self.identity = identity
 
 
 class AlignmentMode(ma.data.Data):

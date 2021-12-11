@@ -244,15 +244,21 @@ class _AlignmentDumper(Dumper):
                  "target_asym_id", "score_type",
                  "score_type_other_details", "score_value",
                  "percent_sequence_identity",
-                 "sequence_identity_denominator"]) as lp:
+                 "sequence_identity_denominator",
+                 "sequence_identity_denominator_other_details"]) as lp:
             for a in system.alignments:
                 for s in a.pairs:
+                    denom = s.identity.denominator
+                    od = s.identity.other_details
                     lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
                              template_segment_id=s.template._segment_id,
                              target_asym_id=s.target.asym._id,
                              score_type=s.score.type,
                              score_type_other_details=s.score.other_details,
-                             score_value=s.score.value)
+                             score_value=s.score.value,
+                             percent_sequence_identity=s.identity.value,
+                             sequence_identity_denominator=denom,
+                             sequence_identity_denominator_other_details=od)
 
     def dump_sequences(self, system, writer):
         ordinal = itertools.count(1)
