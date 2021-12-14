@@ -234,6 +234,66 @@ _ma_protocol_step.output_data_group_id
 #
 """)
 
+    def test_model_dumper(self):
+        """Test ModelDumper"""
+        system = ma.System()
+        e1 = ma.Entity('ACGT')
+        e1._id = 9
+        system.entities.append(e1)
+        asym = ma.AsymUnit(e1, 'foo')
+        asym._id = 'A'
+        system.asym_units.append(asym)
+        asmb = ma.Assembly((asym,))
+        asmb._id = 2
+        model = ma.model.Model(assembly=asmb, name='test model')
+        model._data_id = 42
+        model._atoms = [ma.model.Atom(asym_unit=asym, seq_id=1, atom_id='C',
+                                      type_symbol='C', x=1.0, y=2.0, z=3.0)]
+        mg = ma.model.ModelGroup((model,), name='test group')
+        system.model_groups.append(mg)
+        dumper = ma.dumper._ModelDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+1 1 1 'test model' 'test group' 2 42 .
+#
+#
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_seq_id
+_atom_site.auth_seq_id
+_atom_site.label_asym_id
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.label_entity_id
+_atom_site.auth_asym_id
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_PDB_model_num
+ATOM 1 C C . ALA 1 1 A 1.000 2.000 3.000 . 9 A . 1
+#
+#
+loop_
+_atom_type.symbol
+C
+#
+""")
+
 
 if __name__ == '__main__':
     unittest.main()
