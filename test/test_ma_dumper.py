@@ -192,6 +192,46 @@ _ma_qa_metric_global.metric_value
 #
 """)
 
+    def test_protocol_dumper(self):
+        """Test ProtocolDumper"""
+        class MockObject(object):
+            pass
+        indat = MockObject()
+        indat._data_group_id = 1
+        outdat = MockObject()
+        outdat._data_group_id = 2
+        system = ma.System()
+        s1 = ma.Software(
+            name='s1', classification='test code',
+            description='Some test program',
+            version=1, location='http://test.org')
+        s1._group_id = 42
+        p = ma.protocol.Protocol()
+        p.steps.append(ma.protocol.TemplateSearchStep(
+            name='tsstep', details="some details", software=s1,
+            input_data=indat, output_data=outdat))
+        p.steps.append(ma.protocol.ModelingStep(
+            name='modstep', input_data=indat, output_data=outdat))
+        system.protocols.append(p)
+        dumper = ma.dumper._ProtocolDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_protocol_step.ordinal_id
+_ma_protocol_step.protocol_id
+_ma_protocol_step.step_id
+_ma_protocol_step.method_type
+_ma_protocol_step.step_name
+_ma_protocol_step.details
+_ma_protocol_step.software_group_id
+_ma_protocol_step.input_data_group_id
+_ma_protocol_step.output_data_group_id
+1 1 1 'template search' tsstep 'some details' 42 1 2
+2 1 2 modeling modstep . . 1 2
+#
+""")
+
 
 if __name__ == '__main__':
     unittest.main()
