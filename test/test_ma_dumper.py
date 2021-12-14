@@ -161,9 +161,10 @@ _ma_data_group.data_id
 
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
+        m3 = DistanceScore(60.)
         model = MockObject()
         model._id = 18
-        model.qa_metrics = [m1, m2]
+        model.qa_metrics = [m1, m2, m3]
         mg = ma.model.ModelGroup((model,))
         system.model_groups.append(mg)
         dumper = ma.dumper._QAMetricDumper()
@@ -189,6 +190,7 @@ _ma_qa_metric_global.metric_id
 _ma_qa_metric_global.metric_value
 1 18 1 42.000
 2 18 2 99.000
+3 18 1 60.000
 #
 """)
 
