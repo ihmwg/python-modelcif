@@ -3,7 +3,11 @@
 class TargetReference(object):
     """Point to the sequence of a target :class:`ma.Entity` in a sequence
        database. Typically a subclass such as :class:`UniProt` is used,
-       although this can be subclassed to point to a custom database.
+       although to use a custom database, make a new subclass and set the
+       ``other_details`` attribute with a description, e.g.::
+
+           class CustomRef(TargetReference):
+               other_details = "my custom database"
 
        :param str code: The name of the sequence in the database.
        :param str accession: The database accession.
@@ -45,7 +49,11 @@ class UniProt(TargetReference):
 class TemplateReference(object):
     """Point to the structure of a :class:`ma.Template` in a structure
        database. Typically a subclass such as :class:`PDB` is used,
-       although this can be subclassed to point to a custom database.
+       although to use a custom database, make a new subclass and set the
+       ``other_details`` attribute with a description, e.g.::
+
+           class CustomRef(TemplateReference):
+               other_details = "my custom database"
 
        :param str accession: The database accession.
     """

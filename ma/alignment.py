@@ -8,7 +8,10 @@ class Identity(object):
        when calculating the identity, for example
        :class:`ShorterSequenceIdentity`, or if the denominator is not covered
        here, subclass this class and set the ``other_details`` attribute to
-       describe the denominator.
+       describe the denominator, e.g.::
+
+           class CustomIdentity(Identity):
+               other_details = "my custom sequence identity denominator"
 
        :param float value: The percent sequence identity value.
     """
