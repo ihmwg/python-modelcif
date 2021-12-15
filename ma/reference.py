@@ -1,4 +1,4 @@
-"""Classes for linking back to a sequence database."""
+"""Classes for linking back to a sequence or structure database."""
 
 
 class TargetReference(object):
