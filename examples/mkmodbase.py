@@ -6,10 +6,10 @@ import ma.protocol
 import ma.model
 import ma.dumper
 import ma.reference
-import ma.citations
 import ma.qa_metric
 import ma.alignment
 from ma.alignment import ShorterSequenceIdentity as SequenceIdentity
+import ihm.citations
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
@@ -24,7 +24,7 @@ system.software.append(modpipe_software)
 modeller_software = ma.Software(
     name='MODELLER', classification='comparative modeling',
     location='https://salilab.org/modeller/', type='program',
-    version='SVN', citation=ma.citations.modeller,
+    version='SVN', citation=ihm.citations.modeller,
     description='Comparative modeling by satisfaction of spatial restraints')
 system.software.append(modeller_software)
 
