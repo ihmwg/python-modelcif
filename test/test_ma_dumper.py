@@ -91,10 +91,9 @@ _ma_software_group.parameter_group_id
     def test_data_dumper(self):
         """Test DataDumper"""
         system = ma.System()
-        entity = ma.Entity("DMA")
-        system.entities.append(entity)
-        asym = ma.AsymUnit(entity, name="test asym")
-        system.asym_units.append(asym)
+        entity = ma.Entity("DMA", description='test entity')
+        system.target_entities.append(entity)
+        # Template and target use same entity here (but different data IDs)
         template = ma.Template(entity, asym_id="A", model_num=1,
                                name="test template",
                                transformation=ma.Transformation.identity())
@@ -112,31 +111,29 @@ _ma_data.content_type
 _ma_data.content_type_other_details
 1 'test template' 'template structure' .
 2 'test other' other 'test details'
-3 'test asym' target .
+3 'test entity' target .
 #
 """)
 
     def test_data_group_dumper(self):
         """Test DataGroupDumper"""
         system = ma.System()
-        entity = ma.Entity("DMA")
-        system.entities.append(entity)
-        asym1 = ma.AsymUnit(entity, name="test asym1")
-        asym1._data_id = 1
-        asym2 = ma.AsymUnit(entity, name="test asym2")
-        asym2._data_id = 2
-        asym3 = ma.AsymUnit(entity, name="test asym3")
-        asym3._data_id = 3
-        system.asym_units.extend((asym1, asym2, asym3))
-        dg12 = ma.data.DataGroup((asym1, asym2))
+        tgt_e1 = ma.Entity("D")
+        tgt_e2 = ma.Entity("M")
+        tgt_e3 = ma.Entity("A")
+        tgt_e1._data_id = 1
+        tgt_e2._data_id = 2
+        tgt_e3._data_id = 3
+        system.target_entities.extend((tgt_e1, tgt_e2, tgt_e3))
+        dg12 = ma.data.DataGroup((tgt_e1, tgt_e2))
         p = ma.protocol.Protocol()
         p.steps.append(ma.protocol.ModelingStep(
-            input_data=dg12, output_data=asym3))
+            input_data=dg12, output_data=tgt_e3))
         system.protocols.append(p)
         dumper = ma.dumper._DataGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
-        # First group (asym1,asym2); second group contains just asym3
+        # First group (tgt_e1,tgt_e2); second group contains just tgt_e3
         self.assertEqual(out, """#
 loop_
 _ma_data_group.ordinal_id
@@ -324,13 +321,7 @@ C
 
         e1 = ma.Entity('ACGT', references=[ref1, ref2, ref3])
         e1._id = 1
-        system.entities.append(e1)
-        asym = ma.AsymUnit(e1, 'foo')
-        system.asym_units.append(asym)
-        asmb = ma.Assembly((asym,))
-        model = ma.model.Model(assembly=asmb, name='test model')
-        mg = ma.model.ModelGroup((model,), name='test group')
-        system.model_groups.append(mg)
+        system.target_entities.append(e1)
 
         dumper = ma.dumper._TargetRefDBDumper()
         dumper.finalize(system)

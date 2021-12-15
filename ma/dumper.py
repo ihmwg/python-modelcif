@@ -20,7 +20,9 @@ class _AuditConformDumper(Dumper):
 
 class _TargetRefDBDumper(Dumper):
     def dump(self, system, writer):
-        entities = sorted(system._all_target_entities(),
+        # Since target_entities is a *subset* of all entities, they may not
+        # be ordered by ID. Sort them so the output is prettier.
+        entities = sorted(system.target_entities,
                           key=operator.attrgetter('_id'))
         with writer.loop(
                 "_ma_target_ref_db_details",
@@ -42,6 +44,24 @@ class _TargetRefDBDumper(Dumper):
                              seq_db_align_end=db_end,
                              ncbi_taxonomy_id=r.ncbi_taxonomy_id,
                              organism_scientific=r.organism_scientific)
+
+
+class _TargetEntityDumper(Dumper):
+    def dump(self, system, writer):
+        entities = sorted(system.target_entities,
+                          key=operator.attrgetter('_id'))
+        with writer.loop(
+                "_ma_target_entity",
+                ["entity_id", "data_id", "origin"]) as lp:
+            for e in entities:
+                lp.write(entity_id=e._id, data_id=e._data_id)
+
+        with writer.loop(
+                "_ma_target_entity_instance",
+                ["asym_id", "entity_id", "details"]) as lp:
+            for asym in system.asym_units:
+                lp.write(asym_id=asym._id, entity_id=asym.entity._id,
+                         details=asym.details)
 
 
 class _SoftwareGroupDumper(Dumper):
@@ -419,7 +439,7 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _DataDumper, _DataGroupDumper, _AssemblyDumper,
+        _DataDumper, _DataGroupDumper, _TargetEntityDumper, _AssemblyDumper,
         _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _QAMetricDumper]
 

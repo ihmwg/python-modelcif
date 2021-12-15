@@ -1,6 +1,6 @@
 import itertools
 import ihm
-from ihm import Entity, Software, Assembly, _remove_identical  # noqa: F401
+from ihm import Software, Assembly, _remove_identical  # noqa: F401
 import ma.data
 
 
@@ -19,6 +19,7 @@ class System(ihm._SystemBase):
         #: All modeling alignments.
         self.alignments = []
 
+        self.target_entities = []
         self.templates = []
         self.template_segments = []
         self.template_transformations = []
@@ -32,6 +33,8 @@ class System(ihm._SystemBase):
         self.templates = list(_remove_identical(self._all_templates()))
         self.template_transformations = list(_remove_identical(
             self._all_template_transformations()))
+        self.target_entities = list(_remove_identical(
+            self._all_target_entities()))
 
     def _check_after_write(self):
         pass
@@ -62,8 +65,11 @@ class System(ihm._SystemBase):
              if software.citation)))
 
     def _all_target_entities(self):
-        return _remove_identical(itertools.chain(
-            asym.entity for asmb in self._all_assemblies() for asym in asmb))
+        """Iterate over all Entities that are used for targets rather than
+           templates."""
+        return (itertools.chain(
+            self.target_entities,
+            (asym.entity for asmb in self._all_assemblies() for asym in asmb)))
 
     def _all_software(self):
         """Iterate over all Software in the system.
@@ -103,7 +109,7 @@ class System(ihm._SystemBase):
     def _all_data(self):
         return itertools.chain(
             self.templates,
-            self.asym_units,
+            self._all_target_entities(),
             self.alignments,
             (model for group, model in self._all_models()))
 
@@ -130,15 +136,23 @@ class TargetSegment(object):
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
 
-class AsymUnit(ihm.AsymUnit, ma.data.Data):
+class Entity(ihm.Entity, ma.data.Data):
+    # Technically only target entities have a data_id (for templates, the
+    # data_id is attached to the Template object, which roughly corresponds
+    # to a target AsymUnit). Rather than have a separate TargetEntity and
+    # TemplateEntity (which would cause issues if they were confused, or if
+    # target=template) we just don't use the data_id for template entities.
     data_content_type = "target"
 
-    def __init__(self, entity, details=None, auth_seq_id_map=0, id=None,
-                 name=None):
-        ihm.AsymUnit.__init__(self, entity=entity, details=details,
-                              auth_seq_id_map=auth_seq_id_map, id=id)
-        ma.data.Data.__init__(self, name=name)
+    def __init__(self, sequence, alphabet=ihm.LPeptideAlphabet,
+                 description=None, details=None, source=None, references=[]):
+        ihm.Entity.__init__(self, sequence=sequence, alphabet=alphabet,
+                            description=description, details=details,
+                            source=source, references=references)
+        ma.data.Data.__init__(self, name=description)
 
+
+class AsymUnit(ihm.AsymUnit):
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
         # todo: cache so we return the same object for same parameters
         return TargetSegment(self, gapped_sequence, seq_id_begin, seq_id_end)

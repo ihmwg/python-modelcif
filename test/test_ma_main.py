@@ -5,9 +5,31 @@ import utils
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 import ma
+import ma.model
 
 
 class Tests(unittest.TestCase):
+    def test_all_target_entities(self):
+        """Test _all_target_entities() method"""
+        s = ma.System()
+        e1 = ma.Entity("D")
+        e2 = ma.Entity("M")
+        s.target_entities.extend((e1, e2))
+
+        template_e = ma.Entity("M")
+        s.entities.extend((e1, e2, template_e))
+
+        asym = ma.AsymUnit(e1, 'foo')
+        s.asym_units.append(asym)
+        asmb = ma.Assembly((asym,))
+        model = ma.model.Model(assembly=asmb, name='test model')
+        mg = ma.model.ModelGroup((model,), name='test group')
+        s.model_groups.append(mg)
+
+        te = s._all_target_entities()
+        # List may contain duplicates, but no template entities
+        self.assertEqual(list(te), [e1, e2, e1])
+
     def test_all_template_transformations(self):
         """Test _all_template_transformations() method"""
         s = ma.System()
