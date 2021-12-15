@@ -2,16 +2,32 @@ import ma.data
 
 
 class Identity(object):
+    """Percent sequence identity between the template sequence and the target
+       sequence being modeled.
+       Use the correct subclass that corresponds to the denominator used
+       when calculating the identity, for example
+       :class:`ShorterSequenceIdentity`, or if the denominator is not covered
+       here, subclass this class and set the ``other_details`` attribute to
+       describe the denominator.
+
+       :param float value: The percent sequence identity value.
+    """
+    denominator = "Other"
+
     def __init__(self, value):
         self.value = value
 
 
-class IdentityShorterSequence(Identity):
+class ShorterSequenceIdentity(Identity):
+    """Sequence identity calculated using the length of the shorter sequence
+       as the denominator."""
     other_details = None
     denominator = "Length of the shorter sequence"
 
 
-class IdentityAlignedPositions(Identity):
+class AlignedPositionsIdentity(Identity):
+    """Sequence identity calculated using the numnber of aligned positions
+       (including gaps) as the denominator."""
     other_details = None
     denominator = "Number of aligned positions (including gaps)"
 

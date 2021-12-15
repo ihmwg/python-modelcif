@@ -379,7 +379,7 @@ _ma_target_ref_db_details.organism_scientific
             template=t.segment('AC-G', 1, 3),
             target=asym.segment('ACE-', 1, 3),
             score=ma.alignment.BLASTEValue("1e-15"),
-            identity=ma.alignment.IdentityShorterSequence(42.))
+            identity=ma.alignment.ShorterSequenceIdentity(42.))
         aln = Alignment(name='testaln', pairs=[p])
         aln._data_id = 100
         system.alignments.append(aln)

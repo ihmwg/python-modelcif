@@ -9,7 +9,7 @@ import ma.reference
 import ma.citations
 import ma.qa_metric
 import ma.alignment
-from ma.alignment import IdentityShorterSequence as SequenceIdentity
+from ma.alignment import ShorterSequenceIdentity as SequenceIdentity
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
