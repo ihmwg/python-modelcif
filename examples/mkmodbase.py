@@ -28,13 +28,10 @@ modeller_software = ma.Software(
     description='Comparative modeling by satisfaction of spatial restraints')
 system.software.append(modeller_software)
 
-s = ma.reference.PDBSequence(db_code='3nc1', sequence='DMACDTFIKCC')
-template_e = ma.Entity('DMACDTFIKCC', description='Template subunit',
-                       references=[s])
+template_e = ma.Entity('DMACDTFIKCC', description='Template subunit')
 system.entities.append(template_e)
 
-s = ma.reference.UniProtSequence(db_code='MED1_YEAST', accession='Q12321',
-                                 sequence='DSYVETLDCC')
+s = ma.reference.UniProt(code='MED1_YEAST', accession='Q12321')
 model_e = ma.Entity('DSYVETLDCC', description='Model subunit',
                     references=[s])
 system.entities.append(model_e)
@@ -45,8 +42,9 @@ system.asym_units.append(asymA)
 modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 
 # Alignment used in modeling
+s = ma.reference.PDB('3nc1')
 template = ma.Template(entity=template_e, asym_id='A', model_num=1,
-                       name="Template Structure")
+                       name="Template Structure") # , references=[s])
 
 
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):

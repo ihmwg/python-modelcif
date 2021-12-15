@@ -12,6 +12,7 @@ utils.set_search_paths(TOPDIR)
 import ma.dumper
 import ma.protocol
 import ma.model
+import ma.reference
 import ihm.format
 
 
@@ -302,6 +303,51 @@ ATOM 1 C C . ALA 1 1 A 1.000 2.000 3.000 . 9 A . 1
 loop_
 _atom_type.symbol
 C
+#
+""")
+
+    def test_target_ref_db_dumper(self):
+        """Test TargetRefDBDumper"""
+
+        class CustomRef(ma.reference.TargetReference):
+            other_details = 'my custom ref'
+
+        system = ma.System()
+        ref1 = ma.reference.UniProt(
+            code='testcode', accession='testacc', align_begin=4, align_end=8,
+            isoform='testiso', ncbi_taxonomy_id='1234',
+            organism_scientific='testorg')
+        ref2 = ma.reference.UniProt(code='c2', accession='a2')
+        ref3 = CustomRef(code='c3', accession='a3')
+
+        e1 = ma.Entity('ACGT', references=[ref1, ref2, ref3])
+        e1._id = 1
+        system.entities.append(e1)
+        asym = ma.AsymUnit(e1, 'foo')
+        system.asym_units.append(asym)
+        asmb = ma.Assembly((asym,))
+        model = ma.model.Model(assembly=asmb, name='test model')
+        mg = ma.model.ModelGroup((model,), name='test group')
+        system.model_groups.append(mg)
+
+        dumper = ma.dumper._TargetRefDBDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_target_ref_db_details.target_entity_id
+_ma_target_ref_db_details.db_name
+_ma_target_ref_db_details.db_name_other_details
+_ma_target_ref_db_details.db_code
+_ma_target_ref_db_details.db_accession
+_ma_target_ref_db_details.seq_db_isoform
+_ma_target_ref_db_details.seq_db_align_begin
+_ma_target_ref_db_details.seq_db_align_end
+_ma_target_ref_db_details.ncbi_taxonomy_id
+_ma_target_ref_db_details.organism_scientific
+1 UNP . testcode testacc testiso 4 8 1234 testorg
+1 UNP . c2 a2 ? 1 4 . .
+1 Other 'my custom ref' c3 a3 ? 1 4 . .
 #
 """)
 

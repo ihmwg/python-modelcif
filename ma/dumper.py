@@ -26,15 +26,22 @@ class _TargetRefDBDumper(Dumper):
                 "_ma_target_ref_db_details",
                 ["target_entity_id", "db_name", "db_name_other_details",
                  "db_code", "db_accession", "seq_db_isoform",
-                 "seq_db_align_begin", "seq_db_align_end"]) as lp:
+                 "seq_db_align_begin", "seq_db_align_end",
+                 "ncbi_taxonomy_id", "organism_scientific"]) as lp:
             for e in entities:
                 for r in e.references:
-                    db_begin = min(a.db_begin for a in r._get_alignments())
-                    db_end = max(a.db_end for a in r._get_alignments())
-                    lp.write(target_entity_id=e._id, db_name=r.db_name,
-                             db_code=r.db_code, db_accession=r.accession,
+                    db_begin = (e.seq_id_range[0] if r.align_begin is None
+                                else r.align_begin)
+                    db_end = (e.seq_id_range[1] if r.align_end is None
+                              else r.align_end)
+                    lp.write(target_entity_id=e._id, db_name=r.name,
+                             db_name_other_details=r.other_details,
+                             db_code=r.code, db_accession=r.accession,
+                             seq_db_isoform=r.isoform or ihm.unknown,
                              seq_db_align_begin=db_begin,
-                             seq_db_align_end=db_end)
+                             seq_db_align_end=db_end,
+                             ncbi_taxonomy_id=r.ncbi_taxonomy_id,
+                             organism_scientific=r.organism_scientific)
 
 
 class _SoftwareGroupDumper(Dumper):
