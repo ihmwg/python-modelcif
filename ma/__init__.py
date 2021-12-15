@@ -150,10 +150,11 @@ class TemplateSegment(object):
 class Template(ma.data.Data):
     data_content_type = "template structure"
 
-    def __init__(self, entity, asym_id, model_num, name=None):
+    def __init__(self, entity, asym_id, model_num, name=None, references=[]):
         super(Template, self).__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
+        self.references = references
 
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
         # todo: cache so we return the same object for same parameters

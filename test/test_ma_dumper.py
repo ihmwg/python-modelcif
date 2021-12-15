@@ -13,6 +13,7 @@ import ma.dumper
 import ma.protocol
 import ma.model
 import ma.reference
+import ma.alignment
 import ihm.format
 
 
@@ -348,6 +349,124 @@ _ma_target_ref_db_details.organism_scientific
 1 UNP . testcode testacc testiso 4 8 1234 testorg
 1 UNP . c2 a2 ? 1 4 . .
 1 Other 'my custom ref' c3 a3 ? 1 4 . .
+#
+""")
+
+    def test_alignment_dumper(self):
+        """Test AlignmentDumper"""
+
+        class CustomRef(ma.reference.TemplateReference):
+            other_details = 'my custom ref'
+
+        class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
+            pass
+
+        system = ma.System()
+        tmp_e = ma.Entity('ACG')
+        tmp_e._id = 1
+        tgt_e = ma.Entity('ACE')
+        tgt_e._id = 1
+        system.entities.extend((tmp_e, tgt_e))
+        asym = ma.AsymUnit(tgt_e, id='A')
+        asym._id = 'A'
+        system.asym_units.append(asym)
+        ref1 = ma.reference.PDB('1abc')
+        ref2 = CustomRef('2xyz')
+        t = ma.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
+                        references=[ref1, ref2])
+        t._data_id = 99
+        p = ma.alignment.Pair(
+            template=t.segment('AC-G', 1, 3),
+            target=asym.segment('ACE-', 1, 3),
+            score=ma.alignment.BLASTEValue("1e-15"),
+            identity=ma.alignment.IdentityShorterSequence(42.))
+        aln = Alignment(name='testaln', pairs=[p])
+        aln._data_id = 100
+        system.alignments.append(aln)
+        system._before_write()  # populate system.templates
+
+        dumper = ma.dumper._AlignmentDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+1 1 . . . 99 A H 1 1
+#
+#
+loop_
+_ma_template_poly.template_id
+_ma_template_poly.seq_one_letter_code
+_ma_template_poly.seq_one_letter_code_can
+1 ACG ACG
+#
+#
+loop_
+_ma_template_poly_segment.id
+_ma_template_poly_segment.template_id
+_ma_template_poly_segment.residue_number_begin
+_ma_template_poly_segment.residue_number_end
+1 1 1 3
+#
+#
+loop_
+_ma_template_ref_db_details.template_id
+_ma_template_ref_db_details.db_name
+_ma_template_ref_db_details.db_name_other_details
+_ma_template_ref_db_details.db_accession_code
+1 PDB . 1abc
+1 Other 'my custom ref' 2xyz
+#
+#
+loop_
+_ma_target_template_poly_mapping.id
+_ma_target_template_poly_mapping.template_segment_id
+_ma_target_template_poly_mapping.target_asym_id
+_ma_target_template_poly_mapping.target_seq_id_begin
+_ma_target_template_poly_mapping.target_seq_id_end
+1 1 A 1 3
+#
+#
+loop_
+_ma_alignment_info.alignment_id
+_ma_alignment_info.data_id
+_ma_alignment_info.software_group_id
+_ma_alignment_info.alignment_length
+_ma_alignment_info.alignment_type
+_ma_alignment_info.alignment_mode
+1 100 . . 'target-template pairwise alignment' global
+#
+#
+loop_
+_ma_alignment_details.ordinal_id
+_ma_alignment_details.alignment_id
+_ma_alignment_details.template_segment_id
+_ma_alignment_details.target_asym_id
+_ma_alignment_details.score_type
+_ma_alignment_details.score_type_other_details
+_ma_alignment_details.score_value
+_ma_alignment_details.percent_sequence_identity
+_ma_alignment_details.sequence_identity_denominator
+_ma_alignment_details.sequence_identity_denominator_other_details
+1 1 1 A 'BLAST e-value' . 1e-15 42.000 'Length of the shorter sequence' .
+#
+#
+loop_
+_ma_alignment.ordinal_id
+_ma_alignment.alignment_id
+_ma_alignment.target_template_flag
+_ma_alignment.sequence
+1 1 1 ACE-
+2 1 2 AC-G
 #
 """)
 

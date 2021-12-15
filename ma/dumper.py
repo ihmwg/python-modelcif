@@ -155,6 +155,7 @@ class _AlignmentDumper(Dumper):
         self.dump_template_details(system, writer)
         self.dump_template_poly(system, writer)
         self.dump_template_poly_segment(system, writer)
+        self.dump_template_ref_db(system, writer)
         self.dump_target_template_poly_mapping(system, writer)
         self.dump_info(system, writer)
         self.dump_details(system, writer)
@@ -215,6 +216,17 @@ class _AlignmentDumper(Dumper):
                     id=s._segment_id, template_id=s.template._id,
                     residue_number_begin=s.seq_id_range[0],
                     residue_number_end=s.seq_id_range[1])
+
+    def dump_template_ref_db(self, system, writer):
+        with writer.loop(
+                "_ma_template_ref_db_details",
+                ["template_id", "db_name", "db_name_other_details",
+                 "db_accession_code"]) as lp:
+            for tmpl in system.templates:
+                for ref in tmpl.references:
+                    lp.write(template_id=tmpl._id, db_name=ref.name,
+                             db_name_other_details=ref.other_details,
+                             db_accession_code=ref.accession)
 
     def dump_target_template_poly_mapping(self, system, writer):
         ordinal = itertools.count(1)
