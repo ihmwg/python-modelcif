@@ -1,5 +1,6 @@
 """Classes for linking back to a sequence database."""
 
+
 class TargetReference(object):
     """Point to the sequence of a target :class:`ma.Entity` in a sequence
        database. Typically a subclass such as :class:`UniProt` is used,
