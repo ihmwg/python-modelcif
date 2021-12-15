@@ -2,7 +2,7 @@ import itertools
 import operator
 import ihm.dumper
 from ihm import util
-from ihm.dumper import Dumper, Variant, _prettyprint_seq
+from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
 import ma.qa_metric
 import ma.data
 
@@ -140,6 +140,24 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
                         seq_id_end=comp.seq_id_range[1])
 
 
+class _TemplateTransformDumper(Dumper):
+    def finalize(self, system):
+        for n, trans in enumerate(system.template_transformations):
+            trans._id = n + 1
+
+    def dump(self, system, writer):
+        with writer.loop(
+                "_ma_template_trans_matrix",
+                ["id",
+                 "rot_matrix[1][1]", "rot_matrix[2][1]", "rot_matrix[3][1]",
+                 "rot_matrix[1][2]", "rot_matrix[2][2]", "rot_matrix[3][2]",
+                 "rot_matrix[1][3]", "rot_matrix[2][3]", "rot_matrix[3][3]",
+                 "tr_vector[1]", "tr_vector[2]", "tr_vector[3]"]) as lp:
+            for t in system.template_transformations:
+                lp.write(id=t._id,
+                         **_get_transform(t.rot_matrix, t.tr_vector))
+
+
 class _AlignmentDumper(Dumper):
     def finalize(self, system):
         for n, tmpl in enumerate(system.templates):
@@ -176,6 +194,7 @@ class _AlignmentDumper(Dumper):
                     tmpl = s.template.template
                     lp.write(ordinal_id=next(ordinal),
                              template_id=tmpl._id,
+                             template_trans_matrix_id=tmpl.transformation._id,
                              template_data_id=tmpl._data_id,
                              target_asym_id=s.target.asym._id,
                              template_label_asym_id=tmpl.asym_id,
@@ -400,7 +419,8 @@ class ModelArchiveVariant(Variant):
         ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _DataDumper, _DataGroupDumper, _AssemblyDumper, _AlignmentDumper,
+        _DataDumper, _DataGroupDumper, _AssemblyDumper,
+        _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _QAMetricDumper]
 
     def get_dumpers(self):

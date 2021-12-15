@@ -96,7 +96,8 @@ _ma_software_group.parameter_group_id
         asym = ma.AsymUnit(entity, name="test asym")
         system.asym_units.append(asym)
         template = ma.Template(entity, asym_id="A", model_num=1,
-                               name="test template")
+                               name="test template",
+                               transformation=ma.Transformation.identity())
         system.templates.append(template)
         system.templates.append(ma.data.Data(name="test other",
                                              details="test details"))
@@ -372,8 +373,10 @@ _ma_target_ref_db_details.organism_scientific
         system.asym_units.append(asym)
         ref1 = ma.reference.PDB('1abc')
         ref2 = CustomRef('2xyz')
+        tr = ma.Transformation.identity()
+        tr._id = 42
         t = ma.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
-                        references=[ref1, ref2])
+                        transformation=tr, references=[ref1, ref2])
         t._data_id = 99
         p = ma.alignment.Pair(
             template=t.segment('AC-G', 1, 3),
@@ -400,7 +403,7 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 . . . 99 A H 1 1
+1 1 . . 42 99 A H 1 1
 #
 #
 loop_
@@ -467,6 +470,37 @@ _ma_alignment.target_template_flag
 _ma_alignment.sequence
 1 1 1 ACE-
 2 1 2 AC-G
+#
+""")
+
+    def test_template_transform_dumper(self):
+        """Test TemplateTransformDumper"""
+        system = ma.System()
+        tr1 = ma.Transformation(
+            rot_matrix=[[-0.64, 0.09, 0.77], [0.76, -0.12, 0.64],
+                        [0.15, 0.99, 0.01]],
+            tr_vector=[1., 2., 3.])
+        system.template_transformations.append(tr1)
+        dumper = ma.dumper._TemplateTransformDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_trans_matrix.id
+_ma_template_trans_matrix.rot_matrix[1][1]
+_ma_template_trans_matrix.rot_matrix[2][1]
+_ma_template_trans_matrix.rot_matrix[3][1]
+_ma_template_trans_matrix.rot_matrix[1][2]
+_ma_template_trans_matrix.rot_matrix[2][2]
+_ma_template_trans_matrix.rot_matrix[3][2]
+_ma_template_trans_matrix.rot_matrix[1][3]
+_ma_template_trans_matrix.rot_matrix[2][3]
+_ma_template_trans_matrix.rot_matrix[3][3]
+_ma_template_trans_matrix.tr_vector[1]
+_ma_template_trans_matrix.tr_vector[2]
+_ma_template_trans_matrix.tr_vector[3]
+1 -0.640000 0.760000 0.150000 0.090000 -0.120000 0.990000 0.770000 0.640000
+0.010000 1.000 2.000 3.000
 #
 """)
 

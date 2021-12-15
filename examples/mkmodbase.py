@@ -44,7 +44,9 @@ modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
 # Alignment used in modeling
 s = ma.reference.PDB('3nc1')
 template = ma.Template(entity=template_e, asym_id='A', model_num=1,
-                       name="Template Structure", references=[s])
+                       name="Template Structure",
+                       transformation=ma.Transformation.identity(),
+                       references=[s])
 
 
 class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
