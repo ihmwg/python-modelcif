@@ -6,9 +6,39 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 import ma
 import ma.model
+import ma.protocol
 
 
 class Tests(unittest.TestCase):
+    def test_all_data(self):
+        """Test _all_data() method"""
+        s = ma.System()
+        e1 = ma.Entity("D")
+        e2 = ma.Entity("M")
+        s.target_entities.extend((e1, e2))
+
+        e3 = ma.Entity("A")
+        s.data.extend((e1, e3))
+
+        d = s._all_data()
+        # List may contain duplicates
+        self.assertEqual(list(d), [e1, e3, e1, e2])
+
+    def test_all_data_groups(self):
+        """Test _all_data_groups() method"""
+        s = ma.System()
+        e1 = ma.Entity("A")
+        s.data_groups.append(e1)
+        e2 = ma.Entity("C")
+
+        p = ma.protocol.Protocol()
+        p.steps.append(ma.protocol.ModelingStep(
+            input_data=e1, output_data=e2))
+        s.protocols.append(p)
+
+        d = s._all_data_groups()
+        self.assertEqual(list(d), [e1, e1, e2])
+
     def test_all_target_entities(self):
         """Test _all_target_entities() method"""
         s = ma.System()

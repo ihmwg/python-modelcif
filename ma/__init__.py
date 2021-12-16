@@ -23,6 +23,8 @@ class System(ihm._SystemBase):
         self.templates = []
         self.template_segments = []
         self.template_transformations = []
+        self.data = []
+        self.data_groups = []
 
     def _before_write(self):
         # Populate flat lists to contain all referenced objects only once
@@ -35,6 +37,11 @@ class System(ihm._SystemBase):
             self._all_template_transformations()))
         self.target_entities = list(_remove_identical(
             self._all_target_entities()))
+        self.data = list(_remove_identical(
+            self._all_data()))
+        self.data_groups = list(_remove_identical(
+            self._all_data_groups()))
+        self.model_groups = list(_remove_identical(self.model_groups))
 
     def _check_after_write(self):
         pass
@@ -108,14 +115,16 @@ class System(ihm._SystemBase):
 
     def _all_data(self):
         return itertools.chain(
+            self.data,
             self.templates,
-            self._all_target_entities(),
+            self.target_entities,
             self.alignments,
             (model for group, model in self._all_models()))
 
     def _all_data_groups(self):
         """Return all DataGroup (or singleton Data) objects"""
         return itertools.chain(
+            self.data_groups,
             (step.input_data for p in self.protocols for step in p.steps),
             (step.output_data for p in self.protocols for step in p.steps))
 

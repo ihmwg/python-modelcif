@@ -96,19 +96,15 @@ class _SoftwareGroupDumper(Dumper):
 
 class _DataDumper(Dumper):
     def finalize(self, system):
-        seen_data = {}
-        self._data_by_id = []
-        for d in system._all_data():
-            util._remove_id(d, attr='_data_id')
-        for d in system._all_data():
-            util._assign_id(d, seen_data, self._data_by_id, attr='_data_id')
+        for n, d in enumerate(system.data):
+            d._data_id = n + 1
 
     def dump(self, system, writer):
         with writer.loop(
                 "_ma_data",
                 ["id", "name", "content_type",
                  "content_type_other_details"]) as lp:
-            for d in self._data_by_id:
+            for d in system.data:
                 lp.write(id=d._data_id, name=d.name,
                          content_type=d.data_content_type,
                          content_type_other_details=d.data_other_details)
@@ -116,22 +112,17 @@ class _DataDumper(Dumper):
 
 class _DataGroupDumper(Dumper):
     def finalize(self, system):
-        seen_groups = {}
-        self._group_by_id = []
-        # Use _data_group_id rather than _id as the "group" might be a
-        # singleton Data, which already has its own id
-        for g in system._all_data_groups():
-            util._remove_id(g, attr='_data_group_id')
-        for g in system._all_data_groups():
-            util._assign_id(g, seen_groups, self._group_by_id,
-                            attr='_data_group_id')
+        for n, d in enumerate(system.data_groups):
+            # Use _data_group_id rather than _id as the "group" might be a
+            # singleton Data, which already has its own id
+            d._data_group_id = n + 1
 
     def dump(self, system, writer):
         ordinal = itertools.count(1)
         with writer.loop(
                 "_ma_data_group",
                 ["ordinal_id", "group_id", "data_id"]) as lp:
-            for g in self._group_by_id:
+            for g in system.data_groups:
                 if isinstance(g, ma.data.Data):
                     # If a singleton Data, write a group containing one
                     # member
