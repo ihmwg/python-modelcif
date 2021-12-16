@@ -15,6 +15,7 @@ import ma.model
 import ma.reference
 import ma.alignment
 import ihm.format
+import ihm.dumper
 
 
 def _get_dumper_output(dumper, system):
@@ -492,6 +493,67 @@ _ma_template_trans_matrix.tr_vector[2]
 _ma_template_trans_matrix.tr_vector[3]
 1 -0.640000 0.760000 0.150000 0.090000 -0.120000 0.990000 0.770000 0.640000
 0.010000 1.000 2.000 3.000
+#
+""")
+
+    def test_target_entity_dumper(self):
+        """Test TargetEntityDumper"""
+        system = ma.System()
+        e1 = ma.Entity("D")
+        e1._id = 42
+        e1._data_id = 99
+        system.target_entities.append(e1)
+
+        a1 = ma.AsymUnit(e1, 'foo')
+        a1._id = 'X'
+        system.asym_units.append(a1)
+
+        dumper = ma.dumper._TargetEntityDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_target_entity.entity_id
+_ma_target_entity.data_id
+_ma_target_entity.origin
+42 99 .
+#
+#
+loop_
+_ma_target_entity_instance.asym_id
+_ma_target_entity_instance.entity_id
+_ma_target_entity_instance.details
+X 42 foo
+#
+""")
+    def test_assembly_dumper(self):
+        """Test AssemblyDumper"""
+        system = ma.System()
+        e1 = ma.Entity('ACGT')
+        e1._id = 42
+        system.entities.append(e1)
+        asym = ma.AsymUnit(e1, 'foo')
+        system.asym_units.append(asym)
+        asmb = ma.Assembly((asym,))
+        model = ma.model.Model(assembly=asmb, name='test model')
+        mg = ma.model.ModelGroup((model,), name='test group')
+        system.model_groups.append(mg)
+
+        dumper = ihm.dumper._StructAsymDumper() # Assign _ordinal_id
+        dumper.finalize(system)
+
+        dumper = ma.dumper._AssemblyDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_struct_assembly.ordinal_id
+_ma_struct_assembly.assembly_id
+_ma_struct_assembly.entity_id
+_ma_struct_assembly.asym_id
+_ma_struct_assembly.seq_id_begin
+_ma_struct_assembly.seq_id_end
+1 2 42 A 1 4
 #
 """)
 
