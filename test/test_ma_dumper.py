@@ -99,8 +99,9 @@ _ma_software_group.parameter_group_id
                                name="test template",
                                transformation=ma.Transformation.identity())
         system.templates.append(template)
-        system.templates.append(ma.data.Data(name="test other",
-                                             details="test details"))
+        system.data.append(ma.data.Data(name="test other",
+                                        details="test details"))
+        system._before_write()  # populate system.data
         dumper = ma.dumper._DataDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
@@ -110,8 +111,8 @@ _ma_data.id
 _ma_data.name
 _ma_data.content_type
 _ma_data.content_type_other_details
-1 'test template' 'template structure' .
-2 'test other' other 'test details'
+1 'test other' other 'test details'
+2 'test template' 'template structure' .
 3 'test entity' target .
 #
 """)
@@ -131,6 +132,7 @@ _ma_data.content_type_other_details
         p.steps.append(ma.protocol.ModelingStep(
             input_data=dg12, output_data=tgt_e3))
         system.protocols.append(p)
+        system._before_write()  # populate system.data_groups
         dumper = ma.dumper._DataGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
