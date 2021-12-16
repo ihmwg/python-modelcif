@@ -528,6 +528,7 @@ _ma_target_entity_instance.details
 X 42 foo
 #
 """)
+
     def test_assembly_dumper(self):
         """Test AssemblyDumper"""
         system = ma.System()
@@ -541,7 +542,7 @@ X 42 foo
         mg = ma.model.ModelGroup((model,), name='test group')
         system.model_groups.append(mg)
 
-        dumper = ihm.dumper._StructAsymDumper() # Assign _ordinal_id
+        dumper = ihm.dumper._StructAsymDumper()  # Assign _ordinal_id
         dumper.finalize(system)
 
         dumper = ma.dumper._AssemblyDumper()
