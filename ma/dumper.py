@@ -54,7 +54,9 @@ class _TargetEntityDumper(Dumper):
                 "_ma_target_entity",
                 ["entity_id", "data_id", "origin"]) as lp:
             for e in entities:
-                lp.write(entity_id=e._id, data_id=e._data_id)
+                lp.write(entity_id=e._id, data_id=e._data_id,
+                         origin="reference database" if e.references
+                         else "designed")
 
         with writer.loop(
                 "_ma_target_entity_instance",
