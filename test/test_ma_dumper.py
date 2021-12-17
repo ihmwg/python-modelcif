@@ -250,6 +250,9 @@ _ma_protocol_step.output_data_group_id
 
     def test_model_dumper(self):
         """Test ModelDumper"""
+        class CustomModel(ma.model.Model):
+            other_details = "custom model"
+
         system = ma.System()
         e1 = ma.Entity('ACGT')
         e1._id = 9
@@ -259,11 +262,15 @@ _ma_protocol_step.output_data_group_id
         system.asym_units.append(asym)
         asmb = ma.Assembly((asym,))
         asmb._id = 2
-        model = ma.model.Model(assembly=asmb, name='test model')
-        model._data_id = 42
-        model._atoms = [ma.model.Atom(asym_unit=asym, seq_id=1, atom_id='C',
-                                      type_symbol='C', x=1.0, y=2.0, z=3.0)]
-        mg = ma.model.ModelGroup((model,), name='test group')
+        model1 = ma.model.HomologyModel(assembly=asmb, name='test model')
+        model1._data_id = 42
+        model1._atoms = [ma.model.Atom(asym_unit=asym, seq_id=1, atom_id='C',
+                                       type_symbol='C', x=1.0, y=2.0, z=3.0)]
+        model2 = ma.model.AbInitioModel(assembly=asmb, name='model2')
+        model2._data_id = 43
+        model3 = CustomModel(assembly=asmb, name='model3')
+        model3._data_id = 44
+        mg = ma.model.ModelGroup((model1, model2, model3), name='test group')
         system.model_groups.append(mg)
         dumper = ma.dumper._ModelDumper()
         dumper.finalize(system)
@@ -278,7 +285,10 @@ _ma_model_list.model_group_name
 _ma_model_list.assembly_id
 _ma_model_list.data_id
 _ma_model_list.model_type
-1 1 1 'test model' 'test group' 2 42 .
+_ma_model_list.model_type_other_details
+1 1 1 'test model' 'test group' 2 42 'Homology model' .
+2 2 1 model2 'test group' 2 43 'Ab initio model' .
+3 3 1 model3 'test group' 2 44 Other 'custom model'
 #
 #
 loop_

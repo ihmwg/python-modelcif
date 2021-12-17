@@ -72,7 +72,7 @@ atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
 # translate them into the MA data model. We do this straighforwardly by
 # subclassing the MA Model class and overriding the get_atoms
 # and get_spheres methods:
-class MyModel(ma.model.Model):
+class MyModel(ma.model.HomologyModel):
     # Map our asym unit names to MA asym_unit objects:
     asym_unit_map = {'A': asymA}
 
