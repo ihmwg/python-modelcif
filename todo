@@ -2,8 +2,6 @@ Missing categories (output by modbase_utils scripts, but not yet by python-ihm):
   _exptl
 
 Missing data items:
-  _ma_template_details.template_origin
-  _ma_template_details.template_entity_type
   _ma_alignment_info.alignment_length
   _ma_model_list.model_type
   _ma_target_entity.origin

@@ -397,7 +397,7 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 . . 42 99 A H 1 1
+1 1 'reference database' polymer 42 99 A H 1 1
 #
 #
 loop_

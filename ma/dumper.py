@@ -203,8 +203,14 @@ class _AlignmentDumper(Dumper):
                 for s in a.pairs:
                     # get Template from TemplateSegment
                     tmpl = s.template.template
+                    org = ("reference database" if tmpl.references
+                           else "customized")
+                    poly = ("polymer" if tmpl.entity.is_polymeric()
+                            else "non-polymer")
                     lp.write(ordinal_id=next(ordinal),
                              template_id=tmpl._id,
+                             template_origin=org,
+                             template_entity_type=poly,
                              template_trans_matrix_id=tmpl.transformation._id,
                              template_data_id=tmpl._data_id,
                              target_asym_id=s.target.asym._id,
