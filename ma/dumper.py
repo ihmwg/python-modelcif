@@ -2,7 +2,6 @@ import itertools
 import operator
 import ihm.dumper
 import ihm
-from ihm import util
 from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
 import ma.qa_metric
 import ma.data

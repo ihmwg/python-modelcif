@@ -4,6 +4,7 @@ import ihm.reader
 from ihm.reader import Variant, Handler, _SystemReaderBase, IDMapper
 from ihm.reader import OldFileError
 
+
 class _AuditConformHandler(Handler):
     category = '_audit_conform'
 
@@ -12,7 +13,7 @@ class _AuditConformHandler(Handler):
         if dict_name == "mmcif_ma.dic":
             try:
                 major, minor, _ = [int(x) for x in dict_version.split('.')]
-                if (major, minor) < (1,3):
+                if (major, minor) < (1, 3):
                     raise OldFileError(
                         "This version of python-ma only supports reading "
                         "files that conform to version 1.3 or later of the "
@@ -69,4 +70,3 @@ def read(fh, model_class=ma.model.Model, format='mmCIF', handlers=[],
         warn_unknown_category=warn_unknown_category,
         warn_unknown_keyword=warn_unknown_keyword,
         reject_old_file=reject_old_file, variant=variant)
-
