@@ -10,6 +10,7 @@ import ma.qa_metric
 import ma.alignment
 from ma.alignment import ShorterSequenceIdentity as SequenceIdentity
 import ihm.citations
+import ma.reader
 
 system = ma.System(title='S54091 hypothetical protein YPR070w')
 
@@ -137,3 +138,9 @@ system.model_groups.append(model_group)
 # Once the system is complete, we can write it out to an mmCIF file:
 with open('output.cif', 'w') as fh:
     ma.dumper.write(fh, [system])
+
+# We can also read an mmCIF file back in
+with open('output.cif') as fh:
+    s, = ma.reader.read(fh)
+for e in s.entities:
+    print(e.description, "".join(c.id for c in e.sequence))
