@@ -1,6 +1,6 @@
 import itertools
 import ihm
-from ihm import Software, Assembly, _remove_identical  # noqa: F401
+from ihm import AsymUnit, Software, Assembly, _remove_identical  # noqa: F401
 import ma.data
 
 
@@ -138,13 +138,6 @@ class System(ihm._SystemBase):
              for metric in model.qa_metrics if metric.software))
 
 
-class TargetSegment(object):
-    def __init__(self, asym, gapped_sequence, seq_id_begin, seq_id_end):
-        self.asym = asym
-        self.gapped_sequence = gapped_sequence
-        self.seq_id_range = (seq_id_begin, seq_id_end)
-
-
 class Entity(ihm.Entity, ma.data.Data):
     # Technically only target entities have a data_id (for templates, the
     # data_id is attached to the Template object, which roughly corresponds
@@ -159,12 +152,6 @@ class Entity(ihm.Entity, ma.data.Data):
                             description=description, details=details,
                             source=source, references=references)
         ma.data.Data.__init__(self, name=description)
-
-
-class AsymUnit(ihm.AsymUnit):
-    def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
-        # todo: cache so we return the same object for same parameters
-        return TargetSegment(self, gapped_sequence, seq_id_begin, seq_id_end)
 
 
 class SoftwareGroup(tuple):

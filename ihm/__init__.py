@@ -1193,6 +1193,22 @@ class AsymUnitRange(object):
     entity = property(lambda self: self.asym.entity)
 
 
+class AsymUnitSegment(object):
+    """An aligned part of an asymmetric unit.
+
+       Usually these objects are created from
+       an :class:`AsymUnit`, e.g. to get a segment covering residues 1 through
+       3 in `asym` use::
+
+           asym = ihm.AsymUnit(entity)
+           seg = asym.segment('--ACG', 1, 3)
+    """
+    def __init__(self, asym, gapped_sequence, seq_id_begin, seq_id_end):
+        self.asym = asym
+        self.gapped_sequence = gapped_sequence
+        self.seq_id_range = (seq_id_begin, seq_id_end)
+
+
 class AsymUnit(object):
     """An asymmetric unit, i.e. a unique instance of an Entity that
        was modeled.
@@ -1238,6 +1254,16 @@ class AsymUnit(object):
     def residue(self, seq_id):
         """Get a :class:`Residue` at the given sequence position"""
         return Residue(asym=self, seq_id=seq_id)
+
+    def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
+        """Get an object representing the alignment of part of this sequence.
+
+           :param str gapped_sequence: Sequence of the segment, including gaps.
+           :param int seq_id_begin: Start of the segment.
+           :param int seq_id_end: End of the segment.
+        """
+        # todo: cache so we return the same object for same parameters
+        return AsymUnitSegment(self, gapped_sequence, seq_id_begin, seq_id_end)
 
     seq_id_range = property(lambda self: self.entity.seq_id_range,
                             doc="Sequence range")
