@@ -1,6 +1,7 @@
 import itertools
 import ihm
-from ihm import AsymUnit, Software, Assembly, _remove_identical  # noqa: F401
+from ihm import Entity, AsymUnit, Software, Assembly  # noqa: F401
+from ihm import _remove_identical  # noqa: F401
 import ma.data
 
 
@@ -136,22 +137,6 @@ class System(ihm._SystemBase):
              if step.software),
             (metric.software for group, model in self._all_models()
              for metric in model.qa_metrics if metric.software))
-
-
-class Entity(ihm.Entity, ma.data.Data):
-    # Technically only target entities have a data_id (for templates, the
-    # data_id is attached to the Template object, which roughly corresponds
-    # to a target AsymUnit). Rather than have a separate TargetEntity and
-    # TemplateEntity (which would cause issues if they were confused, or if
-    # target=template) we just don't use the data_id for template entities.
-    data_content_type = "target"
-
-    def __init__(self, sequence, alphabet=ihm.LPeptideAlphabet,
-                 description=None, details=None, source=None, references=[]):
-        ihm.Entity.__init__(self, sequence=sequence, alphabet=alphabet,
-                            description=description, details=details,
-                            source=source, references=references)
-        ma.data.Data.__init__(self, name=description)
 
 
 class SoftwareGroup(tuple):

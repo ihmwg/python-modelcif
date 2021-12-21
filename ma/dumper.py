@@ -1,6 +1,7 @@
 import itertools
 import operator
 import ihm.dumper
+import ihm
 from ihm import util
 from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
 import ma.qa_metric
@@ -107,9 +108,16 @@ class _DataDumper(Dumper):
                 ["id", "name", "content_type",
                  "content_type_other_details"]) as lp:
             for d in system.data:
-                lp.write(id=d._data_id, name=d.name,
-                         content_type=d.data_content_type,
-                         content_type_other_details=d.data_other_details)
+                # ihm.Entity isn't a subclass of ma.Data, so we need
+                # to fill in missing attributes here
+                if isinstance(d, ihm.Entity):
+                    lp.write(id=d._data_id, name=d.description,
+                             content_type="target",
+                             content_type_other_details=None)
+                else:
+                    lp.write(id=d._data_id, name=d.name,
+                             content_type=d.data_content_type,
+                             content_type_other_details=d.data_other_details)
 
 
 class _DataGroupDumper(Dumper):
@@ -125,9 +133,9 @@ class _DataGroupDumper(Dumper):
                 "_ma_data_group",
                 ["ordinal_id", "group_id", "data_id"]) as lp:
             for g in system.data_groups:
-                if isinstance(g, ma.data.Data):
-                    # If a singleton Data, write a group containing one
-                    # member
+                if isinstance(g, (ma.data.Data, ihm.Entity)):
+                    # If a singleton Data (or ihm.Entity, which isn't a
+                    # subclass of Data), write a group containing one member
                     lp.write(ordinal_id=next(ordinal),
                              group_id=g._data_group_id, data_id=g._data_id)
                 else:
