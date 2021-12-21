@@ -90,6 +90,22 @@ class Tests(unittest.TestCase):
                 self.assertAlmostEqual(t.rot_matrix[i][j],
                                        1. if i == j else 0., delta=0.1)
 
+    def test_all_software_groups(self):
+        """Test _all_software_groups() method"""
+        s = ma.System()
+        sg1 = 'sg1'
+        sg2 = 'sg2'
+        s.software_groups.extend((sg1, sg2))
+
+        p = ma.protocol.Protocol()
+        p.steps.append(ma.protocol.ModelingStep(
+            input_data=None, output_data=None, software=sg1))
+        s.protocols.append(p)
+
+        allsg = s._all_software_groups()
+        # List may contain duplicates
+        self.assertEqual(list(allsg), [sg1, sg2, sg1])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -26,6 +26,7 @@ class System(ihm._SystemBase):
         self.template_transformations = []
         self.data = []
         self.data_groups = []
+        self.software_groups = []
 
     def _before_write(self):
         # Populate flat lists to contain all referenced objects only once
@@ -43,6 +44,8 @@ class System(ihm._SystemBase):
         self.data_groups = list(_remove_identical(
             self._all_data_groups()))
         self.model_groups = list(_remove_identical(self.model_groups))
+        self.software_groups = list(_remove_identical(
+            self._all_software_groups()))
 
     def _check_after_write(self):
         pass
@@ -129,9 +132,10 @@ class System(ihm._SystemBase):
             (step.input_data for p in self.protocols for step in p.steps),
             (step.output_data for p in self.protocols for step in p.steps))
 
-    def _all_software_and_groups(self):
+    def _all_software_groups(self):
         """Return all SoftwareGroup (or singleton Software) objects"""
         return itertools.chain(
+            self.software_groups,
             (aln.software for aln in self.alignments if aln.software),
             (step.software for p in self.protocols for step in p.steps
              if step.software),
@@ -139,7 +143,7 @@ class System(ihm._SystemBase):
              for metric in model.qa_metrics if metric.software))
 
 
-class SoftwareGroup(tuple):
+class SoftwareGroup(list):
     pass
 
 

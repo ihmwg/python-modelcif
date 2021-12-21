@@ -69,15 +69,10 @@ class _TargetEntityDumper(Dumper):
 
 class _SoftwareGroupDumper(Dumper):
     def finalize(self, system):
-        seen_groups = {}
-        self._group_by_id = []
-        # Use _group_id rather than _id as the "group" might be a singleton
-        # Software, which already has its own id
-        for g in system._all_software_and_groups():
-            util._remove_id(g, attr='_group_id')
-        for g in system._all_software_and_groups():
-            util._assign_id(g, seen_groups, self._group_by_id,
-                            attr='_group_id')
+        for n, s in enumerate(system.software_groups):
+            # Use _group_id rather than _id as the "group" might be a
+            # singleton Software, which already has its own id
+            s._group_id = n + 1
 
     def dump(self, system, writer):
         ordinal = itertools.count(1)
@@ -85,7 +80,7 @@ class _SoftwareGroupDumper(Dumper):
                 "_ma_software_group",
                 ["ordinal_id", "group_id", "software_id",
                  "parameter_group_id"]) as lp:
-            for g in self._group_by_id:
+            for g in system.software_groups:
                 if isinstance(g, ma.Software):
                     # If a singleton Software, write a group containing one
                     # member

@@ -51,6 +51,27 @@ mmcif_ma.dic    %s
 """ % ver
             s, = ma.reader.read(StringIO(cif), reject_old_file=True)
 
+    def test_software_group_handler(self):
+        """Test SoftwareGroupHandler"""
+        cif = """
+loop_
+_ma_software_group.ordinal_id
+_ma_software_group.group_id
+_ma_software_group.software_id
+_ma_software_group.parameter_group_id
+1 1 1 .
+2 1 2 .
+3 2 3 .
+"""
+        s, = ma.reader.read(StringIO(cif))
+        s1, s2, s3 = s.software
+        g1, g2 = s.software_groups
+        self.assertEqual(len(g1), 2)
+        self.assertEqual(len(g2), 1)
+        self.assertEqual(g1[0], s1)
+        self.assertEqual(g1[1], s2)
+        self.assertEqual(g2[0], s3)
+
 
 if __name__ == '__main__':
     unittest.main()

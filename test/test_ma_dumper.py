@@ -69,10 +69,13 @@ class Tests(unittest.TestCase):
         s3._id = 3
         system = ma.System()
         aln1 = MockObject()
+        aln1.pairs = []
         aln1.software = ma.SoftwareGroup((s1, s2))
         aln2 = MockObject()
+        aln2.pairs = []
         aln2.software = s3
         system.alignments.extend((aln1, aln2))
+        system._before_write()  # populate system.software_groups
         dumper = ma.dumper._SoftwareGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)

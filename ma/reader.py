@@ -1,7 +1,7 @@
 import ma
 import ma.model
 import ihm.reader
-from ihm.reader import Variant, Handler, _SystemReaderBase
+from ihm.reader import Variant, Handler, _SystemReaderBase, IDMapper
 from ihm.reader import OldFileError
 
 class _AuditConformHandler(Handler):
@@ -28,6 +28,18 @@ class SystemReader(_SystemReaderBase):
 
         super(SystemReader, self).__init__(model_class, starting_model_class)
 
+        self.software_groups = IDMapper(self.system.software_groups,
+                                        ma.SoftwareGroup)
+
+
+class _SoftwareGroupHandler(Handler):
+    category = '_ma_software_group'
+
+    def __call__(self, group_id, software_id):
+        g = self.sysr.software_groups.get_by_id(group_id)
+        s = self.sysr.software.get_by_id(software_id)
+        g.append(s)
+
 
 class ModelArchiveVariant(Variant):
     system_reader = SystemReader
@@ -40,7 +52,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcNatHandler, ihm.reader._EntitySrcGenHandler,
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
-        ihm.reader._StructAsymHandler]
+        ihm.reader._StructAsymHandler, _SoftwareGroupHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
