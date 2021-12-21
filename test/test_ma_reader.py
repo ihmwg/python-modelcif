@@ -3,7 +3,7 @@ import unittest
 import utils
 import os
 if sys.version_info[0] >= 3:
-    from io import StringIO, BytesIO
+    from io import StringIO
 else:
     from io import BytesIO as StringIO
 
