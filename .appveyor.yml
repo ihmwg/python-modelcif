@@ -17,6 +17,7 @@ install:
   - python.exe setup.py build
   - python.exe setup.py install
   - cd ..
+  - rd /q /s python-ihm
 
 build: off
 

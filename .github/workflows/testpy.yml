@@ -32,6 +32,7 @@ jobs:
         # Get and build latest python-ihm
         git clone --depth=5 https://github.com/ihmwg/python-ihm
         (cd python-ihm && python setup.py build && python setup.py install)
+        rm -rf python-ihm
     - name: Test
       run: |
         pytest --cov=ma --cov-branch --cov-report=xml --cov-append --flake8 -v .
