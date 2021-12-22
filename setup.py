@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup
 except ImportError:
-    from distutils.core import setup, Extension
+    from distutils.core import setup
 import sys
-import os
 
 VERSION = "0.1"
 
