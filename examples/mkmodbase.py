@@ -116,6 +116,7 @@ class MyModel(ma.model.HomologyModel):
                                 type_symbol=type_symbol, seq_id=seq_id,
                                 atom_id=atom_id, x=x, y=y, z=z)
 
+
 # Link the model to the Assembly that describes all subunits
 model = MyModel(assembly=modeled_assembly, name='Best scoring model')
 
@@ -129,6 +130,7 @@ protocol.steps.append(ma.protocol.ModelingStep(
 protocol.steps.append(ma.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
 system.protocols.append(protocol)
+
 
 # We can also attach quality scores to our model(s). To do this we must
 # first define the scores by creating subclasses using a MetricMode
