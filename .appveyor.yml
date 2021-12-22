@@ -12,7 +12,11 @@ install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python.exe -m pip install codecov coverage nose"
   - choco install -y swig
-  - python.exe setup.py build_ext --inplace
+  - git clone --depth=5 https://github.com/ihmwg/python-ihm
+  - cd python-ihm
+  - python.exe setup.py build
+  - python.exe setup.py install
+  - cd ..
 
 build: off
 
