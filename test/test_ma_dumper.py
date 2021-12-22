@@ -303,6 +303,7 @@ _atom_site.label_alt_id
 _atom_site.label_comp_id
 _atom_site.label_seq_id
 _atom_site.auth_seq_id
+_atom_site.pdbx_PDB_ins_code
 _atom_site.label_asym_id
 _atom_site.Cartn_x
 _atom_site.Cartn_y
@@ -312,7 +313,7 @@ _atom_site.label_entity_id
 _atom_site.auth_asym_id
 _atom_site.B_iso_or_equiv
 _atom_site.pdbx_PDB_model_num
-ATOM 1 C C . ALA 1 1 A 1.000 2.000 3.000 . 9 A . 1
+ATOM 1 C C . ALA 1 1 ? A 1.000 2.000 3.000 . 9 A . 1
 #
 #
 loop_

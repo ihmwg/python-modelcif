@@ -4,6 +4,8 @@ from ihm import Entity, AsymUnit, Software, Assembly  # noqa: F401
 from ihm import _remove_identical  # noqa: F401
 import ma.data
 
+__version__ = '0.1'
+
 
 class System(ihm._SystemBase):
     def __init__(self, title=None, id='model'):
