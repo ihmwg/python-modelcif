@@ -2,12 +2,12 @@
 
 .. _dumper_module:
 
-The :mod:`ihm.dumper` Python module
-===================================
+The :mod:`ma.dumper` Python module
+==================================
 
-.. automodule:: ihm.dumper
-
-.. autoclass:: Dumper
-   :members:
+.. automodule:: ma.dumper
 
 .. autofunction:: write
+
+.. autoclass:: ModelArchiveVariant
+   :members:

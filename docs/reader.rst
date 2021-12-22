@@ -2,27 +2,12 @@
 
 .. _reader_module:
 
-The :mod:`ihm.reader` Python module
-===================================
+The :mod:`ma.reader` Python module
+==================================
 
-.. automodule:: ihm.reader
+.. automodule:: ma.reader
 
 .. autofunction:: read
 
-.. autoexception:: UnknownCategoryWarning
-
-.. autoexception:: UnknownKeywordWarning
-
-.. autoexception:: OldFileError
-
-.. autoclass:: Handler
-   :members:
-
-.. autoclass:: SystemReader
-   :members:
-
-.. autoclass:: IDMapper
-   :members:
-
-.. autoclass:: RangeIDMapper
+.. autoclass:: ModelArchiveVariant
    :members:

@@ -2,12 +2,21 @@
 
 .. _protocol_module:
 
-The :mod:`ihm.protocol` Python module
-=====================================
+The :mod:`ma.protocol` Python module
+====================================
 
-.. automodule:: ihm.protocol
+.. automodule:: ma.protocol
 
 .. autoclass:: Step
+   :members:
+
+.. autoclass:: TemplateSearchStep
+   :members:
+
+.. autoclass:: ModelingStep
+   :members:
+
+.. autoclass:: ModelSelectionStep
    :members:
 
 .. autoclass:: Protocol

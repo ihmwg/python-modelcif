@@ -2,12 +2,10 @@
 
 .. _main_module:
 
-The :mod:`ihm` Python module
-===================================
+The :mod:`ma` Python module
+==================================
 
-.. automodule:: ihm
-
-.. autodata:: unknown
+.. automodule:: ma
 
 .. autoclass:: System
    :members:
@@ -15,71 +13,14 @@ The :mod:`ihm` Python module
 .. autoclass:: Software
    :members:
 
-.. autoclass:: Citation
+.. autoclass:: SoftwareGroup
    :members:
 
-.. autoclass:: Grant
+.. autoclass:: Transformation
    :members:
 
-.. autoclass:: ChemComp
+.. autoclass:: TemplateSegment
    :members:
 
-.. autoclass:: PeptideChemComp
-   :members:
-
-.. autoclass:: LPeptideChemComp
-   :members:
-
-.. autoclass:: DPeptideChemComp
-   :members:
-
-.. autoclass:: RNAChemComp
-   :members:
-
-.. autoclass:: DNAChemComp
-   :members:
-
-.. autoclass:: NonPolymerChemComp
-   :members:
-
-.. autoclass:: WaterChemComp
-   :members:
-
-.. autoclass:: Alphabet
-   :members:
-
-.. autoclass:: LPeptideAlphabet
-   :members:
-
-.. autoclass:: DPeptideAlphabet
-   :members:
-
-.. autoclass:: RNAAlphabet
-   :members:
-
-.. autoclass:: DNAAlphabet
-   :members:
-
-.. autoclass:: Entity
-   :members:
-
-.. autoclass:: EntityRange
-   :members:
-
-.. autoclass:: AsymUnit
-   :members:
-
-.. autoclass:: AsymUnitRange
-   :members:
-
-.. autoclass:: Atom
-   :members:
-
-.. autoclass:: Residue
-   :members:
-
-.. autoclass:: Assembly
-   :members:
-
-.. autoclass:: ChemDescriptor
+.. autoclass:: Template
    :members:

@@ -1,6 +1,6 @@
 .. _changes:
 
-.. currentmodule:: ihm
+.. currentmodule:: ma
 
 Change history
 **************

@@ -2,22 +2,19 @@
 
 .. _reference_module:
 
-The :mod:`ihm.reference` Python module
-======================================
+The :mod:`ma.reference` Python module
+=====================================
 
-.. automodule:: ihm.reference
+.. automodule:: ma.reference
 
-.. autoclass:: Reference
+.. autoclass:: TargetReference
    :members:
 
-.. autoclass:: Sequence
+.. autoclass:: UniProt
    :members:
 
-.. autoclass:: UniProtSequence
+.. autoclass:: TemplateReference
    :members:
 
-.. autoclass:: Alignment
-   :members:
-
-.. autoclass:: SeqDif
+.. autoclass:: PDB
    :members:

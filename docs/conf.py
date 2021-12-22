@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Python-IHM documentation build configuration file, created by
+# Python-MA documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar  1 14:05:33 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,8 +46,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Python-IHM'
-copyright = u'2018-2021, Benjamin Webb'
+project = u'Python-MA'
+copyright = u'2021, Benjamin Webb'
 author = u'Benjamin Webb'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -104,7 +104,7 @@ html_sidebars = {}
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Python-IHMdoc'
+htmlhelp_basename = 'Python-MAdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -131,7 +131,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Python-IHM.tex', u'Python-IHM Documentation',
+    (master_doc, 'Python-MA.tex', u'Python-MA Documentation',
      u'Benjamin Webb', 'manual'),
 ]
 
@@ -141,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'python-ihm', u'Python-IHM Documentation',
+    (master_doc, 'python-ma', u'Python-MA Documentation',
      [author], 1)
 ]
 
@@ -152,7 +152,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Python-IHM', u'Python-IHM Documentation',
-     author, 'Python-IHM', 'One line description of project.',
+    (master_doc, 'Python-MA', u'Python-MA Documentation',
+     author, 'Python-MA', 'One line description of project.',
      'Miscellaneous'),
 ]
