@@ -9,7 +9,7 @@ and [BinaryCIF](https://github.com/dsehnal/BinaryCIF) files compliant with the
 extension. It works with Python 2.7 or Python 3.
 
 Please [see the documentation](https://python-ma.readthedocs.org/)
-or some
+(currently incomplete) or some
 [worked examples](https://github.com/ihmwg/python-ma/tree/main/examples)
 for more details.
 
