@@ -2,9 +2,9 @@
 [![docs](https://readthedocs.org/projects/python-ihm/badge/)](https://python-ihm.readthedocs.org/)
 [![conda package](https://img.shields.io/conda/vn/conda-forge/ihm.svg)](https://anaconda.org/conda-forge/ihm)
 [![pypi package](https://badge.fury.io/py/ihm.svg)](https://badge.fury.io/py/ihm)
-[![Linux Build Status](https://github.com/ihmwg/python-ihm/workflows/build/badge.svg)](https://github.com/ihmwg/python-ihm/actions?query=workflow%3Abuild)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/5o28oe477ii8ur4h?svg=true)](https://ci.appveyor.com/project/benmwebb/python-ihm)
-[![codecov](https://codecov.io/gh/ihmwg/python-ihm/branch/main/graph/badge.svg)](https://codecov.io/gh/ihmwg/python-ihm)
+[![Linux Build Status](https://github.com/ihmwg/python-ma/workflows/build/badge.svg)](https://github.com/ihmwg/python-ma/actions?query=workflow%3Abuild)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/5o28oe477ii8ur4h?svg=true)](https://ci.appveyor.com/project/benmwebb/python-ma)
+[![codecov](https://codecov.io/gh/ihmwg/python-ma/branch/main/graph/badge.svg)](https://codecov.io/gh/ihmwg/python-ma)
 
 This is a Python package to assist in handling [mmCIF](http://mmcif.wwpdb.org/)
 and [BinaryCIF](https://github.com/dsehnal/BinaryCIF) files compliant with the
