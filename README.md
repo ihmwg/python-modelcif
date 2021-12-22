@@ -1,5 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2603378.svg)](https://doi.org/10.5281/zenodo.2603378)
-[![docs](https://readthedocs.org/projects/python-ihm/badge/)](https://python-ihm.readthedocs.org/)
+[![docs](https://readthedocs.org/projects/python-ma/badge/)](https://python-ma.readthedocs.org/)
 [![conda package](https://img.shields.io/conda/vn/conda-forge/ihm.svg)](https://anaconda.org/conda-forge/ihm)
 [![pypi package](https://badge.fury.io/py/ihm.svg)](https://badge.fury.io/py/ihm)
 [![Linux Build Status](https://github.com/ihmwg/python-ma/workflows/build/badge.svg)](https://github.com/ihmwg/python-ma/actions?query=workflow%3Abuild)
