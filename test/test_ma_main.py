@@ -51,10 +51,7 @@ class Tests(unittest.TestCase):
 
         asym = ma.AsymUnit(e1, 'foo')
         s.asym_units.append(asym)
-        asmb = ma.Assembly((asym,))
-        model = ma.model.Model(assembly=asmb, name='test model')
-        mg = ma.model.ModelGroup((model,), name='test group')
-        s.model_groups.append(mg)
+        s.assemblies.append(ma.Assembly((asym,)))
 
         te = s._all_target_entities()
         # List may contain duplicates, but no template entities

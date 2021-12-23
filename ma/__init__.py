@@ -7,9 +7,34 @@ import ma.data
 __version__ = '0.1'
 
 
-class System(ihm._SystemBase):
+class System(object):
     def __init__(self, title=None, id='model'):
-        ihm._SystemBase.__init__(self, title, id)
+        self.id, self.title = id, title
+
+        #: List of plain text comments. These will be added to the top of
+        #: the mmCIF file.
+        self.comments = []
+
+        #: List of all software used in the modeling. See :class:`Software`.
+        self.software = []
+
+        #: List of all authors of this system, as a list of strings (last name
+        #: followed by initials, e.g. "Smith AJ"). When writing out a file,
+        #: if this list is empty, the set of all citation authors (see
+        #: :attr:`Citation.authors`) is used instead.
+        self.authors = []
+
+        #: List of all grants that supported this work. See :class:`Grant`.
+        self.grants = []
+
+        #: List of all citations. See :class:`Citation`.
+        self.citations = []
+
+        #: All entities used in the system. See :class:`Entity`.
+        self.entities = []
+
+        #: All asymmetric units used in the system. See :class:`AsymUnit`.
+        self.asym_units = []
 
         #: All model groups (collections of models).
         #: See :class:`~ma.model.ModelGroup`.
@@ -29,10 +54,23 @@ class System(ihm._SystemBase):
         self.data = []
         self.data_groups = []
         self.software_groups = []
+        self.assemblies = []
+
+    def _all_models(self):
+        """Iterate over all Models in the system"""
+        # todo: raise an error if a model is present in multiple groups
+        for group in self._all_model_groups():
+            seen_models = {}
+            for model in group:
+                if model in seen_models:
+                    continue
+                seen_models[model] = None
+                yield group, model
 
     def _before_write(self):
         # Populate flat lists to contain all referenced objects only once
         # We must populate these in the correct order to get all objects
+        self.assemblies = list(_remove_identical(self._all_assemblies()))
         self.alignments = list(_remove_identical(self.alignments))
         self.template_segments = list(
             _remove_identical(self._all_template_segments()))
@@ -82,7 +120,7 @@ class System(ihm._SystemBase):
            templates."""
         return (itertools.chain(
             self.target_entities,
-            (asym.entity for asmb in self._all_assemblies() for asym in asmb)))
+            (asym.entity for asmb in self.assemblies for asym in asmb)))
 
     def _all_software(self):
         """Iterate over all Software in the system.
@@ -103,16 +141,14 @@ class System(ihm._SystemBase):
            as we only want ranges that were actually used.
            Duplicates may be present."""
         return (itertools.chain(
-            (comp for a in self._all_assemblies() for comp in a)))
+            (comp for a in self.assemblies for comp in a)))
 
     def _all_assemblies(self):
         """Iterate over all Assemblies in the system.
            This includes all Assemblies referenced from other objects, plus
            any orphaned Assemblies. Duplicates may be present."""
         return itertools.chain(
-            # Complete assembly is always first
-            (self.complete_assembly,),
-            self.orphan_assemblies,
+            self.assemblies,
             (model.assembly for group, model in self._all_models()
              if model.assembly))
 

@@ -139,12 +139,16 @@ class _DataGroupDumper(Dumper):
 
 
 class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
+    def dump(self, system):
+        for n, asmb in system.assemblies:
+            asmb._id = n + 1
+
     def dump(self, system, writer):
         ordinal = itertools.count(1)
         with writer.loop("_ma_struct_assembly",
                          ["ordinal_id", "assembly_id", "entity_id", "asym_id",
                           "seq_id_begin", "seq_id_end"]) as lp:
-            for a in self._assembly_by_id:
+             for a in system.assemblies:
                 for comp in a:
                     entity = comp.entity if hasattr(comp, 'entity') else comp
                     lp.write(

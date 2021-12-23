@@ -552,9 +552,7 @@ X 42 foo
         asym = ma.AsymUnit(e1, 'foo')
         system.asym_units.append(asym)
         asmb = ma.Assembly((asym,))
-        model = ma.model.Model(assembly=asmb, name='test model')
-        mg = ma.model.ModelGroup((model,), name='test group')
-        system.model_groups.append(mg)
+        system.assemblies.append(asmb)
 
         dumper = ihm.dumper._StructAsymDumper()  # Assign _ordinal_id
         dumper.finalize(system)
@@ -570,7 +568,7 @@ _ma_struct_assembly.entity_id
 _ma_struct_assembly.asym_id
 _ma_struct_assembly.seq_id_begin
 _ma_struct_assembly.seq_id_end
-1 2 42 A 1 4
+1 1 42 A 1 4
 #
 """)
 
