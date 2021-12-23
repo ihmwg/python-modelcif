@@ -138,9 +138,9 @@ class _DataGroupDumper(Dumper):
                                  group_id=g._data_group_id, data_id=d._data_id)
 
 
-class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
-    def dump(self, system):
-        for n, asmb in system.assemblies:
+class _AssemblyDumper(Dumper):
+    def finalize(self, system):
+        for n, asmb in enumerate(system.assemblies):
             asmb._id = n + 1
 
     def dump(self, system, writer):
@@ -148,7 +148,7 @@ class _AssemblyDumper(ihm.dumper._AssemblyDumperBase):
         with writer.loop("_ma_struct_assembly",
                          ["ordinal_id", "assembly_id", "entity_id", "asym_id",
                           "seq_id_begin", "seq_id_end"]) as lp:
-             for a in system.assemblies:
+            for a in system.assemblies:
                 for comp in a:
                     entity = comp.entity if hasattr(comp, 'entity') else comp
                     lp.write(

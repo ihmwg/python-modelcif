@@ -1,5 +1,4 @@
 import itertools
-import ihm
 from ihm import Entity, AsymUnit, Software, Assembly  # noqa: F401
 from ihm import _remove_identical  # noqa: F401
 import ma.data

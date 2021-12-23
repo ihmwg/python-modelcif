@@ -1,8 +1,10 @@
 import ma
 import ma.model
+import ihm
+import ihm.source
 import ihm.reader
-from ihm.reader import Variant, Handler, _SystemReaderBase, IDMapper
-from ihm.reader import OldFileError
+from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
+from ihm.reader import OldFileError, _make_new_entity
 
 
 class _AuditConformHandler(Handler):
@@ -23,14 +25,43 @@ class _AuditConformHandler(Handler):
                 pass
 
 
-class SystemReader(_SystemReaderBase):
+class _SystemReader(object):
     def __init__(self, model_class, starting_model_class):
         self.system = ma.System()
 
-        super(SystemReader, self).__init__(model_class, starting_model_class)
+        #: Mapping from ID to :class:`ihm.Software` objects
+        self.software = IDMapper(self.system.software, ihm.Software,
+                                 *(None,) * 4)
+
+        #: Mapping from ID to :class:`ihm.Citation` objects
+        self.citations = IDMapper(self.system.citations, ihm.Citation,
+                                  *(None,) * 8)
+
+        #: Mapping from ID to :class:`ihm.Entity` objects
+        self.entities = IDMapper(self.system.entities, _make_new_entity)
+
+        #: Mapping from ID to :class:`ihm.source.Manipulated` objects
+        self.src_gens = IDMapper(None, ihm.source.Manipulated)
+
+        #: Mapping from ID to :class:`ihm.source.Natural` objects
+        self.src_nats = IDMapper(None, ihm.source.Natural)
+
+        #: Mapping from ID to :class:`ihm.source.Synthetic` objects
+        self.src_syns = IDMapper(None, ihm.source.Synthetic)
+
+        #: Mapping from ID to :class:`ihm.AsymUnit` objects
+        self.asym_units = IDMapper(self.system.asym_units, ihm.AsymUnit, None)
+
+        #: Mapping from ID to :class:`ihm.ChemComp` objects
+        self.chem_comps = _ChemCompIDMapper(None, ihm.ChemComp, *(None,) * 3)
 
         self.software_groups = IDMapper(self.system.software_groups,
                                         ma.SoftwareGroup)
+
+    def finalize(self):
+        # make sequence immutable (see also _make_new_entity)
+        for e in self.system.entities:
+            e.sequence = tuple(e.sequence)
 
 
 class _SoftwareGroupHandler(Handler):
@@ -43,7 +74,7 @@ class _SoftwareGroupHandler(Handler):
 
 
 class ModelArchiveVariant(Variant):
-    system_reader = SystemReader
+    system_reader = _SystemReader
 
     _handlers = [
         ihm.reader._StructHandler, ihm.reader._SoftwareHandler,
