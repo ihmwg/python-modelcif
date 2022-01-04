@@ -129,19 +129,6 @@ class System(object):
         return (itertools.chain(
             self.software))
 
-    def _all_starting_models(self):
-        return []
-
-    def _all_entity_ranges(self):
-        """Iterate over all Entity ranges in the system (these may be
-           :class:`Entity`, :class:`AsymUnit`, :class:`EntityRange` or
-           :class:`AsymUnitRange` objects).
-           Note that we don't include self.entities or self.asym_units here,
-           as we only want ranges that were actually used.
-           Duplicates may be present."""
-        return (itertools.chain(
-            (comp for a in self.assemblies for comp in a)))
-
     def _all_assemblies(self):
         """Iterate over all Assemblies in the system.
            This includes all Assemblies referenced from other objects, plus
