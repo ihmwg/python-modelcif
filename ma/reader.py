@@ -5,6 +5,7 @@ import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
+import inspect
 
 
 class _AuditConformHandler(Handler):
@@ -73,6 +74,63 @@ class _SoftwareGroupHandler(Handler):
         g.append(s)
 
 
+class _EnumerationMapper(object):
+    """Map an mmCIF enumerated value to the corresponding Python class"""
+    def __init__(self, module, base_class):
+        self._base_class = base_class
+        self._other_name = base_class.name.upper()
+        self._map = dict(
+            (x[1].name.upper(), x[1])
+            for x in inspect.getmembers(module, inspect.isclass)
+            if issubclass(x[1], base_class) and x[1] is not base_class)
+        self._other_map = {}
+
+    def get(self, nam, other_det):
+        """Get the Python class that matches the given name
+           and other_details"""
+        nam = nam.upper()
+        typ = self._map.get(nam)
+        if typ:
+            return typ
+        # If name is not Other this is an enumeration value we don't have
+        # a class for; make and cache a new class for the given name:
+        if nam != self._other_name:
+            class ExtraType(self._base_class):
+                name = nam
+                other_details = None
+            self._map[nam] = ExtraType
+            return ExtraType
+        # If name is "Other" then treat other_details as the key
+        other_det_up = other_det.upper()
+        if other_det_up not in self._other_map:
+            class CustomType(self._base_class):
+                other_details = other_det
+            self._other_map[other_det_up] = CustomType
+        return self._other_map[other_det_up]
+
+
+class _TargetRefDBHandler(Handler):
+    category = '_ma_target_ref_db_details'
+
+    def __init__(self, *args):
+        super(_TargetRefDBHandler, self).__init__(*args)
+        # Map db_name to subclass of ma.reference.TargetReference
+        self.type_map = _EnumerationMapper(ma.reference,
+                                           ma.reference.TargetReference)
+
+    def __call__(self, target_entity_id, db_name, db_name_other_details,
+                 db_code, db_accession, seq_db_isoform, seq_db_align_begin,
+                 seq_db_align_end, ncbi_taxonomy_id, organism_scientific):
+        e = self.sysr.entities.get_by_id(target_entity_id)
+        typ = self.type_map.get(db_name, db_name_other_details)
+        ref = typ(code=db_code, accession=db_accession,
+                  align_begin=self.get_int(seq_db_align_begin),
+                  align_end=self.get_int(seq_db_align_end),
+                  isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
+                  organism_scientific=organism_scientific)
+        e.references.append(ref)
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -84,7 +142,8 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcNatHandler, ihm.reader._EntitySrcGenHandler,
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
-        ihm.reader._StructAsymHandler, _SoftwareGroupHandler]
+        ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
+        _TargetRefDBHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
