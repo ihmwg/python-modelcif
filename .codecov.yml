@@ -1,4 +1,2 @@
 ignore:
   - test
-  - util
-  - **/_compat_collections.py
