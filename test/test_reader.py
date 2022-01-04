@@ -42,7 +42,7 @@ mmcif_ma.dic    0.1.3
         """Test success reading not-old files"""
         # File read is OK if version is new enough, or version cannot be parsed
         # because it is non-int or has too many elements
-        for ver in ('1.3', '0.0.4.3', '0.0a'):
+        for ver in ('1.3.2', '1.3', '0.0.4.3', '0.0a'):
             cif = """
 loop_
 _audit_conform.dict_name
