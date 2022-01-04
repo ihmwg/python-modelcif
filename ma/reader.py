@@ -59,6 +59,12 @@ class _SystemReader(object):
         self.software_groups = IDMapper(self.system.software_groups,
                                         ma.SoftwareGroup)
 
+        self.transformations = IDMapper(self.system.template_transformations,
+                                        ma.Transformation, *(None,) * 2)
+
+        self.templates = IDMapper(self.system.templates, ma.Template,
+                                  *(None,) * 4)
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -131,6 +137,34 @@ class _TargetRefDBHandler(Handler):
         e.references.append(ref)
 
 
+class _TransformationHandler(Handler):
+    category = '_ma_template_trans_matrix'
+
+    def __call__(self, id, tr_vector1, tr_vector2, tr_vector3, rot_matrix11,
+                 rot_matrix21, rot_matrix31, rot_matrix12, rot_matrix22,
+                 rot_matrix32, rot_matrix13, rot_matrix23, rot_matrix33):
+        t = self.sysr.transformations.get_by_id(id)
+        t.rot_matrix = ihm.reader._get_matrix33(locals(), 'rot_matrix')
+        t.tr_vector = ihm.reader._get_vector3(locals(), 'tr_vector')
+
+
+class _TemplateDetailsHandler(Handler):
+    category = '_ma_template_details'
+
+    def __call__(self, template_id, template_trans_matrix_id,
+                 template_data_id, target_asym_id, template_label_asym_id,
+                 template_label_entity_id, template_model_num):
+        template = self.sysr.templates.get_by_id(template_id)
+        template.transformation = self.sysr.transformations.get_by_id(
+            template_trans_matrix_id)
+        template.entity = self.sysr.entities.get_by_id(
+            template_label_entity_id)
+        template.asym_id = template_label_asym_id
+        template.model_num = self.get_int(template_model_num)
+        # todo: fill in target_asym_id in alignment
+        # todo: fill in data_id
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -143,7 +177,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
-        _TargetRefDBHandler]
+        _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

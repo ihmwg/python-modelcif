@@ -141,6 +141,53 @@ _ma_target_ref_db_details.organism_scientific
         self.assertEqual(r4.name, 'MIS')
         self.assertIsNone(r4.other_details)  # should be ignored
 
+    def test_transformation_handler(self):
+        """Test _TransformationHandler"""
+        cif = """
+loop_
+_ma_template_trans_matrix.id
+_ma_template_trans_matrix.rot_matrix[1][1]
+_ma_template_trans_matrix.rot_matrix[2][1]
+_ma_template_trans_matrix.rot_matrix[3][1]
+_ma_template_trans_matrix.rot_matrix[1][2]
+_ma_template_trans_matrix.rot_matrix[2][2]
+_ma_template_trans_matrix.rot_matrix[3][2]
+_ma_template_trans_matrix.rot_matrix[1][3]
+_ma_template_trans_matrix.rot_matrix[2][3]
+_ma_template_trans_matrix.rot_matrix[3][3]
+_ma_template_trans_matrix.tr_vector[1]
+_ma_template_trans_matrix.tr_vector[2]
+_ma_template_trans_matrix.tr_vector[3]
+1 1.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000
+1.000000 0.000 0.000 0.000
+"""
+        s, = ma.reader.read(StringIO(cif))
+        t, = s.template_transformations
+        self.assertAlmostEqual(t.rot_matrix[0][0], 1.0, delta=1e-6)
+        self.assertAlmostEqual(t.tr_vector[0], 0.0, delta=1e-6)
+
+    def test_template_details_handler(self):
+        """Test _TemplateDetailsHandler"""
+        cif = """
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+1 1 'reference database' polymer 1 2 A B 3 4
+"""
+        s, = ma.reader.read(StringIO(cif))
+        t, = s.templates
+        self.assertEqual(t.entity._id, '3')
+        self.assertEqual(t.model_num, 4)
+        self.assertEqual(t.asym_id, 'B')
+
 
 if __name__ == '__main__':
     unittest.main()
