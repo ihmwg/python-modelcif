@@ -188,6 +188,28 @@ _ma_template_details.template_model_num
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
 
+    def test_template_ref_db_handler(self):
+        """Test _TemplateRefDBHandler"""
+        cif = """
+loop_
+_ma_template_ref_db_details.template_id
+_ma_template_ref_db_details.db_name
+_ma_template_ref_db_details.db_name_other_details
+_ma_template_ref_db_details.db_accession_code
+1 PDB . 3nc1
+1 MIS . testacc
+1 Other foo acc2
+"""
+        s, = ma.reader.read(StringIO(cif))
+        t, = s.templates
+        r1, r2, r3 = t.references
+        self.assertIsInstance(r1, ma.reference.PDB)
+        self.assertEqual(r1.accession, '3nc1')
+        self.assertEqual(r2.name, 'MIS')
+        self.assertIsNone(r2.other_details)
+        self.assertEqual(r3.name, 'Other')
+        self.assertEqual(r3.other_details, 'foo')
+
 
 if __name__ == '__main__':
     unittest.main()

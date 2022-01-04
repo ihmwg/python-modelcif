@@ -165,6 +165,23 @@ class _TemplateDetailsHandler(Handler):
         # todo: fill in data_id
 
 
+class _TemplateRefDBHandler(Handler):
+    category = '_ma_template_ref_db_details'
+
+    def __init__(self, *args):
+        super(_TemplateRefDBHandler, self).__init__(*args)
+        # Map db_name to subclass of ma.reference.TemplateReference
+        self.type_map = _EnumerationMapper(ma.reference,
+                                           ma.reference.TemplateReference)
+
+    def __call__(self, template_id, db_name, db_name_other_details,
+                 db_accession_code):
+        t = self.sysr.templates.get_by_id(template_id)
+        typ = self.type_map.get(db_name, db_name_other_details)
+        ref = typ(accession=db_accession_code)
+        t.references.append(ref)
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -177,7 +194,8 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
-        _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler]
+        _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
+        _TemplateRefDBHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
