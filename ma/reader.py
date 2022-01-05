@@ -65,6 +65,11 @@ class _SystemReader(object):
         self.templates = IDMapper(self.system.templates, ma.Template,
                                   *(None,) * 4)
 
+        self.models = IDMapper(None, model_class, [], None)
+
+        self.model_groups = IDMapper(self.system.model_groups,
+                                     ma.model.ModelGroup)
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -182,6 +187,19 @@ class _TemplateRefDBHandler(Handler):
         t.references.append(ref)
 
 
+class _ModelListHandler(Handler):
+    category = '_ma_model_list'
+
+    def __call__(self, model_id, model_group_id, model_name, model_group_name,
+                 assembly_id, data_id, model_type, model_type_other_details):
+        mg = self.sysr.model_groups.get_by_id(model_group_id)
+        mg.name = model_group_name
+        model = self.sysr.models.get_by_id(model_id)
+        model.name = model_name
+        mg.append(model)
+        # todo: handle other fields
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -195,7 +213,8 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
-        _TemplateRefDBHandler]
+        _TemplateRefDBHandler, ihm.reader._AtomSiteHandler,
+        _ModelListHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

@@ -210,6 +210,33 @@ _ma_template_ref_db_details.db_accession_code
         self.assertEqual(r3.name, 'Other')
         self.assertEqual(r3.other_details, 'foo')
 
+    def test_model_list_handler(self):
+        """Test _ModelListHandler"""
+        cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+1 2 1 '2nd best scoring model' 'All models' 1 5 'Homology model' .
+1 3 2 'Best scoring model' 'group2' 1 6 'Homology model' .
+"""
+        s, = ma.reader.read(StringIO(cif))
+        mg1, mg2 = s.model_groups
+        self.assertEqual(mg1.name, 'All models')
+        m1, m2 = list(mg1)
+        self.assertEqual(m1.name, 'Best scoring model')
+        self.assertEqual(m2.name, '2nd best scoring model')
+        self.assertEqual(mg2.name, 'group2')
+        m1, = list(mg2)
+        self.assertEqual(m1.name, 'Best scoring model')
+
 
 if __name__ == '__main__':
     unittest.main()
