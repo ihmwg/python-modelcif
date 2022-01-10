@@ -16,6 +16,18 @@ The :mod:`ma` Python module
 .. autoclass:: SoftwareGroup
    :members:
 
+.. autoclass:: Entity
+   :members:
+
+.. autoclass:: AsymUnit
+   :members:
+
+.. autoclass:: Assembly
+   :members:
+
+.. autoclass:: AsymUnitRange
+   :members:
+
 .. autoclass:: Transformation
    :members:
 

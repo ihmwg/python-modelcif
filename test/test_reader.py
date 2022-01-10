@@ -223,9 +223,9 @@ _ma_model_list.assembly_id
 _ma_model_list.data_id
 _ma_model_list.model_type
 _ma_model_list.model_type_other_details
-1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
-1 2 1 '2nd best scoring model' 'All models' 1 5 'Homology model' .
-1 3 2 'Best scoring model' 'group2' 1 6 'Homology model' .
+1 1 1 'Best scoring model' 'All models' 99 4 'Homology model' .
+1 2 1 '2nd best scoring model' 'All models' 99 5 'Homology model' .
+1 3 2 'Best scoring model' 'group2' 99 6 'Homology model' .
 """
         s, = ma.reader.read(StringIO(cif))
         mg1, mg2 = s.model_groups
@@ -236,6 +236,42 @@ _ma_model_list.model_type_other_details
         self.assertEqual(mg2.name, 'group2')
         m1, = list(mg2)
         self.assertEqual(m1.name, 'Best scoring model')
+        self.assertEqual(m1.assembly._id, '99')
+
+    def test_assembly_handler(self):
+        """Test _AssemblyHandler"""
+        cif = """
+loop_
+_entity_poly_seq.entity_id
+_entity_poly_seq.num
+_entity_poly_seq.mon_id
+1 1 ALA
+1 2 ALA
+#
+loop_
+_struct_asym.id
+_struct_asym.entity_id
+_struct_asym.details
+A 1 Nup84
+#
+loop_
+_ma_struct_assembly.ordinal_id
+_ma_struct_assembly.assembly_id
+_ma_struct_assembly.entity_id
+_ma_struct_assembly.asym_id
+_ma_struct_assembly.seq_id_begin
+_ma_struct_assembly.seq_id_end
+1 1 1 A 1 2
+2 1 1 A 1 1
+"""
+        s, = ma.reader.read(StringIO(cif))
+        a, = s.assemblies
+        self.assertEqual(len(a), 2)
+        # Complete asym
+        self.assertIsInstance(a[0], ma.AsymUnit)
+        # asym range
+        self.assertIsInstance(a[1], ma.AsymUnitRange)
+        self.assertEqual(a[1].seq_id_range, (1, 1))
 
 
 if __name__ == '__main__':

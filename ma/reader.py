@@ -70,6 +70,8 @@ class _SystemReader(object):
         self.model_groups = IDMapper(self.system.model_groups,
                                      ma.model.ModelGroup)
 
+        self.assemblies = IDMapper(self.system.assemblies, ma.Assembly)
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -187,6 +189,28 @@ class _TemplateRefDBHandler(Handler):
         t.references.append(ref)
 
 
+class _AssemblyHandler(Handler):
+    category = '_ma_struct_assembly'
+
+    def __call__(self, assembly_id, asym_id, seq_id_begin, seq_id_end):
+        a = self.sysr.assemblies.get_by_id(assembly_id)
+        asym = self.sysr.asym_units.get_by_id(asym_id)
+        a.append(asym(int(seq_id_begin), int(seq_id_end)))
+
+    def finalize(self):
+        # Any AsymUnitRange which covers an entire asym,
+        # replace with AsymUnit object
+        for a in self.system.assemblies:
+            a[:] = [self._handle_component(x) for x in a]
+
+    def _handle_component(self, comp):
+        if isinstance(comp, ma.AsymUnitRange) \
+           and comp.seq_id_range == comp.asym.seq_id_range:
+            return comp.asym
+        else:
+            return comp
+
+
 class _ModelListHandler(Handler):
     category = '_ma_model_list'
 
@@ -196,6 +220,7 @@ class _ModelListHandler(Handler):
         mg.name = model_group_name
         model = self.sysr.models.get_by_id(model_id)
         model.name = model_name
+        model.assembly = self.sysr.assemblies.get_by_id(assembly_id)
         mg.append(model)
         # todo: handle other fields
 
@@ -213,7 +238,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
-        _TemplateRefDBHandler, ihm.reader._AtomSiteHandler,
+        _TemplateRefDBHandler, _AssemblyHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler]
 
     def get_handlers(self, sysr):
