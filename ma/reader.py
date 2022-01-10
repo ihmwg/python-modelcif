@@ -65,6 +65,9 @@ class _SystemReader(object):
         self.templates = IDMapper(self.system.templates, ma.Template,
                                   *(None,) * 4)
 
+        self.template_segments = IDMapper(
+            self.system.template_segments, ma.TemplateSegment, *(None,) * 4)
+
         self.models = IDMapper(None, model_class, [], None)
 
         self.model_groups = IDMapper(self.system.model_groups,
@@ -189,6 +192,17 @@ class _TemplateRefDBHandler(Handler):
         t.references.append(ref)
 
 
+class _TemplatePolySegmentHandler(Handler):
+    category = '_ma_template_poly_segment'
+
+    def __call__(self, id, template_id, residue_number_begin,
+                 residue_number_end):
+        segment = self.sysr.template_segments.get_by_id(id)
+        segment.template = self.sysr.templates.get_by_id(template_id)
+        segment.seq_id_range = (int(residue_number_begin),
+                                int(residue_number_end))
+
+
 class _AssemblyHandler(Handler):
     category = '_ma_struct_assembly'
 
@@ -238,7 +252,8 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
-        _TemplateRefDBHandler, _AssemblyHandler, ihm.reader._AtomSiteHandler,
+        _TemplateRefDBHandler, _TemplatePolySegmentHandler,
+        _AssemblyHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler]
 
     def get_handlers(self, sysr):

@@ -273,6 +273,21 @@ _ma_struct_assembly.seq_id_end
         self.assertIsInstance(a[1], ma.AsymUnitRange)
         self.assertEqual(a[1].seq_id_range, (1, 1))
 
+    def test_template_poly_segment_handler(self):
+        """Test _TemplatePolySegmentHandler"""
+        cif = """
+loop_
+_ma_template_poly_segment.id
+_ma_template_poly_segment.template_id
+_ma_template_poly_segment.residue_number_begin
+_ma_template_poly_segment.residue_number_end
+1 42 2 9
+"""
+        s, = ma.reader.read(StringIO(cif))
+        seg, = s.template_segments
+        self.assertEqual(seg.template._id, '42')
+        self.assertEqual(seg.seq_id_range, (2, 9))
+
 
 if __name__ == '__main__':
     unittest.main()
