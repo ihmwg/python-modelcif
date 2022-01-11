@@ -1,6 +1,7 @@
 import ma
 import ma.model
 import ma.protocol
+import ma.qa_metric
 import ihm
 import ihm.source
 import ihm.reader
@@ -81,6 +82,8 @@ class _SystemReader(object):
 
         self.protocols = IDMapper(self.system.protocols, ma.protocol.Protocol)
 
+        self.qa_by_id = {}
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -113,29 +116,30 @@ class _DataGroupHandler(Handler):
 
 class _EnumerationMapper(object):
     """Map an mmCIF enumerated value to the corresponding Python class"""
-    def __init__(self, module, base_class):
+    def __init__(self, module, base_class, attr="name"):
         self._base_class = base_class
-        self._other_name = base_class.name.upper()
+        self._other_name = getattr(base_class, attr).upper()
+        self._attr = attr
         self._map = dict(
-            (x[1].name.upper(), x[1])
+            (getattr(x[1], attr).upper(), x[1])
             for x in inspect.getmembers(module, inspect.isclass)
             if issubclass(x[1], base_class) and x[1] is not base_class)
         self._other_map = {}
 
-    def get(self, nam, other_det):
+    def get(self, name, other_det):
         """Get the Python class that matches the given name
            and other_details"""
-        nam = nam.upper()
-        typ = self._map.get(nam)
+        name = name.upper()
+        typ = self._map.get(name)
         if typ:
             return typ
         # If name is not Other this is an enumeration value we don't have
         # a class for; make and cache a new class for the given name:
-        if nam != self._other_name:
+        if name != self._other_name:
             class ExtraType(self._base_class):
-                name = nam
                 other_details = None
-            self._map[nam] = ExtraType
+            setattr(ExtraType, self._attr, name)
+            self._map[name] = ExtraType
             return ExtraType
         # If name is "Other" then treat other_details as the key
         other_det_up = other_det.upper()
@@ -297,6 +301,50 @@ class _ProtocolHandler(Handler):
         p.steps.append(step)
 
 
+def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
+    """Create and return a new class to represent a QA metric"""
+    class QA(type_class, mode_class):
+        name = p_name
+        description = p_description
+        software = p_software
+    return QA
+
+
+class _QAMetricHandler(Handler):
+    category = '_ma_qa_metric'
+
+    def __init__(self, *args):
+        super(_QAMetricHandler, self).__init__(*args)
+        # Map mode to subclass of ma.qa_metric.MetricMode
+        self._mode_map = dict(
+            (x[1].mode.upper(), x[1])
+            for x in inspect.getmembers(ma.qa_metric, inspect.isclass)
+            if issubclass(x[1], ma.qa_metric.MetricMode)
+            and x[1] is not ma.qa_metric.MetricMode)
+        # Map type to subclass of ma.qa_metric.MetricType
+        # (also allow user-defined "other" classes)
+        self._type_map = _EnumerationMapper(
+            ma.qa_metric, ma.qa_metric.MetricType, attr="type")
+
+    def __call__(self, id, name, description, type, mode, type_other_details,
+                 software_group_id):
+        type_class = self._type_map.get(type, type_other_details)
+        mode_class = self._mode_map.get(mode.upper(), ma.qa_metric.MetricMode)
+        software = self.sysr.software_groups.get_by_id_or_none(
+            software_group_id)
+        self.sysr.qa_by_id[id] = _make_qa_class(
+            type_class, mode_class, name, description, software)
+
+
+class _QAMetricGlobalHandler(Handler):
+    category = '_ma_qa_metric_global'
+
+    def __call__(self, model_id, metric_id, metric_value):
+        model = self.sysr.models.get_by_id(model_id)
+        metric_class = self.sysr.qa_by_id[metric_id]
+        model.qa_metrics.append(metric_class(self.get_float(metric_value)))
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -313,7 +361,8 @@ class ModelArchiveVariant(Variant):
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
-        _ModelListHandler, _ProtocolHandler]
+        _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
+        _QAMetricGlobalHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

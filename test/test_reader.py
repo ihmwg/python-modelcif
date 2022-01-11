@@ -367,6 +367,68 @@ _ma_target_entity.origin
         e, = s.entities
         self.assertEqual(e._data_id, '2')
 
+    def test_qa_metric_global_handler(self):
+        """Test _QAMetricGlobalHandler"""
+        cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 MPQS 'ModPipe Quality Score' other global
+'composite score, values >1.1 are considered reliable' 1
+2 zDOPE 'Normalized DOPE' zscore global . 2
+3 'TSVMod RMSD' 'TSVMod predicted RMSD (MSALL)' distance global . .
+4 'TSVMod NO35' 'TSVMod predicted native overlap (MSALL)' normalized_score
+global . .
+#
+loop_
+_ma_qa_metric_global.ordinal_id
+_ma_qa_metric_global.model_id
+_ma_qa_metric_global.metric_id
+_ma_qa_metric_global.metric_value
+1 1 1 1.0
+2 1 2 2.0
+3 1 3 3.0
+4 1 4 4.0
+"""
+        s, = ma.reader.read(StringIO(cif))
+        mg, = s.model_groups
+        m, = mg
+        q1, q2, q3, q4 = m.qa_metrics
+        self.assertIsInstance(q1, ma.qa_metric.Global)
+        self.assertEqual(q1.type, "other")
+        self.assertEqual(q1.name, "MPQS")
+        self.assertEqual(q1.description, "ModPipe Quality Score")
+        self.assertEqual(q1.software._id, '1')
+        self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
+
+        self.assertIsInstance(q2, ma.qa_metric.Global)
+        self.assertIsInstance(q2, ma.qa_metric.ZScore)
+        self.assertAlmostEqual(q2.value, 2.0, delta=1e-6)
+
+        self.assertIsInstance(q3, ma.qa_metric.Global)
+        self.assertIsInstance(q3, ma.qa_metric.Distance)
+        self.assertAlmostEqual(q3.value, 3.0, delta=1e-6)
+
+        self.assertIsInstance(q4, ma.qa_metric.Global)
+        self.assertIsInstance(q4, ma.qa_metric.NormalizedScore)
+
 
 if __name__ == '__main__':
     unittest.main()

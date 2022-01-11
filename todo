@@ -12,5 +12,3 @@ ma_target_template_poly_mapping
 ma_alignment_info
 ma_alignment_details
 ma_alignment
-ma_qa_metric
-ma_qa_metric_global
