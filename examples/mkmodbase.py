@@ -124,7 +124,7 @@ model = MyModel(assembly=modeled_assembly, name='Best scoring model')
 protocol = ma.protocol.Protocol()
 protocol.steps.append(ma.protocol.TemplateSearchStep(
     name='ModPipe Seq-Prf (0001)', software=modpipe_software,
-    input_data=model, output_data=aln))
+    input_data=model_e, output_data=aln))
 protocol.steps.append(ma.protocol.ModelingStep(
     software=modeller_software, input_data=aln, output_data=model))
 protocol.steps.append(ma.protocol.ModelSelectionStep(
