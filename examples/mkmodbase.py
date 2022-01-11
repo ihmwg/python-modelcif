@@ -135,7 +135,7 @@ system.protocols.append(protocol)
 # We can also attach quality scores to our model(s). To do this we must
 # first define the scores by creating subclasses using a MetricMode
 # (e.g. global, per-residue) and a MetricType (e.g. distance, z-score).
-# Here we defined the quality scores used by ModPipe pipeline that is used
+# Here we define the quality scores used by the ModPipe pipeline that is used
 # by ModBase. Note that one score (MPQS) uses a custom metric type, while
 # another (zDOPE) is a simple global z-score:
 class MPQSMetricType(ma.qa_metric.MetricType):
