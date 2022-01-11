@@ -288,6 +288,39 @@ _ma_template_poly_segment.residue_number_end
         self.assertEqual(seg.template._id, '42')
         self.assertEqual(seg.seq_id_range, (2, 9))
 
+    def test_data_group_handler(self):
+        """Test _DataGroupHandler"""
+        cif = """
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+1 1 'reference database' polymer 1 1 A A 1 1
+#
+loop_
+_ma_data_group.ordinal_id
+_ma_data_group.group_id
+_ma_data_group.data_id
+1 1 1
+2 1 2
+3 2 3
+"""
+        s, = ma.reader.read(StringIO(cif))
+        g1, g2, = s.data_groups
+        self.assertEqual(len(g1), 2)
+        self.assertIsInstance(g1[0], ma.Template)
+        self.assertEqual(g1[0]._data_id, '1')
+        self.assertIsNone(g1[1])
+        self.assertEqual(len(g2), 1)
+        self.assertIsNone(g2[0])
+
 
 if __name__ == '__main__':
     unittest.main()

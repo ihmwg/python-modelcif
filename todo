@@ -1,5 +1,18 @@
-Missing categories (output by modbase_utils scripts, but not yet by python-ihm):
+Missing categories (output by modbase_utils scripts, but not yet by python-ma):
   _exptl
 
 Missing data items:
   _ma_alignment_info.alignment_length
+
+Missing readers:
+ma_data
+ma_target_entity
+ma_target_entity_instance
+(ma_template_poly probably not needed)
+ma_target_template_poly_mapping
+ma_alignment_info
+ma_alignment_details
+ma_alignment
+ma_protocol_step
+ma_qa_metric
+ma_qa_metric_global

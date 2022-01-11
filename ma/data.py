@@ -7,5 +7,5 @@ class Data(object):
         self.data_other_details = details
 
 
-class DataGroup(tuple):
+class DataGroup(list):
     pass

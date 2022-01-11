@@ -59,6 +59,9 @@ class _SystemReader(object):
         self.software_groups = IDMapper(self.system.software_groups,
                                         ma.SoftwareGroup)
 
+        self.data_by_id = {}
+        self.data_groups = IDMapper(self.system.data_groups, ma.data.DataGroup)
+
         self.transformations = IDMapper(self.system.template_transformations,
                                         ma.Transformation, *(None,) * 2)
 
@@ -88,6 +91,21 @@ class _SoftwareGroupHandler(Handler):
         g = self.sysr.software_groups.get_by_id(group_id)
         s = self.sysr.software.get_by_id(software_id)
         g.append(s)
+
+
+class _DataGroupHandler(Handler):
+    category = '_ma_data_group'
+
+    def __call__(self, group_id, data_id):
+        g = self.sysr.data_groups.get_by_id(group_id)
+        # fill in real Data objects at finalize time
+        g.append(data_id)
+
+    def finalize(self):
+        for g in self.system.data_groups:
+            # todo: return Data placeholder if Model/Template/etc. object
+            # not available for a given id?
+            g[:] = [self.sysr.data_by_id.get(x) for x in g]
 
 
 class _EnumerationMapper(object):
@@ -171,8 +189,9 @@ class _TemplateDetailsHandler(Handler):
             template_label_entity_id)
         template.asym_id = template_label_asym_id
         template.model_num = self.get_int(template_model_num)
+        self.sysr.data_by_id[template_data_id] = template
+        template._data_id = template_data_id
         # todo: fill in target_asym_id in alignment
-        # todo: fill in data_id
 
 
 class _TemplateRefDBHandler(Handler):
@@ -234,6 +253,8 @@ class _ModelListHandler(Handler):
         mg.name = model_group_name
         model = self.sysr.models.get_by_id(model_id)
         model.name = model_name
+        self.sysr.data_by_id[data_id] = model
+        model._data_id = data_id
         model.assembly = self.sysr.assemblies.get_by_id(assembly_id)
         mg.append(model)
         # todo: handle other fields
@@ -251,6 +272,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
+        _DataGroupHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
