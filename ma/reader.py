@@ -2,12 +2,14 @@ import ma
 import ma.model
 import ma.protocol
 import ma.qa_metric
+import ma.alignment
 import ihm
 import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
 import inspect
+import collections
 
 
 class _AuditConformHandler(Handler):
@@ -83,6 +85,8 @@ class _SystemReader(object):
         self.protocols = IDMapper(self.system.protocols, ma.protocol.Protocol)
 
         self.qa_by_id = {}
+
+        self.alignment_pairs = collections.defaultdict(list)
 
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
@@ -238,6 +242,92 @@ class _TemplatePolySegmentHandler(Handler):
                                 int(residue_number_end))
 
 
+def _get_align_class(type_class, mode_class, align_class_map):
+    """Create and return a new class to represent an alignment"""
+    k = (type_class, mode_class)
+    if k not in align_class_map:
+        class Alignment(type_class, mode_class):
+            pass
+        align_class_map[k] = Alignment
+    return align_class_map[k]
+
+
+class _AlignmentInfoHandler(Handler):
+    category = '_ma_alignment_info'
+
+    def __init__(self, *args):
+        super(_AlignmentInfoHandler, self).__init__(*args)
+        # Map type to subclass of ma.alignment.AlignmentType
+        self._type_map = dict(
+            (x[1].type.upper(), x[1])
+            for x in inspect.getmembers(ma.alignment, inspect.isclass)
+            if issubclass(x[1], ma.alignment.AlignmentType)
+            and x[1] is not ma.alignment.AlignmentType)
+        # Map mode to subclass of ma.alignment.AlignmentMode
+        self._mode_map = dict(
+            (x[1].mode.upper(), x[1])
+            for x in inspect.getmembers(ma.alignment, inspect.isclass)
+            if issubclass(x[1], ma.alignment.AlignmentMode)
+            and x[1] is not ma.alignment.AlignmentMode)
+        # Cache created Alignment classes
+        self._align_class_map = {}
+
+    def __call__(self, alignment_id, data_id, software_group_id,
+                 alignment_type, alignment_mode):
+        type_class = self._type_map.get(
+            alignment_type.upper(), ma.alignment.AlignmentType)
+        mode_class = self._mode_map.get(
+            alignment_mode.upper(), ma.alignment.AlignmentMode)
+        software = self.sysr.software_groups.get_by_id_or_none(
+            software_group_id)
+        align_class = _get_align_class(type_class, mode_class,
+                                       self._align_class_map)
+        # todo: fill in name from ma_data table
+        alignment = align_class(name=None, pairs=[], software=software)
+        alignment._id = alignment_id
+        self.sysr.data_by_id[data_id] = alignment
+        alignment._data_id = data_id
+        self.sysr.system.alignments.append(alignment)
+
+    def finalize(self):
+        for aln in self.sysr.system.alignments:
+            for pair in self.sysr.alignment_pairs[aln._id]:
+                # todo: replace asym with TargetSegment using
+                # _ma_target_template_poly_mapping table
+                aln.pairs.append(pair)
+
+
+class _AlignmentDetailsHandler(Handler):
+    category = '_ma_alignment_details'
+
+    def __init__(self, *args):
+        super(_AlignmentDetailsHandler, self).__init__(*args)
+        # Map denom to subclass of ma.alignment.Identity
+        self._ident_map = _EnumerationMapper(
+            ma.alignment, ma.alignment.Identity, attr='denominator')
+        # Map score_type to subclass of ma.alignment.Score
+        self._score_map = _EnumerationMapper(ma.alignment,
+                                             ma.alignment.Score, attr='type')
+
+    def __call__(self, alignment_id, template_segment_id, target_asym_id,
+                 score_type, score_type_other_details, score_value,
+                 percent_sequence_identity, sequence_identity_denominator,
+                 sequence_identity_denominator_other_details):
+        score_class = self._score_map.get(score_type, score_type_other_details)
+        score = score_class(self.get_float(score_value))
+        ident_class = self._ident_map.get(
+            sequence_identity_denominator,
+            sequence_identity_denominator_other_details)
+        ident = ident_class(self.get_float(percent_sequence_identity))
+        template = self.sysr.template_segments.get_by_id(template_segment_id)
+        asym = self.sysr.asym_units.get_by_id(target_asym_id)
+        p = ma.alignment.Pair(template=template, target=asym, identity=ident,
+                              score=score)
+        # Cannot add to alignment yet as it might not exist; remember for
+        # now and we'll add in finalize() of AlignmentInfoHandler
+        self.sysr.alignment_pairs[alignment_id].append(p)
+
+
 class _AssemblyHandler(Handler):
     category = '_ma_struct_assembly'
 
@@ -360,6 +450,7 @@ class ModelArchiveVariant(Variant):
         _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
+        _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
         _QAMetricGlobalHandler]

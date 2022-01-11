@@ -429,6 +429,48 @@ _ma_qa_metric_global.metric_value
         self.assertIsInstance(q4, ma.qa_metric.Global)
         self.assertIsInstance(q4, ma.qa_metric.NormalizedScore)
 
+    def test_alignment_info_details_handler(self):
+        """Test _AlignmentInfoHandler and _AlignmentDetailsHandler"""
+        cif = """
+loop_
+_ma_alignment_info.alignment_id
+_ma_alignment_info.data_id
+_ma_alignment_info.software_group_id
+_ma_alignment_info.alignment_length
+_ma_alignment_info.alignment_type
+_ma_alignment_info.alignment_mode
+1 3 1 . 'target-template pairwise alignment' global
+2 4 1 . 'target-template pairwise alignment' global
+#
+#
+loop_
+_ma_alignment_details.ordinal_id
+_ma_alignment_details.alignment_id
+_ma_alignment_details.template_segment_id
+_ma_alignment_details.target_asym_id
+_ma_alignment_details.score_type
+_ma_alignment_details.score_type_other_details
+_ma_alignment_details.score_value
+_ma_alignment_details.percent_sequence_identity
+_ma_alignment_details.sequence_identity_denominator
+_ma_alignment_details.sequence_identity_denominator_other_details
+1 1 1 A 'BLAST e-value' . 1.0 45.000 'Length of the shorter sequence' .
+"""
+        s, = ma.reader.read(StringIO(cif))
+        a1, a2, = s.alignments
+        self.assertIs(a1.__class__, a2.__class__)
+        self.assertIsInstance(a1, ma.alignment.Global)
+        self.assertIsInstance(a1, ma.alignment.Pairwise)
+        self.assertEqual(len(a2.pairs), 0)
+        p, = a1.pairs
+        self.assertIsInstance(p.score, ma.alignment.BLASTEValue)
+        self.assertAlmostEqual(p.score.value, 1.0, delta=1e-6)
+        self.assertIsInstance(p.identity, ma.alignment.ShorterSequenceIdentity)
+        self.assertAlmostEqual(p.identity.value, 45.0, delta=1e-6)
+        self.assertIsInstance(p.template, ma.TemplateSegment)
+        self.assertEqual(p.template._id, '1')
+        self.assertEqual(p.target._id, 'A')
+
 
 if __name__ == '__main__':
     unittest.main()
