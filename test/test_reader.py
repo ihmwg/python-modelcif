@@ -321,6 +321,39 @@ _ma_data_group.data_id
         self.assertEqual(len(g2), 1)
         self.assertIsNone(g2[0])
 
+    def test_protocol_handler(self):
+        """Test _ProtocolHandler"""
+        cif = """
+loop_
+_ma_protocol_step.ordinal_id
+_ma_protocol_step.protocol_id
+_ma_protocol_step.step_id
+_ma_protocol_step.method_type
+_ma_protocol_step.step_name
+_ma_protocol_step.details
+_ma_protocol_step.software_group_id
+_ma_protocol_step.input_data_group_id
+_ma_protocol_step.output_data_group_id
+1 1 1 'template search' 'ModPipe Seq-Prf (0001)' . 1 1 2
+2 1 2 modeling . . 2 2 1
+3 1 3 'model selection' . . 1 1 1
+4 1 4 other testname testdetails 42 99 66
+"""
+        s, = ma.reader.read(StringIO(cif))
+        p, = s.protocols
+        self.assertEqual(len(p.steps), 4)
+        s1, s2, s3, s4 = p.steps
+        self.assertIsInstance(s1, ma.protocol.TemplateSearchStep)
+        self.assertIsInstance(s2, ma.protocol.ModelingStep)
+        self.assertIsInstance(s3, ma.protocol.ModelSelectionStep)
+        self.assertIsInstance(s4, ma.protocol.Step)
+        self.assertEqual(s4.method_type, "other")
+        self.assertEqual(s4.name, "testname")
+        self.assertEqual(s4.details, "testdetails")
+        self.assertEqual(s4.input_data._id, '99')
+        self.assertEqual(s4.output_data._id, '66')
+        self.assertEqual(s4.software._id, '42')
+
 
 if __name__ == '__main__':
     unittest.main()

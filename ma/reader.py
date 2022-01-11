@@ -1,5 +1,6 @@
 import ma
 import ma.model
+import ma.protocol
 import ihm
 import ihm.source
 import ihm.reader
@@ -77,6 +78,8 @@ class _SystemReader(object):
                                      ma.model.ModelGroup)
 
         self.assemblies = IDMapper(self.system.assemblies, ma.Assembly)
+
+        self.protocols = IDMapper(self.system.protocols, ma.protocol.Protocol)
 
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
@@ -260,6 +263,31 @@ class _ModelListHandler(Handler):
         # todo: handle other fields
 
 
+class _ProtocolHandler(Handler):
+    category = '_ma_protocol_step'
+
+    def __init__(self, *args):
+        super(_ProtocolHandler, self).__init__(*args)
+        # Map method_type to subclass of ma.protocol.Step
+        self._method_map = dict(
+            (x[1].method_type.upper(), x[1])
+            for x in inspect.getmembers(ma.protocol, inspect.isclass)
+            if issubclass(x[1], ma.protocol.Step)
+            and x[1] is not ma.protocol.Step)
+
+    def __call__(self, protocol_id, method_type, step_name, details,
+                 software_group_id, input_data_group_id, output_data_group_id):
+        p = self.sysr.protocols.get_by_id(protocol_id)
+        stepcls = self._method_map.get(method_type.upper(), ma.protocol.Step)
+        indata = self.sysr.data_groups.get_by_id(input_data_group_id)
+        outdata = self.sysr.data_groups.get_by_id(output_data_group_id)
+        software = self.sysr.software_groups.get_by_id_or_none(
+            software_group_id)
+        step = stepcls(input_data=indata, output_data=outdata, name=step_name,
+                       details=details, software=software)
+        p.steps.append(step)
+
+
 class ModelArchiveVariant(Variant):
     system_reader = _SystemReader
 
@@ -276,7 +304,7 @@ class ModelArchiveVariant(Variant):
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
-        _ModelListHandler]
+        _ModelListHandler, _ProtocolHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
