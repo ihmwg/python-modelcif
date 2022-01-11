@@ -354,6 +354,19 @@ _ma_protocol_step.output_data_group_id
         self.assertEqual(s4.output_data._id, '66')
         self.assertEqual(s4.software._id, '42')
 
+    def test_target_entity_handler(self):
+        """Test _TargetEntityHandler"""
+        cif = """
+loop_
+_ma_target_entity.entity_id
+_ma_target_entity.data_id
+_ma_target_entity.origin
+1 2 'reference database'
+"""
+        s, = ma.reader.read(StringIO(cif))
+        e, = s.entities
+        self.assertEqual(e._data_id, '2')
+
 
 if __name__ == '__main__':
     unittest.main()

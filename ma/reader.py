@@ -146,6 +146,15 @@ class _EnumerationMapper(object):
         return self._other_map[other_det_up]
 
 
+class _TargetEntityHandler(Handler):
+    category = '_ma_target_entity'
+
+    def __call__(self, entity_id, data_id):
+        e = self.sysr.entities.get_by_id(entity_id)
+        self.sysr.data_by_id[data_id] = e
+        e._data_id = data_id
+
+
 class _TargetRefDBHandler(Handler):
     category = '_ma_target_ref_db_details'
 
@@ -300,7 +309,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
-        _DataGroupHandler,
+        _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,

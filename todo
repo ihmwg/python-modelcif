@@ -6,7 +6,6 @@ Missing data items:
 
 Missing readers:
 ma_data
-ma_target_entity
 ma_target_entity_instance
 (ma_template_poly probably not needed)
 ma_target_template_poly_mapping
