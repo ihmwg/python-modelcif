@@ -21,7 +21,7 @@ class Step(object):
        :type output_data: :class:`ma.data.DataGroup` or :class:`ma.data.Data`
        :param str name: A short name for this step.
        :param str details: Longer description of this step.
-       :param software: The software was employed in this modeling step.
+       :param software: The software that was employed in this modeling step.
        :type software: :class:`ma.Software` or :class:`ma.SoftwareGroup`
     """
     method_type = "other"
