@@ -3,6 +3,7 @@
    See also :class:`ma.protocol.Step`.
 """
 
+
 class Data(object):
     """Some part of the system that is input or output by part of
        the modeling protocol.
