@@ -288,9 +288,66 @@ _ma_template_poly_segment.residue_number_end
         self.assertEqual(seg.template._id, '42')
         self.assertEqual(seg.seq_id_range, (2, 9))
 
+    def test_data__handler(self):
+        """Test _DataHandler"""
+        cif = """
+loop_
+_ma_data.id
+_ma_data.name
+_ma_data.content_type
+_ma_data.content_type_other_details
+1 'Template Structure' 'template structure' .
+2 'Model subunit' target .
+3 'Default model name' 'model coordinates' .
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+1 1 'reference database' polymer 1 1 A A 1 1
+#
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Model name' 'All models' 1 3 'Homology model' .
+"""
+        s, = ma.reader.read(StringIO(cif))
+        d1, d2, d3 = s.data
+        self.assertIsInstance(d1, ma.Template)
+        # d2 is not referenced by any other table, so gets Data base class
+        self.assertIsInstance(d2, ma.data.Data)
+        self.assertIsInstance(d3, ma.model.Model)
+        # Name not given in template_details so taken from ma_data
+        self.assertEqual(d1.name, 'Template Structure')
+        self.assertEqual(d2.name, 'Model subunit')
+        # Name in model_list used rather than that from ma_data
+        self.assertEqual(d3.name, 'Model name')
+
     def test_data_group_handler(self):
         """Test _DataGroupHandler"""
         cif = """
+loop_
+_ma_data.id
+_ma_data.name
+_ma_data.content_type
+_ma_data.content_type_other_details
+1 'Template Structure' 'template structure' .
+2 'Model subunit' target .
+#
 loop_
 _ma_template_details.ordinal_id
 _ma_template_details.template_id
@@ -317,7 +374,8 @@ _ma_data_group.data_id
         self.assertEqual(len(g1), 2)
         self.assertIsInstance(g1[0], ma.Template)
         self.assertEqual(g1[0]._data_id, '1')
-        self.assertIsNone(g1[1])
+        self.assertIsInstance(g1[1], ma.data.Data)
+        self.assertEqual(g1[1]._data_id, '2')
         self.assertEqual(len(g2), 1)
         self.assertIsNone(g2[0])
 

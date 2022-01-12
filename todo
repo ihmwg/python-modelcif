@@ -5,7 +5,6 @@ Missing data items:
   _ma_alignment_info.alignment_length
 
 Missing readers:
-ma_data
 ma_target_entity_instance
 (ma_template_poly probably not needed)
 ma_target_template_poly_mapping

@@ -8,6 +8,7 @@ import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
+import operator
 import inspect
 import collections
 
@@ -63,6 +64,7 @@ class _SystemReader(object):
         self.software_groups = IDMapper(self.system.software_groups,
                                         ma.SoftwareGroup)
 
+        self.default_data_by_id = {}
         self.data_by_id = {}
         self.data_groups = IDMapper(self.system.data_groups, ma.data.DataGroup)
 
@@ -103,19 +105,38 @@ class _SoftwareGroupHandler(Handler):
         g.append(s)
 
 
+class _DataHandler(Handler):
+    category = '_ma_data'
+
+    def __call__(self, id, name, content_type_other_details):
+        d = ma.data.Data(name=name, details=content_type_other_details)
+        d._data_id = id
+        self.sysr.default_data_by_id[id] = d
+
+    def finalize(self):
+        for data_id, defdata in self.sysr.default_data_by_id.items():
+            data = self.sysr.data_by_id.get(data_id)
+            if not data:
+                # Add placeholder Data if only referenced in ma_data
+                self.sysr.data_by_id[data_id] = defdata
+            elif hasattr(data, 'name') and not data.name:
+                # Add data-specific fields if they are present in ma_data
+                # but not elsewhere
+                data.name = defdata.name
+        self.system.data[:] = sorted(self.sysr.data_by_id.values(),
+                                     key=operator.attrgetter('_data_id'))
+
+        for g in self.system.data_groups:
+            g[:] = [self.sysr.data_by_id.get(x) for x in g]
+
+
 class _DataGroupHandler(Handler):
     category = '_ma_data_group'
 
     def __call__(self, group_id, data_id):
         g = self.sysr.data_groups.get_by_id(group_id)
-        # fill in real Data objects at finalize time
+        # fill in real Data objects at _DataHandler.finalize time
         g.append(data_id)
-
-    def finalize(self):
-        for g in self.system.data_groups:
-            # todo: return Data placeholder if Model/Template/etc. object
-            # not available for a given id?
-            g[:] = [self.sysr.data_by_id.get(x) for x in g]
 
 
 class _EnumerationMapper(object):
@@ -447,7 +468,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
-        _DataGroupHandler, _TargetEntityHandler,
+        _DataHandler, _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AlignmentInfoHandler, _AlignmentDetailsHandler,
