@@ -3,6 +3,3 @@ Missing categories (output by modbase_utils scripts, but not yet by python-ma):
 
 Missing data items:
   _ma_alignment_info.alignment_length
-
-Missing readers:
-ma_target_template_poly_mapping

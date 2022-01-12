@@ -522,6 +522,14 @@ _ma_alignment.target_template_flag
 _ma_alignment.sequence
 1 1 1 DSYV-ETLD
 2 1 2 DMACDTFIK
+#
+loop_
+_ma_target_template_poly_mapping.id
+_ma_target_template_poly_mapping.template_segment_id
+_ma_target_template_poly_mapping.target_asym_id
+_ma_target_template_poly_mapping.target_seq_id_begin
+_ma_target_template_poly_mapping.target_seq_id_end
+1 1 A 1 8
 """
         s, = ma.reader.read(StringIO(cif))
         a1, a2, = s.alignments
@@ -540,6 +548,7 @@ _ma_alignment.sequence
         self.assertIsInstance(p.target, ihm.AsymUnitSegment)
         self.assertEqual(p.target.asym._id, 'A')
         self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
+        self.assertEqual(p.target.seq_id_range, (1, 8))
 
 
 if __name__ == '__main__':

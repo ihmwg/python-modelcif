@@ -92,6 +92,8 @@ class _SystemReader(object):
 
         self.alignment_seqs = collections.defaultdict(list)
 
+        self.target_template_mapping = {}
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -315,8 +317,9 @@ class _AlignmentInfoHandler(Handler):
     def finalize(self):
         for aln in self.sysr.system.alignments:
             for pair in self.sysr.alignment_pairs[aln._id]:
-                # todo: fill in TargetSegment using
-                # _ma_target_template_poly_mapping table
+                k = (pair.template._id, pair.target.asym._id)
+                pair.target.seq_id_range = \
+                    self.sysr.target_template_mapping.get(k)
                 aln.pairs.append(pair)
             # todo: handle multiple alignments, multiple templates
             for flag, sequence in self.sysr.alignment_seqs[aln._id]:
@@ -369,6 +372,18 @@ class _AlignmentDetailsHandler(Handler):
         # Cannot add to alignment yet as it might not exist; remember for
         # now and we'll add in finalize() of AlignmentInfoHandler
         self.sysr.alignment_pairs[alignment_id].append(p)
+
+
+class _TargetTemplatePolyMappingHandler(Handler):
+    category = '_ma_target_template_poly_mapping'
+
+    def __call__(self, template_segment_id, target_asym_id,
+                 target_seq_id_begin, target_seq_id_end):
+        k = (template_segment_id, target_asym_id)
+        rng = (self.get_int(target_seq_id_begin),
+               self.get_int(target_seq_id_end))
+        # Remember for now and we'll add in finalize() of AlignmentInfoHandler
+        self.sysr.target_template_mapping[k] = rng
 
 
 class _AssemblyHandler(Handler):
@@ -494,6 +509,7 @@ class ModelArchiveVariant(Variant):
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
+        _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
         _QAMetricGlobalHandler]
