@@ -434,6 +434,7 @@ class _QAMetricDumper(Dumper):
 
 
 class ModelArchiveVariant(Variant):
+    """Used to select typical PDBx/MA file output. See :func:`write`."""
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
@@ -457,4 +458,9 @@ class ModelArchiveVariant(Variant):
 
 def write(fh, systems, format='mmCIF', dumpers=[],
           variant=ModelArchiveVariant):
+    """Write out all `systems` to the file handle `fh`.
+
+       See :func:`ihm.dumper.write` for more information. The function
+       here behaves similarly but writes out files compliant with the
+       MA extension directory rather than IHM."""
     return ihm.dumper.write(fh, systems, format, dumpers, variant)

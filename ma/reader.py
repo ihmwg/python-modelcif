@@ -524,6 +524,14 @@ class ModelArchiveVariant(Variant):
 def read(fh, model_class=ma.model.Model, format='mmCIF', handlers=[],
          warn_unknown_category=False, warn_unknown_keyword=False,
          reject_old_file=False, variant=ModelArchiveVariant):
+    """Read data from the file handle `fh`.
+
+       See :func:`ihm.reader.read` for more information. The function
+       here behaves similarly but reads in files compliant with the
+       MA extension directory rather than IHM.
+
+      :return: A list of :class:`ma.System` objects.
+    """
     return ihm.reader.read(
         fh, model_class=model_class, format=format, handlers=handlers,
         warn_unknown_category=warn_unknown_category,

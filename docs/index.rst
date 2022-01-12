@@ -23,8 +23,11 @@ API Reference:
 
    main
    reference
+   alignment
+   data
    protocol
    model
+   qa_metric
    dumper
    reader
    
