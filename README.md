@@ -15,8 +15,8 @@ for more details.
 
 # Installation
 
-This module is still a work in progress and currently works only with the
-latest git HEAD of the [python-ihm](https://github.com/ihmwg/python-ihm)
+This module is still a work in progress and currently works only with
+version 0.26 or later of the [python-ihm](https://github.com/ihmwg/python-ihm)
 module. To use, first build and install python-ihm. Then, build with
 
 ```

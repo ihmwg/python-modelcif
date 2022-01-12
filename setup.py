@@ -23,7 +23,7 @@ setup(name='ma',
       author_email='ben@salilab.org',
       url='https://github.com/ihmwg/python-ma',
       packages=['ma'],
-      install_requires=['ihm'],
+      install_requires=['ihm>=0.26'],
       classifiers=[
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3",

@@ -29,10 +29,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install coverage pytest-cov pytest-flake8
-        # Get and build latest python-ihm
-        git clone --depth=5 https://github.com/ihmwg/python-ihm
-        (cd python-ihm && python setup.py build && python setup.py install)
-        rm -rf python-ihm
+        pip install -r requirements.txt
     - name: Test
       run: |
         pytest --cov=ma --cov-branch --cov-report=xml --cov-append --flake8 -v .
