@@ -367,8 +367,8 @@ class _AlignmentDetailsHandler(Handler):
         # tables)
         tgt_seg = asym.segment(gapped_sequence=None, seq_id_begin=None,
                                seq_id_end=None)
-        p = ma.alignment.Pair(template=template, target=tgt_seg, identity=ident,
-                              score=score)
+        p = ma.alignment.Pair(template=template, target=tgt_seg,
+                              identity=ident, score=score)
         # Cannot add to alignment yet as it might not exist; remember for
         # now and we'll add in finalize() of AlignmentInfoHandler
         self.sysr.alignment_pairs[alignment_id].append(p)
