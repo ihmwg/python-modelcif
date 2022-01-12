@@ -307,7 +307,6 @@ class _AlignmentInfoHandler(Handler):
             software_group_id)
         align_class = _get_align_class(type_class, mode_class,
                                        self._align_class_map)
-        # todo: fill in name from ma_data table
         alignment = align_class(name=None, pairs=[], software=software)
         alignment._id = alignment_id
         self.sysr.data_by_id[data_id] = alignment
