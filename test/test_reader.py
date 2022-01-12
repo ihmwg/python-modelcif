@@ -11,6 +11,7 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 import ma.reader
 import ma.reference
+import ihm
 
 
 class Tests(unittest.TestCase):
@@ -513,6 +514,14 @@ _ma_alignment_details.percent_sequence_identity
 _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1.0 45.000 'Length of the shorter sequence' .
+#
+loop_
+_ma_alignment.ordinal_id
+_ma_alignment.alignment_id
+_ma_alignment.target_template_flag
+_ma_alignment.sequence
+1 1 1 DSYV-ETLD
+2 1 2 DMACDTFIK
 """
         s, = ma.reader.read(StringIO(cif))
         a1, a2, = s.alignments
@@ -527,7 +536,10 @@ _ma_alignment_details.sequence_identity_denominator_other_details
         self.assertAlmostEqual(p.identity.value, 45.0, delta=1e-6)
         self.assertIsInstance(p.template, ma.TemplateSegment)
         self.assertEqual(p.template._id, '1')
-        self.assertEqual(p.target._id, 'A')
+        self.assertEqual(p.template.gapped_sequence, 'DMACDTFIK')
+        self.assertIsInstance(p.target, ihm.AsymUnitSegment)
+        self.assertEqual(p.target.asym._id, 'A')
+        self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
 
 
 if __name__ == '__main__':

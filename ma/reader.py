@@ -90,6 +90,8 @@ class _SystemReader(object):
 
         self.alignment_pairs = collections.defaultdict(list)
 
+        self.alignment_seqs = collections.defaultdict(list)
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -313,9 +315,24 @@ class _AlignmentInfoHandler(Handler):
     def finalize(self):
         for aln in self.sysr.system.alignments:
             for pair in self.sysr.alignment_pairs[aln._id]:
-                # todo: replace asym with TargetSegment using
+                # todo: fill in TargetSegment using
                 # _ma_target_template_poly_mapping table
                 aln.pairs.append(pair)
+            # todo: handle multiple alignments, multiple templates
+            for flag, sequence in self.sysr.alignment_seqs[aln._id]:
+                if flag == '2':  # template
+                    aln.pairs[0].template.gapped_sequence = sequence
+                else:  # target
+                    aln.pairs[0].target.gapped_sequence = sequence
+
+
+class _AlignmentHandler(Handler):
+    category = '_ma_alignment'
+
+    def __call__(self, alignment_id, target_template_flag, sequence):
+        # Remember for later; processed by AlignmentInfoHandler.finalize()
+        self.sysr.alignment_seqs[alignment_id].append((target_template_flag,
+                                                       sequence))
 
 
 class _AlignmentDetailsHandler(Handler):
@@ -342,7 +359,12 @@ class _AlignmentDetailsHandler(Handler):
         ident = ident_class(self.get_float(percent_sequence_identity))
         template = self.sysr.template_segments.get_by_id(template_segment_id)
         asym = self.sysr.asym_units.get_by_id(target_asym_id)
-        p = ma.alignment.Pair(template=template, target=asym, identity=ident,
+        # We don't know the target segment yet (will be filled in at finalize
+        # time from the ma_target_template_poly_mapping and ma_alignment
+        # tables)
+        tgt_seg = asym.segment(gapped_sequence=None, seq_id_begin=None,
+                               seq_id_end=None)
+        p = ma.alignment.Pair(template=template, target=tgt_seg, identity=ident,
                               score=score)
         # Cannot add to alignment yet as it might not exist; remember for
         # now and we'll add in finalize() of AlignmentInfoHandler
@@ -471,7 +493,7 @@ class ModelArchiveVariant(Variant):
         _DataHandler, _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
-        _AlignmentInfoHandler, _AlignmentDetailsHandler,
+        _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _AssemblyHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
         _QAMetricGlobalHandler]
