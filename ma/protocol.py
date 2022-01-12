@@ -14,7 +14,7 @@ class Step(object):
               Any individual :class:`ma.data.Data` object (such as a template
               structure, target sequence, alignment, or model coordinates)
               can be given here, or a group of such objects (as a
-              :class:`ma.DataGroup` object) can be passed.
+              :class:`ma.data.DataGroup` object) can be passed.
        :type input_data: :class:`ma.data.DataGroup` or :class:`ma.data.Data`
        :param output_data: Any objects that this step creates as output,
               similarly to ``input_data``.
