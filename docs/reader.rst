@@ -10,4 +10,3 @@ The :mod:`ma.reader` Python module
 .. autofunction:: read
 
 .. autoclass:: ModelArchiveVariant
-   :members:

@@ -7,6 +7,12 @@ __version__ = '0.1'
 
 
 class System(object):
+    """Top-level class representing a complete modeled system.
+
+       :param str title: Longer text description of the system.
+       :param str id: Unique identifier for this system in the mmCIF file.
+    """
+
     def __init__(self, title=None, id='model'):
         self.id, self.title = id, title
 
@@ -168,6 +174,14 @@ class System(object):
 
 
 class SoftwareGroup(list):
+    """A number of :class:`Software` objects that are grouped together.
+
+       This class can be used to group together multiple :class:`Software`
+       objects if multiple pieces of software were used together to generate
+       a single alignment (see :class:`ma.alignment.AlignmentMode`) or to
+       run a modeling step (see :class:`ma.protocol.Step`).
+       It behaves like a regular Python list.
+    """
     pass
 
 
@@ -198,6 +212,15 @@ class Transformation(object):
 
 
 class TemplateSegment(object):
+    """An aligned part of a template (see :class:`ma.alignment.Pair`).
+
+       Usually these objects are created from
+       a :class:`Template` using :meth:`Template.segment`, e.g. to get a
+       segment covering residues 1 through 3 in `tmpl` use::
+
+           tmpl = ma.Template(entity, ...)
+           seg = tmpl.segment('--ACG', 1, 3)
+    """
     def __init__(self, template, gapped_sequence, seq_id_begin, seq_id_end):
         self.template = template
         self.gapped_sequence = gapped_sequence
@@ -205,6 +228,27 @@ class TemplateSegment(object):
 
 
 class Template(ma.data.Data):
+    """A single chain that was used as a template structure for modeling.
+
+       After creating a template, use :meth:`segment` to denote the part of
+       its sequence used in any modeling alignments
+       (see :class:`ma.alignment.Pair`).
+       Template objects can also be used as inputs or outputs in modeling
+       protocol steps; see :class:`ma.protocol.Step`.
+
+       :param entity: The sequence of the chain.
+       :type entity: :class:`Entity`
+       :param str asym_id: The asym or chain ID in the template structure.
+       :param int model_num: The model number of the template structure.
+       :param transformation: Rotation and translation applied to the original
+              template structure to get the starting model used in modeling.
+       :type transformation: :class:`Transformation`
+       :param str name: A short name for this template.
+       :param references: A list of pointers to reference databases (such as
+              PDB) from which the template structure was taken.
+       :type references: list of :class:`ma.reference.TemplateReference`
+             objects
+    """
     data_content_type = "template structure"
 
     def __init__(self, entity, asym_id, model_num, transformation,
@@ -216,6 +260,12 @@ class Template(ma.data.Data):
         self.references = references
 
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
+        """Get an object representing the alignment of part of this sequence.
+
+           :param str gapped_sequence: Sequence of the segment, including gaps.
+           :param int seq_id_begin: Start of the segment.
+           :param int seq_id_end: End of the segment.
+        """
         # todo: cache so we return the same object for same parameters
         return TemplateSegment(self, gapped_sequence, seq_id_begin, seq_id_end)
 

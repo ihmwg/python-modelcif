@@ -10,4 +10,3 @@ The :mod:`ma.dumper` Python module
 .. autofunction:: write
 
 .. autoclass:: ModelArchiveVariant
-   :members:
