@@ -47,18 +47,21 @@ class MetricType(object):
 
 
 class ZScore(MetricType):
-    """Score that is the number of standard deviations from optimal/best"""
+    """Score that is the number of standard deviations from optimal/best.
+       See :class:`MetricType` for more information."""
     type = "zscore"
     other_details = None
 
 
 class Distance(MetricType):
-    """Distance score (the lower the distance, the better the quality)"""
+    """Distance score (the lower the distance, the better the quality).
+       See :class:`MetricType` for more information."""
     type = "distance"
     other_details = None
 
 
 class NormalizedScore(MetricType):
-    """Normalized score ranging from 0 to 1"""
+    """Normalized score ranging from 0 to 1.
+       See :class:`MetricType` for more information."""
     type = "normalized_score"
     other_details = None

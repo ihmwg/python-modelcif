@@ -1,3 +1,5 @@
+"""Utility classes to read in information in mmCIF or BinaryCIF format"""
+
 import ma
 import ma.model
 import ma.protocol
@@ -493,6 +495,8 @@ class _QAMetricGlobalHandler(Handler):
 
 
 class ModelArchiveVariant(Variant):
+    """Used to select typical PDBx/MA file input.
+       See :func:`read` and :class:`ihm.reader.Variant`."""
     system_reader = _SystemReader
 
     _handlers = [

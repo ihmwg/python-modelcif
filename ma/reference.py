@@ -39,7 +39,8 @@ class UniProt(TargetReference):
     """Point to the sequence of an :class:`ma.Entity` in UniProt.
 
        These objects are typically passed to the :class:`ma.Entity`
-       constructor for target sequences.
+       constructor for target sequences (for templates, see
+       :class:`TemplateReference`).
 
        See :class:`TargetReference` for a description of the parameters.
     """
@@ -49,7 +50,13 @@ class UniProt(TargetReference):
 
 class TemplateReference(object):
     """Point to the structure of a :class:`ma.Template` in a structure
-       database. Typically a subclass such as :class:`PDB` is used,
+       database.
+
+       These objects are typically passed to the :class:`ma.Template`
+       constructor for template sequences (for target sequences, see
+       :class:`Targeteference`).
+
+       Typically a subclass such as :class:`PDB` is used,
        although to use a custom database, make a new subclass and set the
        ``other_details`` attribute with a description, e.g.::
 

@@ -51,13 +51,13 @@ class AlignedPositionsIdentity(Identity):
 
 class Pair(object):
     """A single pairwise alignment between a single target and template chain.
-       See :class:`AlignmentMode`. An alignment consists of one of more of
+       See :class:`AlignmentMode`. An alignment consists of one or more of
        these pairs.
 
        :param template: The template segment that is aligned, i.e. the
               seq_id range for the template and the sequence (including gaps)
               of one-letter codes.
-       :type template: :class:`TemplateSegment`
+       :type template: :class:`ma.TemplateSegment`
        :param target: The target segment that is aligned.
        :type target: :class:`ihm.AsymUnitSegment`
        :param identity: The sequence identity between target and template.
@@ -77,7 +77,7 @@ class AlignmentMode(ma.data.Data):
 
        :param str name: A short description of this alignment.
        :param pairs: List of individual target-template alignments.
-       :type pairs: List of :class:`Pair` objects
+       :type pairs: list of :class:`Pair` objects
        :param software: The software that was used to build the alignment.
        :type software: :class:`ma.Software` or :class:`ma.SoftwareGroup`
     """

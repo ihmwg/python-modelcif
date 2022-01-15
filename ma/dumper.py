@@ -1,3 +1,5 @@
+"""Utility classes to dump out information in mmCIF or BinaryCIF format"""
+
 import itertools
 import operator
 import ihm.dumper
@@ -434,7 +436,8 @@ class _QAMetricDumper(Dumper):
 
 
 class ModelArchiveVariant(Variant):
-    """Used to select typical PDBx/MA file output. See :func:`write`."""
+    """Used to select typical PDBx/MA file output.
+       See :func:`write` and :class:`ihm.dumper.Variant`."""
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
