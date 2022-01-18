@@ -3,7 +3,6 @@ import os
 import unittest
 import sys
 import subprocess
-import pickle
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
