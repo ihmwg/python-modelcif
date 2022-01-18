@@ -5,6 +5,7 @@ import ma.model
 import ma.protocol
 import ma.qa_metric
 import ma.alignment
+import ma.reference
 import ihm
 import ihm.source
 import ihm.reader
