@@ -257,7 +257,8 @@ class Template(ma.data.Data):
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
         self.transformation = transformation
-        self.references = references
+        self.references = []
+        self.references.extend(references)
 
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
         """Get an object representing the alignment of part of this sequence.
