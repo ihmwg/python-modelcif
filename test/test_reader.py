@@ -545,6 +545,60 @@ _ma_qa_metric_local.metric_value
         self.assertEqual(q1.residue.seq_id, 2)
         self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
 
+    def test_qa_metric_pairwise_handler(self):
+        """Test _QAMetricPairwiseHandler"""
+        cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test pair' 'some pair score' normalized_score local-pairwise . .
+#
+loop_
+_ma_qa_metric_local_pairwise.ordinal_id
+_ma_qa_metric_local_pairwise.model_id
+_ma_qa_metric_local_pairwise.label_asym_id_1
+_ma_qa_metric_local_pairwise.label_seq_id_1
+_ma_qa_metric_local_pairwise.label_comp_id_1
+_ma_qa_metric_local_pairwise.label_asym_id_2
+_ma_qa_metric_local_pairwise.label_seq_id_2
+_ma_qa_metric_local_pairwise.label_comp_id_2
+_ma_qa_metric_local_pairwise.metric_id
+_ma_qa_metric_local_pairwise.metric_value
+1 1 A 2 CYS B 4 GLY 1 1.0
+"""
+        s, = ma.reader.read(StringIO(cif))
+        mg, = s.model_groups
+        m, = mg
+        q1, = m.qa_metrics
+        self.assertIsInstance(q1, ma.qa_metric.LocalPairwise)
+        self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
+        self.assertEqual(q1.type, "normalized_score")
+        self.assertEqual(q1.name, "test pair")
+        self.assertEqual(q1.description, "some pair score")
+        self.assertIsNone(q1.software)
+        self.assertEqual(q1.residue1.asym._id, 'A')
+        self.assertEqual(q1.residue1.seq_id, 2)
+        self.assertEqual(q1.residue2.asym._id, 'B')
+        self.assertEqual(q1.residue2.seq_id, 4)
+        self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
+
     def test_alignment_info_details_handler(self):
         """Test _AlignmentInfoHandler and _AlignmentDetailsHandler"""
         cif = """

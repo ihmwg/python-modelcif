@@ -175,15 +175,25 @@ model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),
                          TSVModNO35(0.143)))
 
 # All ModBase QA metrics are global, but the library also supports per-residue
-# scores. Here's a fictional example for a z-score on the 4th residue of
-# the first chain in the model:
+# or pairwise (between two residues) scores. Here's a fictional example for a
+# z-score on the 4th residue of the first chain in the model, and a distance
+# score between the 1st and 3rd residues:
+
 
 class SomeLocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
     name = "Some local score"
     description = "A per-residue z-score"
     software = None
 
+
+class SomePairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Distance):
+    name = "Some pair score"
+    description = "A distance score betwen two residues"
+    software = None
+
+
 model.qa_metrics.append(SomeLocalScore(asymA.residue(4), -0.1))
+model.qa_metrics.append(SomePairScore(asymA.residue(1), asymA.residue(3), 1.0))
 
 # Similar models can be grouped together. Here we only have a single model
 # in the group

@@ -423,6 +423,7 @@ class _QAMetricDumper(Dumper):
         self.dump_metric_types(system, writer)
         self.dump_metric_global(system, writer)
         self.dump_metric_local(system, writer)
+        self.dump_metric_pairwise(system, writer)
 
     def dump_metric_types(self, system, writer):
         with writer.loop(
@@ -463,6 +464,28 @@ class _QAMetricDumper(Dumper):
                              label_asym_id=m.residue.asym._id,
                              label_seq_id=m.residue.seq_id,
                              label_comp_id=seq[m.residue.seq_id - 1].id,
+                             metric_id=m._id, metric_value=m.value)
+
+    def dump_metric_pairwise(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_local_pairwise",
+                ["ordinal_id", "model_id", "label_asym_id_1", "label_seq_id_1",
+                 "label_comp_id_1", "label_asym_id_2", "label_seq_id_2",
+                 "label_comp_id_2", "metric_id", "metric_value"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, ma.qa_metric.LocalPairwise):
+                        continue
+                    seq1 = m.residue1.asym.entity.sequence
+                    seq2 = m.residue2.asym.entity.sequence
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             label_asym_id_1=m.residue1.asym._id,
+                             label_seq_id_1=m.residue1.seq_id,
+                             label_comp_id_1=seq1[m.residue1.seq_id - 1].id,
+                             label_asym_id_2=m.residue2.asym._id,
+                             label_seq_id_2=m.residue2.seq_id,
+                             label_comp_id_2=seq2[m.residue2.seq_id - 1].id,
                              metric_id=m._id, metric_value=m.value)
 
 

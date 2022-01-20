@@ -518,6 +518,23 @@ class _QAMetricLocalHandler(Handler):
                                              self.get_float(metric_value)))
 
 
+class _QAMetricPairwiseHandler(Handler):
+    category = '_ma_qa_metric_local_pairwise'
+
+    def __call__(self, model_id, label_asym_id_1, label_seq_id_1,
+                 label_asym_id_2, label_seq_id_2, metric_id, metric_value):
+        model = self.sysr.models.get_by_id(model_id)
+        asym1 = self.sysr.asym_units.get_by_id(label_asym_id_1)
+        seq_id1 = self.get_int(label_seq_id_1)
+        residue1 = asym1.residue(seq_id1)
+        asym2 = self.sysr.asym_units.get_by_id(label_asym_id_2)
+        seq_id2 = self.get_int(label_seq_id_2)
+        residue2 = asym2.residue(seq_id2)
+        metric_class = self.sysr.qa_by_id[metric_id]
+        model.qa_metrics.append(metric_class(residue1, residue2,
+                                             self.get_float(metric_value)))
+
+
 class ModelArchiveVariant(Variant):
     """Used to select typical PDBx/MA file input.
        See :func:`read` and :class:`ihm.reader.Variant`."""
@@ -539,7 +556,8 @@ class ModelArchiveVariant(Variant):
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
-        _QAMetricGlobalHandler, _QAMetricLocalHandler]
+        _QAMetricGlobalHandler, _QAMetricLocalHandler,
+        _QAMetricPairwiseHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

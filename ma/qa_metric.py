@@ -15,8 +15,8 @@
 
 class MetricMode(object):
     """Base class for the mode of a quality metric.
-       Use a derived class such as :class:`Global` or :class:`Local`
-       for declaring a new score.
+       Use a derived class such as :class:`Global`, :class:`Local`,
+       or :class:`LocalPairwise` for declaring a new score.
     """
     pass
 
@@ -45,6 +45,24 @@ class Local(MetricMode):
 
     def __init__(self, residue, value):
         self.residue = residue
+        self.value = value
+
+
+class LocalPairwise(MetricMode):
+    """A score that is calculated between two residues.
+
+       :param residue1: The first residue that is scored.
+       :type residue1: :class:`ma.Residue`
+       :param residue2: The second residue that is scored.
+       :type residue2: :class:`ma.Residue`
+       :param float value: The score value (see :class:`MetricType`).
+    """
+
+    mode = "local-pairwise"
+
+    def __init__(self, residue1, residue2, value):
+        self.residue1 = residue1
+        self.residue2 = residue2
         self.value = value
 
 

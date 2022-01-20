@@ -181,6 +181,11 @@ _ma_data_group.data_id
             description = "custom local description"
             software = None
 
+        class PairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.ZScore):
+            name = "custom pair score"
+            description = "custom pair description"
+            software = None
+
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
         m3 = DistanceScore(60.)
@@ -188,15 +193,15 @@ _ma_data_group.data_id
         asym = ma.AsymUnit(e1, 'foo')
         asym._id = 'Z'
         m4 = LocalScore(asym.residue(2), 20.)
+        m5 = PairScore(asym.residue(1), asym.residue(3), 30.)
         model = MockObject()
         model._id = 18
-        model.qa_metrics = [m1, m2, m3, m4]
+        model.qa_metrics = [m1, m2, m3, m4, m5]
         mg = ma.model.ModelGroup((model,))
         system.model_groups.append(mg)
         dumper = ma.dumper._QAMetricDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
-        self.maxDiff=None
         self.assertEqual(out, """#
 loop_
 _ma_qa_metric.id
@@ -209,6 +214,7 @@ _ma_qa_metric.software_group_id
 1 'test score' 'test description' distance global . 1
 2 'custom score' 'custom description' other global 'my custom type' .
 3 'custom local score' 'custom local description' zscore local . .
+4 'custom pair score' 'custom pair description' zscore local-pairwise . .
 #
 #
 loop_
@@ -230,6 +236,20 @@ _ma_qa_metric_local.label_comp_id
 _ma_qa_metric_local.metric_id
 _ma_qa_metric_local.metric_value
 1 18 Z 2 CYS 3 20.000
+#
+#
+loop_
+_ma_qa_metric_local_pairwise.ordinal_id
+_ma_qa_metric_local_pairwise.model_id
+_ma_qa_metric_local_pairwise.label_asym_id_1
+_ma_qa_metric_local_pairwise.label_seq_id_1
+_ma_qa_metric_local_pairwise.label_comp_id_1
+_ma_qa_metric_local_pairwise.label_asym_id_2
+_ma_qa_metric_local_pairwise.label_seq_id_2
+_ma_qa_metric_local_pairwise.label_comp_id_2
+_ma_qa_metric_local_pairwise.metric_id
+_ma_qa_metric_local_pairwise.metric_value
+1 18 Z 1 ALA Z 3 GLY 4 30.000
 #
 """)
 
