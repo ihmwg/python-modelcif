@@ -188,7 +188,7 @@ class SomeLocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
 
 class SomePairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Distance):
     name = "Some pair score"
-    description = "A distance score betwen two residues"
+    description = "A distance score between two residues"
     software = None
 
 
