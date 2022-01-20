@@ -551,7 +551,7 @@ X 42 foo
         system.entities.append(e1)
         asym = ma.AsymUnit(e1, 'foo')
         system.asym_units.append(asym)
-        asmb = ma.Assembly((asym,))
+        asmb = ma.Assembly((asym,), name='foo', description='bar')
         system.assemblies.append(asmb)
 
         dumper = ihm.dumper._StructAsymDumper()  # Assign _ordinal_id
@@ -569,6 +569,13 @@ _ma_struct_assembly.asym_id
 _ma_struct_assembly.seq_id_begin
 _ma_struct_assembly.seq_id_end
 1 1 42 A 1 4
+#
+#
+loop_
+_ma_struct_assembly_details.assembly_id
+_ma_struct_assembly_details.assembly_name
+_ma_struct_assembly_details.assembly_description
+1 foo bar
 #
 """)
 

@@ -410,6 +410,15 @@ class _AssemblyHandler(Handler):
             return comp
 
 
+class _AssemblyDetailsHandler(Handler):
+    category = '_ma_struct_assembly_details'
+
+    def __call__(self, assembly_id, assembly_name, assembly_description):
+        a = self.sysr.assemblies.get_by_id(assembly_id)
+        a.name = assembly_name
+        a.description = assembly_description
+
+
 class _ModelListHandler(Handler):
     category = '_ma_model_list'
 
@@ -514,7 +523,7 @@ class ModelArchiveVariant(Variant):
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
-        _AssemblyHandler, ihm.reader._AtomSiteHandler,
+        _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
         _QAMetricGlobalHandler]
 

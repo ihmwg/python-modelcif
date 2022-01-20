@@ -240,7 +240,7 @@ _ma_model_list.model_type_other_details
         self.assertEqual(m1.assembly._id, '99')
 
     def test_assembly_handler(self):
-        """Test _AssemblyHandler"""
+        """Test _AssemblyHandler and _AssemblyDetailsHandler"""
         cif = """
 loop_
 _entity_poly_seq.entity_id
@@ -264,9 +264,17 @@ _ma_struct_assembly.seq_id_begin
 _ma_struct_assembly.seq_id_end
 1 1 1 A 1 2
 2 1 1 A 1 1
+#
+loop_
+_ma_struct_assembly_details.assembly_id
+_ma_struct_assembly_details.assembly_name
+_ma_struct_assembly_details.assembly_description
+1 foo bar
 """
         s, = ma.reader.read(StringIO(cif))
         a, = s.assemblies
+        self.assertEqual(a.name, 'foo')
+        self.assertEqual(a.description, 'bar')
         self.assertEqual(len(a), 2)
         # Complete asym
         self.assertIsInstance(a[0], ma.AsymUnit)
