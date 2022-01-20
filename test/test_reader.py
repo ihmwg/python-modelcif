@@ -496,6 +496,55 @@ _ma_qa_metric_global.metric_value
         self.assertIsInstance(q4, ma.qa_metric.Global)
         self.assertIsInstance(q4, ma.qa_metric.NormalizedScore)
 
+    def test_qa_metric_local_handler(self):
+        """Test _QAMetricLocalHandler"""
+        cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test local' 'some local score' normalized_score local . .
+#
+loop_
+_ma_qa_metric_local.ordinal_id
+_ma_qa_metric_local.model_id
+_ma_qa_metric_local.label_asym_id
+_ma_qa_metric_local.label_seq_id
+_ma_qa_metric_local.label_comp_id
+_ma_qa_metric_local.metric_id
+_ma_qa_metric_local.metric_value
+1 1 A 2 CYS 1 1.0
+"""
+        s, = ma.reader.read(StringIO(cif))
+        mg, = s.model_groups
+        m, = mg
+        q1, = m.qa_metrics
+        self.assertIsInstance(q1, ma.qa_metric.Local)
+        self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
+        self.assertEqual(q1.type, "normalized_score")
+        self.assertEqual(q1.name, "test local")
+        self.assertEqual(q1.description, "some local score")
+        self.assertIsNone(q1.software)
+        self.assertEqual(q1.residue.asym._id, 'A')
+        self.assertEqual(q1.residue.seq_id, 2)
+        self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
+
     def test_alignment_info_details_handler(self):
         """Test _AlignmentInfoHandler and _AlignmentDetailsHandler"""
         cif = """

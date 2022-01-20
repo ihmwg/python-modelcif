@@ -422,6 +422,7 @@ class _QAMetricDumper(Dumper):
     def dump(self, system, writer):
         self.dump_metric_types(system, writer)
         self.dump_metric_global(system, writer)
+        self.dump_metric_local(system, writer)
 
     def dump_metric_types(self, system, writer):
         with writer.loop(
@@ -443,8 +444,25 @@ class _QAMetricDumper(Dumper):
             for group, model in system._all_models():
                 for m in model.qa_metrics:
                     if not isinstance(m, ma.qa_metric.Global):
-                        pass
+                        continue
                     lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             metric_id=m._id, metric_value=m.value)
+
+    def dump_metric_local(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_local",
+                ["ordinal_id", "model_id", "label_asym_id", "label_seq_id",
+                 "label_comp_id", "metric_id", "metric_value"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, ma.qa_metric.Local):
+                        continue
+                    seq = m.residue.asym.entity.sequence
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             label_asym_id=m.residue.asym._id,
+                             label_seq_id=m.residue.seq_id,
+                             label_comp_id=seq[m.residue.seq_id - 1].id,
                              metric_id=m._id, metric_value=m.value)
 
 

@@ -176,17 +176,27 @@ _ma_data_group.data_id
             description = "custom description"
             software = None
 
+        class LocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
+            name = "custom local score"
+            description = "custom local description"
+            software = None
+
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
         m3 = DistanceScore(60.)
+        e1 = ma.Entity('ACGT')
+        asym = ma.AsymUnit(e1, 'foo')
+        asym._id = 'Z'
+        m4 = LocalScore(asym.residue(2), 20.)
         model = MockObject()
         model._id = 18
-        model.qa_metrics = [m1, m2, m3]
+        model.qa_metrics = [m1, m2, m3, m4]
         mg = ma.model.ModelGroup((model,))
         system.model_groups.append(mg)
         dumper = ma.dumper._QAMetricDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
+        self.maxDiff=None
         self.assertEqual(out, """#
 loop_
 _ma_qa_metric.id
@@ -198,6 +208,7 @@ _ma_qa_metric.type_other_details
 _ma_qa_metric.software_group_id
 1 'test score' 'test description' distance global . 1
 2 'custom score' 'custom description' other global 'my custom type' .
+3 'custom local score' 'custom local description' zscore local . .
 #
 #
 loop_
@@ -208,6 +219,17 @@ _ma_qa_metric_global.metric_value
 1 18 1 42.000
 2 18 2 99.000
 3 18 1 60.000
+#
+#
+loop_
+_ma_qa_metric_local.ordinal_id
+_ma_qa_metric_local.model_id
+_ma_qa_metric_local.label_asym_id
+_ma_qa_metric_local.label_seq_id
+_ma_qa_metric_local.label_comp_id
+_ma_qa_metric_local.metric_id
+_ma_qa_metric_local.metric_value
+1 18 Z 2 CYS 3 20.000
 #
 """)
 

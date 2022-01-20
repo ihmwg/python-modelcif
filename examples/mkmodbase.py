@@ -174,6 +174,17 @@ class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
 model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),
                          TSVModNO35(0.143)))
 
+# All ModBase QA metrics are global, but the library also supports per-residue
+# scores. Here's a fictional example for a z-score on the 4th residue of
+# the first chain in the model:
+
+class SomeLocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
+    name = "Some local score"
+    description = "A per-residue z-score"
+    software = None
+
+model.qa_metrics.append(SomeLocalScore(asymA.residue(4), -0.1))
+
 # Similar models can be grouped together. Here we only have a single model
 # in the group
 model_group = ma.model.ModelGroup([model], name='All models')

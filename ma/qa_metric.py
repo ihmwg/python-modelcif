@@ -15,7 +15,8 @@
 
 class MetricMode(object):
     """Base class for the mode of a quality metric.
-       Use a derived class such as :class:`Global` for declaring a new score.
+       Use a derived class such as :class:`Global` or :class:`Local`
+       for declaring a new score.
     """
     pass
 
@@ -29,6 +30,21 @@ class Global(MetricMode):
     mode = "global"
 
     def __init__(self, value):
+        self.value = value
+
+
+class Local(MetricMode):
+    """A score that is calculated on a single residue.
+
+       :param residue: The residue that is scored.
+       :type residue: :class:`ma.Residue`
+       :param float value: The score value (see :class:`MetricType`).
+    """
+
+    mode = "local"
+
+    def __init__(self, residue, value):
+        self.residue = residue
         self.value = value
 
 

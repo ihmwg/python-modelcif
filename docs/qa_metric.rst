@@ -13,6 +13,9 @@ The :mod:`ma.qa_metric` Python module
 .. autoclass:: Global
    :members:
 
+.. autoclass:: Local
+   :members:
+
 .. autoclass:: MetricType
    :members:
 
