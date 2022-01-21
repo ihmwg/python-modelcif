@@ -188,23 +188,24 @@ _ma_data_group.data_id
             other_details = "my custom type"
 
         class DistanceScore(ma.qa_metric.Global, ma.qa_metric.Distance):
+            """test description"""
             name = "test score"
-            description = "test description"
             software = s1
 
         class CustomScore(ma.qa_metric.Global, CustomMetricType):
-            name = "custom score"
+            """Description does not match docstring"""
             description = "custom description"
             software = None
 
         class LocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
+            """custom local description
+               Second line of docstring (ignored)"""
             name = "custom local score"
-            description = "custom local description"
             software = None
 
         class PairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Energy):
+            """custom pair description"""
             name = "custom pair score"
-            description = "custom pair description"
             software = None
 
         m1 = DistanceScore(42.)
@@ -233,7 +234,7 @@ _ma_qa_metric.mode
 _ma_qa_metric.type_other_details
 _ma_qa_metric.software_group_id
 1 'test score' 'test description' distance global . 1
-2 'custom score' 'custom description' other global 'my custom type' .
+2 CustomScore 'custom description' other global 'my custom type' .
 3 'custom local score' 'custom local description' zscore local . .
 4 'custom pair score' 'custom pair description' energy local-pairwise . .
 #

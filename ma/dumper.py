@@ -450,7 +450,9 @@ class _QAMetricDumper(Dumper):
                 if cls not in seen_metric_classes:
                     seen_metric_classes.add(cls)
                     cls._id = next(metric_id)
-                    self._metric_classes_by_id.append(cls)
+                    # We need an instance of the class in case name or
+                    # description are provided by property()
+                    self._metric_classes_by_id.append(m)
 
     def dump(self, system, writer):
         self.dump_metric_types(system, writer)

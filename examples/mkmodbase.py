@@ -147,26 +147,22 @@ class MPQSMetricType(ma.qa_metric.MetricType):
 
 
 class MPQS(ma.qa_metric.Global, MPQSMetricType):
-    name = "MPQS"
-    description = "ModPipe Quality Score"
+    """ModPipe Quality Score"""
     software = modpipe_software
 
 
 class zDOPE(ma.qa_metric.Global, ma.qa_metric.ZScore):
-    name = "zDOPE"
-    description = "Normalized DOPE"
+    """Normalized DOPE"""
     software = modeller_software
 
 
 class TSVModRMSD(ma.qa_metric.Global, ma.qa_metric.Distance):
-    name = "TSVMod RMSD"
-    description = "TSVMod predicted RMSD (MSALL)"
+    """TSVMod predicted RMSD (MSALL)"""
     software = None
 
 
 class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
-    name = "TSVMod NO35"
-    description = "TSVMod predicted native overlap (MSALL)"
+    """TSVMod predicted native overlap (MSALL)"""
     software = None
 
 
@@ -181,14 +177,12 @@ model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),
 
 
 class SomeLocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
-    name = "Some local score"
-    description = "A per-residue z-score"
+    """A per-residue z-score"""
     software = None
 
 
 class SomePairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Distance):
-    name = "Some pair score"
-    description = "A distance score between two residues"
+    """A distance score between two residues"""
     software = None
 
 

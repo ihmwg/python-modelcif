@@ -7,9 +7,13 @@
    a global distance score::
 
        class MyScore(ma.qa_metric.Global, ma.qa_metric.Distance):
-           name = "My score"
-           description = "My distance-based quality score"
+           "My distance-based quality score"
            software = ma.Software(...)
+
+   The name and description of the score in the mmCIF file will be taken from
+   the name and docstring of the Python class, unless the
+   :attr:`MetricMode.name` or :attr:`MetricMode.description` attributes are
+   overridden in the subclass.
 """
 
 
@@ -18,7 +22,15 @@ class MetricMode(object):
        Use a derived class such as :class:`Global`, :class:`Local`,
        or :class:`LocalPairwise` for declaring a new score.
     """
-    pass
+    name = property(lambda x: type(x).__name__,
+                    doc="Short name of this score. By default it is just the "
+                        "class name, but this can be overridden in subclasses "
+                        "(for example to create names containing spaces).")
+
+    description = property(lambda x: x.__doc__.split("\n")[0],
+                           doc="Longer text description of this score. By "
+                               "default it is the first line of the "
+                               "docstring.")
 
 
 class Global(MetricMode):

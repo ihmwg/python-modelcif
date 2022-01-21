@@ -504,6 +504,7 @@ _ma_qa_metric_global.metric_value
         self.assertEqual(q1.type, "other")
         self.assertEqual(q1.name, "MPQS")
         self.assertEqual(q1.description, "ModPipe Quality Score")
+        self.assertEqual(q1.__doc__, "ModPipe Quality Score")
         self.assertEqual(q1.software._id, '1')
         self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
 
