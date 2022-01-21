@@ -54,8 +54,19 @@ mmcif_ma.dic    %s
             s, = ma.reader.read(StringIO(cif), reject_old_file=True)
 
     def test_software_group_handler(self):
-        """Test SoftwareGroupHandler"""
+        """Test SoftwareGroupHandler and SoftwareParameterHandler"""
         cif = """
+loop_
+_ma_software_parameter.parameter_id
+_ma_software_parameter.group_id
+_ma_software_parameter.data_type
+_ma_software_parameter.name
+_ma_software_parameter.value
+_ma_software_parameter.description
+1 1 integer foo 42 foodesc
+2 1 boolean bar YES .
+3 1 string baz ok .
+#
 loop_
 _ma_software_group.ordinal_id
 _ma_software_group.group_id
@@ -63,16 +74,27 @@ _ma_software_group.software_id
 _ma_software_group.parameter_group_id
 1 1 1 .
 2 1 2 .
-3 2 3 .
+3 2 3 1
 """
         s, = ma.reader.read(StringIO(cif))
         s1, s2, s3 = s.software
         g1, g2 = s.software_groups
         self.assertEqual(len(g1), 2)
         self.assertEqual(len(g2), 1)
+        self.assertEqual(g1.parameters, [])
         self.assertEqual(g1[0], s1)
         self.assertEqual(g1[1], s2)
         self.assertEqual(g2[0], s3)
+        p1, p2, p3 = g2.parameters
+        self.assertEqual(p1.name, 'foo')
+        self.assertEqual(p1.value, 42)
+        self.assertEqual(p1.description, 'foodesc')
+        self.assertEqual(p2.name, 'bar')
+        self.assertTrue(p2.value)
+        self.assertIsNone(p2.description)
+        self.assertEqual(p3.name, 'baz')
+        self.assertEqual(p3.value, 'ok')
+        self.assertIsNone(p3.description)
 
     def test_enumeration_mapper(self):
         """Test EnumerationMapper class"""

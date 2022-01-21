@@ -16,6 +16,9 @@ The :mod:`ma` Python module
 .. autoclass:: SoftwareGroup
    :members:
 
+.. autoclass:: SoftwareParameter
+   :members:
+
 .. autoclass:: Entity
    :members:
 

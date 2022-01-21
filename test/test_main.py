@@ -103,6 +103,14 @@ class Tests(unittest.TestCase):
         # List may contain duplicates
         self.assertEqual(list(allsg), [sg1, sg2, sg1])
 
+    def test_software_parameter(self):
+        """Test SoftwareParameter class"""
+        p = ma.SoftwareParameter(name='foo', value=42)
+        self.assertEqual(p.name, 'foo')
+        self.assertEqual(p.value, 42)
+        self.assertIsNone(p.description)
+        _ = repr(p)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -52,6 +52,9 @@ class Tests(unittest.TestCase):
         """Test SoftwareGroupDumper"""
         class MockObject(object):
             pass
+        p1 = ma.SoftwareParameter(name='foo', value=42)
+        p2 = ma.SoftwareParameter(name='bar', value=True)
+        p3 = ma.SoftwareParameter(name='baz', value='ok')
         s1 = ma.Software(
             name='s1', classification='test code',
             description='Some test program',
@@ -74,13 +77,29 @@ class Tests(unittest.TestCase):
         aln2 = MockObject()
         aln2.pairs = []
         aln2.software = s3
-        system.alignments.extend((aln1, aln2))
+        aln3 = MockObject()
+        aln3.pairs = []
+        aln3.software = ma.SoftwareGroup((s2, s3), parameters=[p1, p2, p3])
+        system.alignments.extend((aln1, aln2, aln3))
         system._before_write()  # populate system.software_groups
         dumper = ma.dumper._SoftwareGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
-        # Should have one group (s1, s2) and another singleton group (s3)
+        # Should have two groups (s1, s2) and (s2, s3) and another
+        # singleton group (s3)
         self.assertEqual(out, """#
+loop_
+_ma_software_parameter.parameter_id
+_ma_software_parameter.group_id
+_ma_software_parameter.data_type
+_ma_software_parameter.name
+_ma_software_parameter.value
+_ma_software_parameter.description
+1 1 integer foo 42 .
+2 1 boolean bar YES .
+3 1 string baz ok .
+#
+#
 loop_
 _ma_software_group.ordinal_id
 _ma_software_group.group_id
@@ -89,6 +108,8 @@ _ma_software_group.parameter_group_id
 1 1 1 .
 2 1 2 .
 3 2 3 .
+4 3 2 1
+5 3 3 1
 #
 """)
 

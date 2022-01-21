@@ -70,12 +70,24 @@ class _TargetEntityDumper(Dumper):
 
 class _SoftwareGroupDumper(Dumper):
     def finalize(self, system):
+        # Map from id(list) to id
+        self._param_group_id = {}
+        self._param_groups = []
         for n, s in enumerate(system.software_groups):
             # Use _group_id rather than _id as the "group" might be a
             # singleton Software, which already has its own id
             s._group_id = n + 1
+            if (isinstance(s, ma.SoftwareGroup) and s.parameters
+                    and id(s.parameters) not in self._param_groups):
+                self._param_groups.append(s.parameters)
+                self._param_group_id[id(s.parameters)] \
+                    = len(self._param_groups)
 
     def dump(self, system, writer):
+        self.dump_parameters(system, writer)
+        self.dump_groups(system, writer)
+
+    def dump_groups(self, system, writer):
         ordinal = itertools.count(1)
         with writer.loop(
                 "_ma_software_group",
@@ -88,9 +100,30 @@ class _SoftwareGroupDumper(Dumper):
                     lp.write(ordinal_id=next(ordinal), group_id=g._group_id,
                              software_id=g._id)
                 else:
+                    param = None
+                    if g.parameters:
+                        param = self._param_group_id[id(g.parameters)]
                     for s in g:
                         lp.write(ordinal_id=next(ordinal),
-                                 group_id=g._group_id, software_id=s._id)
+                                 group_id=g._group_id, software_id=s._id,
+                                 parameter_group_id=param)
+
+    def dump_parameters(self, system, writer):
+        parameter_id = itertools.count(1)
+        type_map = {int: "integer", float: "float", str: "string",
+                    bool: "boolean"}
+        with writer.loop(
+                "_ma_software_parameter",
+                ["parameter_id", "group_id", "data_type",
+                 "name", "value", "description"]) as lp:
+            for g in self._param_groups:
+                group_id = self._param_group_id[id(g)]
+                for p in g:
+                    lp.write(parameter_id=next(parameter_id),
+                             group_id=group_id,
+                             data_type=type_map.get(type(p.value), str),
+                             name=p.name, value=p.value,
+                             description=p.description)
 
 
 class _DataDumper(Dumper):

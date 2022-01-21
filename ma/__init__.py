@@ -181,8 +181,34 @@ class SoftwareGroup(list):
        a single alignment (see :class:`ma.alignment.AlignmentMode`) or to
        run a modeling step (see :class:`ma.protocol.Step`).
        It behaves like a regular Python list.
+
+       :param sequence elements: Initial set of :class:`Software` objects.
+       :param parameters: All parameters input to this software group.
+       :type parameters: sequence of :class:`SoftwareParameter`
     """
-    pass
+
+    def __init__(self, elements=(), parameters=None):
+        super(SoftwareGroup, self).__init__(elements)
+        self.parameters = [] if parameters is None else parameters
+
+
+class SoftwareParameter(object):
+    """A single parameter given to software used in modeling.
+
+       See :class:`SoftwareGroup`.
+
+       :param str name: A short name for this parameter.
+       :param value: Parameter value.
+       :type value: ``int``, ``float``, ``str``, or ``bool``
+       :param str description: A longer description of the parameter.
+    """
+    def __init__(self, name, value, description=None):
+        self.name, self.value = name, value
+        self.description = description
+
+    def __repr__(self):
+        return("<SoftwareParameter(name=%r, value=%r)>"
+               % (self.name, self.value))
 
 
 class Transformation(object):

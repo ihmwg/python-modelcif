@@ -91,6 +91,8 @@ class _SystemReader(object):
 
         self.qa_by_id = {}
 
+        self.software_parameters = collections.defaultdict(list)
+
         self.alignment_pairs = collections.defaultdict(list)
 
         self.alignment_seqs = collections.defaultdict(list)
@@ -106,10 +108,26 @@ class _SystemReader(object):
 class _SoftwareGroupHandler(Handler):
     category = '_ma_software_group'
 
-    def __call__(self, group_id, software_id):
+    def __call__(self, group_id, software_id, parameter_group_id):
         g = self.sysr.software_groups.get_by_id(group_id)
         s = self.sysr.software.get_by_id(software_id)
+        # Don't need to handle None or ihm.unknown specially here; this will
+        # map them to an empty list
+        g.parameters = self.sysr.software_parameters[parameter_group_id]
         g.append(s)
+
+
+class _SoftwareParameterHandler(Handler):
+    category = '_ma_software_parameter'
+
+    def __call__(self, group_id, data_type, name, value, description):
+        type_map = {"integer": self.get_int, "float": self.get_float,
+                    "boolean": self.get_bool, "string": str}
+        pg = self.sysr.software_parameters[group_id]
+        converter = type_map.get(data_type, str)
+        p = ma.SoftwareParameter(name=name, value=converter(value),
+                                 description=description)
+        pg.append(p)
 
 
 class _DataHandler(Handler):
@@ -549,6 +567,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
+        _SoftwareParameterHandler,
         _DataHandler, _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
