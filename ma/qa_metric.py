@@ -87,6 +87,13 @@ class ZScore(MetricType):
     other_details = None
 
 
+class Energy(MetricType):
+    """Energy score (the lower the energy, the better the quality).
+       See :class:`MetricType` for more information."""
+    type = "energy"
+    other_details = None
+
+
 class Distance(MetricType):
     """Distance score (the lower the distance, the better the quality).
        See :class:`MetricType` for more information."""
@@ -98,4 +105,18 @@ class NormalizedScore(MetricType):
     """Normalized score ranging from 0 to 1.
        See :class:`MetricType` for more information."""
     type = "normalized score"
+    other_details = None
+
+
+class PAE(MetricType):
+    """Score that is a predicted aligned error.
+       See :class:`MetricType` for more information."""
+    type = "PAE"
+    other_details = None
+
+
+class ContactProbability(MetricType):
+    """Score that is a contact probability of a pairwise interaction.
+       See :class:`MetricType` for more information."""
+    type = "contact probability"
     other_details = None

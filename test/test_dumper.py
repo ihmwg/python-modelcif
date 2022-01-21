@@ -202,7 +202,7 @@ _ma_data_group.data_id
             description = "custom local description"
             software = None
 
-        class PairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.ZScore):
+        class PairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Energy):
             name = "custom pair score"
             description = "custom pair description"
             software = None
@@ -235,7 +235,7 @@ _ma_qa_metric.software_group_id
 1 'test score' 'test description' distance global . 1
 2 'custom score' 'custom description' other global 'my custom type' .
 3 'custom local score' 'custom local description' zscore local . .
-4 'custom pair score' 'custom pair description' zscore local-pairwise . .
+4 'custom pair score' 'custom pair description' energy local-pairwise . .
 #
 #
 loop_
