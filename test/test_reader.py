@@ -483,7 +483,7 @@ _ma_qa_metric.software_group_id
 'composite score, values >1.1 are considered reliable' 1
 2 zDOPE 'Normalized DOPE' zscore global . 2
 3 'TSVMod RMSD' 'TSVMod predicted RMSD (MSALL)' distance global . .
-4 'TSVMod NO35' 'TSVMod predicted native overlap (MSALL)' normalized_score
+4 'TSVMod NO35' 'TSVMod predicted native overlap (MSALL)' 'normalized score'
 global . .
 #
 loop_
@@ -541,7 +541,7 @@ _ma_qa_metric.type
 _ma_qa_metric.mode
 _ma_qa_metric.type_other_details
 _ma_qa_metric.software_group_id
-1 'test local' 'some local score' normalized_score local . .
+1 'test local' 'some local score' 'normalized score' local . .
 #
 loop_
 _ma_qa_metric_local.ordinal_id
@@ -559,7 +559,7 @@ _ma_qa_metric_local.metric_value
         q1, = m.qa_metrics
         self.assertIsInstance(q1, ma.qa_metric.Local)
         self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
-        self.assertEqual(q1.type, "normalized_score")
+        self.assertEqual(q1.type, "normalized score")
         self.assertEqual(q1.name, "test local")
         self.assertEqual(q1.description, "some local score")
         self.assertIsNone(q1.software)
@@ -590,7 +590,7 @@ _ma_qa_metric.type
 _ma_qa_metric.mode
 _ma_qa_metric.type_other_details
 _ma_qa_metric.software_group_id
-1 'test pair' 'some pair score' normalized_score local-pairwise . .
+1 'test pair' 'some pair score' 'normalized score' local-pairwise . .
 #
 loop_
 _ma_qa_metric_local_pairwise.ordinal_id
@@ -611,7 +611,7 @@ _ma_qa_metric_local_pairwise.metric_value
         q1, = m.qa_metrics
         self.assertIsInstance(q1, ma.qa_metric.LocalPairwise)
         self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
-        self.assertEqual(q1.type, "normalized_score")
+        self.assertEqual(q1.type, "normalized score")
         self.assertEqual(q1.name, "test pair")
         self.assertEqual(q1.description, "some pair score")
         self.assertIsNone(q1.software)

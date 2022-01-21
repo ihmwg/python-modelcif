@@ -97,5 +97,5 @@ class Distance(MetricType):
 class NormalizedScore(MetricType):
     """Normalized score ranging from 0 to 1.
        See :class:`MetricType` for more information."""
-    type = "normalized_score"
+    type = "normalized score"
     other_details = None
