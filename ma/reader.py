@@ -196,6 +196,7 @@ class _EnumerationMapper(object):
         if other_det_up not in self._other_map:
             class CustomType(self._base_class):
                 other_details = other_det
+                __doc__ = other_det
             self._other_map[other_det_up] = CustomType
         return self._other_map[other_det_up]
 

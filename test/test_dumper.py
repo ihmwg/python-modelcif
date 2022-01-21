@@ -185,7 +185,7 @@ _ma_data_group.data_id
             pass
 
         class CustomMetricType(ma.qa_metric.MetricType):
-            other_details = "my custom type"
+            """my custom type"""
 
         class DistanceScore(ma.qa_metric.Global, ma.qa_metric.Distance):
             """test description"""

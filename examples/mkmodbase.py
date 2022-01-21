@@ -143,7 +143,7 @@ system.protocols.append(protocol)
 # by ModBase. Note that one score (MPQS) uses a custom metric type, while
 # another (zDOPE) is a simple global z-score:
 class MPQSMetricType(ma.qa_metric.MetricType):
-    other_details = "composite score, values >1.1 are considered reliable"
+    """composite score, values >1.1 are considered reliable"""
 
 
 class MPQS(ma.qa_metric.Global, MPQSMetricType):

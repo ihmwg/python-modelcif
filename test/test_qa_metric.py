@@ -11,9 +11,27 @@ class Tests(unittest.TestCase):
     def test_metric_types(self):
         """Test MetricType subclasses"""
         self.assertEqual(ma.qa_metric.Energy.type, "energy")
+        self.assertIsNone(ma.qa_metric.Energy.other_details)
         self.assertEqual(ma.qa_metric.PAE.type, "PAE")
         self.assertEqual(ma.qa_metric.ContactProbability.type,
                          "contact probability")
+
+        # MetricType itself should have no other_details
+        class Custom1(ma.qa_metric.Global, ma.qa_metric.MetricType):
+            """Custom 1"""
+        x = Custom1(42)
+        self.assertEqual(x.type, "other")
+        self.assertIsNone(x.other_details)
+
+        class CustomMetricType(ma.qa_metric.MetricType):
+            """foo
+               bar"""
+
+        class Custom2(ma.qa_metric.Global, CustomMetricType):
+            """Custom 2"""
+        x = Custom2(42)
+        self.assertEqual(x.type, "other")
+        self.assertEqual(x.other_details, "foo")
 
     def test_global_metric(self):
         """Test Global MetricMode"""

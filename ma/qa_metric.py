@@ -94,14 +94,28 @@ class MetricType(object):
     """Base class for the type of a quality metric.
        Generally a derived class such as :class:`ZScore` or :class:`Distance`
        is used to declare a new score, but a custom type can also be declared
-       by deriving from this class and setting the ``other_details`` attribute
-       to a description::
+       by deriving from this class::
 
            class MPQSMetricType(ma.qa_metric.MetricType):
-                other_details = "composite score, values >1.1 are reliable"
+                "composite score, values >1.1 are reliable"
     """
 
     type = "other"
+
+    def _get_other_details(self):
+        # Find most derived class of MetricType before we pulled in MetricMode
+        # and use the first line of its docstring as other_details
+        if self.type == MetricType.type:
+            for base in type(self).mro():
+                if (issubclass(base, MetricType)
+                        and base is not MetricType
+                        and not issubclass(base, MetricMode)):
+                    return base.__doc__.split('\n')[0]
+
+    other_details = property(
+        _get_other_details,
+        doc="More information about this metric type. By default it is the "
+            "first line of the MetricType subclass docstring.")
 
 
 class ZScore(MetricType):
