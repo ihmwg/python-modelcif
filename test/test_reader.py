@@ -503,6 +503,7 @@ _ma_qa_metric_global.metric_value
         self.assertIsInstance(q1, ma.qa_metric.Global)
         self.assertEqual(q1.type, "other")
         self.assertEqual(q1.name, "MPQS")
+        self.assertEqual(type(q1).__name__, "MPQS")
         self.assertEqual(q1.description, "ModPipe Quality Score")
         self.assertEqual(q1.__doc__, "ModPipe Quality Score")
         self.assertEqual(q1.software._id, '1')

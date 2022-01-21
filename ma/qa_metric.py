@@ -44,6 +44,9 @@ class Global(MetricMode):
     def __init__(self, value):
         self.value = value
 
+    def __repr__(self):
+        return "<%s(value=%r)>" % (type(self).__name__, self.value)
+
 
 class Local(MetricMode):
     """A score that is calculated on a single residue.
@@ -58,6 +61,10 @@ class Local(MetricMode):
     def __init__(self, residue, value):
         self.residue = residue
         self.value = value
+
+    def __repr__(self):
+        return "<%s(residue=%r, value=%r)>" % (type(self).__name__,
+                                               self.residue, self.value)
 
 
 class LocalPairwise(MetricMode):
@@ -76,6 +83,11 @@ class LocalPairwise(MetricMode):
         self.residue1 = residue1
         self.residue2 = residue2
         self.value = value
+
+    def __repr__(self):
+        return("<%s(residue1=%r, residue2=%r, value=%r)>"
+               % (type(self).__name__, self.residue1, self.residue2,
+                  self.value))
 
 
 class MetricType(object):

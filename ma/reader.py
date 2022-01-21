@@ -484,6 +484,7 @@ def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
         name = p_name
         __doc__ = p_description
         software = p_software
+    QA.__name__ = p_name
     return QA
 
 
