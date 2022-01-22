@@ -26,13 +26,13 @@ class System(object):
         #: List of all authors of this system, as a list of strings (last name
         #: followed by initials, e.g. "Smith AJ"). When writing out a file,
         #: if this list is empty, the set of all citation authors (see
-        #: :attr:`Citation.authors`) is used instead.
+        #: :attr:`ihm.Citation.authors`) is used instead.
         self.authors = []
 
-        #: List of all grants that supported this work. See :class:`Grant`.
+        #: List of all grants that supported this work. See :class:`ihm.Grant`.
         self.grants = []
 
-        #: List of all citations. See :class:`Citation`.
+        #: List of all citations. See :class:`ihm.Citation`.
         self.citations = []
 
         #: All entities used in the system. See :class:`Entity`.
@@ -186,6 +186,33 @@ class System(object):
              if step.software),
             (metric.software for group, model in self._all_models()
              for metric in model.qa_metrics if metric.software))
+
+
+# Provide ma-specific docs for Entity
+Entity.__doc__ = """Represent a unique molecular sequence.
+
+This can be used both for template sequences (in which case the Entity is
+then used in a :class:`Template` object) or for target (model) sequences
+(where it is used in a :class:`AsymUnit` object).
+
+:param sequence sequence: The primary sequence, as a sequence of
+       :class:`ihm.ChemComp` objects, and/or codes looked up in `alphabet`.
+       See :class:`ihm.Entity` for examples.
+:param alphabet: The mapping from code to chemical components to use
+       (it is not necessary to instantiate this class).
+:type alphabet: :class:`ihm.Alphabet`
+:param str description: A short text name for the sequence.
+:param str details: Longer text describing the sequence.
+:param source: The method by which the sample for this entity was produced.
+:type source: :class:`ihm.source.Source`
+:param references: For a target (model) sequence, information about this
+       entity stored in external databases (for example the sequence in
+       UniProt). For references to structure databases for templates,
+       see :class:`Template` instead.
+:type references: sequence of :class:`reference.TargetReference` objects
+
+See :class:`ihm.Entity` for more information.
+"""
 
 
 # Provide ma-specific docs for Software
