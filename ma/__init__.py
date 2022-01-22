@@ -197,7 +197,7 @@ then used in a :class:`Template` object) or for target (model) sequences
 
 :param sequence sequence: The primary sequence, as a sequence of
        :class:`ihm.ChemComp` objects, and/or codes looked up in `alphabet`.
-       See :class:`ihm.Entity` for examples.
+       See `ihm.Entity <https://python-ihm.readthedocs.io/en/latest/main.html#ihm.Entity>` for examples.
 :param alphabet: The mapping from code to chemical components to use
        (it is not necessary to instantiate this class).
 :type alphabet: :class:`ihm.Alphabet`
@@ -211,8 +211,8 @@ then used in a :class:`Template` object) or for target (model) sequences
        see :class:`Template` instead.
 :type references: sequence of :class:`reference.TargetReference` objects
 
-See :class:`ihm.Entity` for more information.
-"""
+See `ihm.Entity <https://python-ihm.readthedocs.io/en/latest/main.html#ihm.Entity>` for more information.
+"""  # noqa: E501
 
 
 # Provide ma-specific docs for Software
