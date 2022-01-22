@@ -103,6 +103,20 @@ class Tests(unittest.TestCase):
         # List may contain duplicates
         self.assertEqual(list(allsg), [sg1, sg2, sg1])
 
+    def test_all_ref_software(self):
+        """Test _all_ref_software() method"""
+        s1 = ma.Software(name='foo', version='1.0',
+                         classification='1', description='2', location='3')
+        s2 = ma.Software(name='foo', version='2.0',
+                         classification='4', description='5', location='6')
+        s = ma.System()
+        s.software_groups.append(ma.SoftwareGroup((s1, s2)))
+        s.software_groups.append(s1)
+
+        alls = s._all_ref_software()
+        # List may contain duplicates
+        self.assertEqual(list(alls), [s1, s2, s1])
+
     def test_software_parameter(self):
         """Test SoftwareParameter class"""
         p = ma.SoftwareParameter(name='foo', value=42)

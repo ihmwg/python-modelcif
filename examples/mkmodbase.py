@@ -35,15 +35,18 @@ modpipe_software = ma.Software(
     name='ModPipe', classification='comparative modeling',
     location='https://salilab.org/modpipe/', type='program',
     version='SVN.r1703', description='Comparative modeling pipeline')
-# Every object must be referenced in a hierarchy with its root at the System.
-system.software.append(modpipe_software)
+# Every object we create must ultimately be linked to the System, which
+# maintains simple lists for each type of object. For example, there is a
+# list system.software (like system.authors above) which can be used for
+# any Software object not referenced by any other object. But in this case
+# we're going to use these Software objects further on in the script, so
+# don't need to explicitly add them here.
 
 modeller_software = ma.Software(
     name='MODELLER', classification='comparative modeling',
     location='https://salilab.org/modeller/', type='program',
     version='SVN', citation=ihm.citations.modeller,
     description='Comparative modeling by satisfaction of spatial restraints')
-system.software.append(modeller_software)
 
 # Next, we define "entities", unique sequences in the system, as ma.Entity
 # objects. First, the template sequence:
@@ -96,6 +99,8 @@ p = ma.alignment.Pair(
     identity=SequenceIdentity(45.0))
 aln = Alignment(name="Modeling alignment", software=modpipe_software,
                 pairs=[p])
+# Alignments aren't used by any objects; they should be added directly
+# to the System:
 system.alignments.append(aln)
 
 # For the actual model coordinates, we must subclass a suitable class and

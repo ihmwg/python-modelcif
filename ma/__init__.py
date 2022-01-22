@@ -91,6 +91,8 @@ class System(object):
         self.model_groups = list(_remove_identical(self.model_groups))
         self.software_groups = list(_remove_identical(
             self._all_software_groups()))
+        self.software = list(_remove_identical(
+            self._all_ref_software()))
 
     def _check_after_write(self):
         pass
@@ -128,12 +130,25 @@ class System(object):
             (asym.entity for asmb in self.assemblies for asym in asmb)))
 
     def _all_software(self):
+        """Utility method used by ihm.dumper to get all Software. To initially
+           populate this list from all Software referenced in the system,
+           use _all_ref_software() instead."""
+        return self.software
+
+    def _all_ref_software(self):
         """Iterate over all Software in the system.
            This includes all Software referenced from other objects, plus
            any referenced from the top-level system.
            Duplicates may be present."""
+        def _all_software_in_groups():
+            for sg in self.software_groups:
+                if isinstance(sg, Software):
+                    yield sg
+                else:
+                    for s in sg:
+                        yield s
         return (itertools.chain(
-            self.software))
+            self.software, _all_software_in_groups()))
 
     def _all_assemblies(self):
         """Iterate over all Assemblies in the system.
@@ -173,13 +188,37 @@ class System(object):
              for metric in model.qa_metrics if metric.software))
 
 
+# Provide ma-specific docs for Software
+Software.__doc__ = """Software used as part of the modeling protocol.
+
+:param str name: The name of the software.
+:param str classification: The major function of the sofware, for
+       example 'model building', 'sample preparation', 'data collection'.
+:param str description: A longer text description of the software.
+:param str location: Place where the software can be found (e.g. URL).
+:param str type: Type of software (program/package/library/other).
+:param str version: The version used.
+:param citation: Publication describing the software.
+:type citation: :class:`ihm.Citation`
+
+Generally these objects are added to groups (see :class:`SoftwareGroup`)
+which can then be used to describe the software used in various parts of the
+modeling (``Software`` objects can also be used any place
+:class:`SoftwareGroup` are accepted, in which case they will act as if a group
+containing only a single member was used).
+
+See also :attr:`System.software`.
+"""
+
+
 class SoftwareGroup(list):
     """A number of :class:`Software` objects that are grouped together.
 
        This class can be used to group together multiple :class:`Software`
        objects if multiple pieces of software were used together to generate
-       a single alignment (see :class:`ma.alignment.AlignmentMode`) or to
-       run a modeling step (see :class:`ma.protocol.Step`).
+       a single alignment (see :class:`ma.alignment.AlignmentMode`), to
+       run a modeling step (see :class:`ma.protocol.Step`), or to calculate
+       a model quality score (see :mod:`ma.qa_metric`).
        It behaves like a regular Python list.
 
        :param sequence elements: Initial set of :class:`Software` objects.
