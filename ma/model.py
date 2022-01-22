@@ -7,11 +7,10 @@ class Model(ma.data.Data):
     """Base class for coordinates of a single structure.
        Use a subclass such as :class:`HomologyModel` or
        :class:`AbInitioModel`, or represent a custom model type by
-       creating a new subclass and setting the ``other_details``
-       attribute to describe it, e.g.::
+       creating a new subclass and providing a docstring to describe it, e.g.::
 
            class CustomModel(Model):
-               other_details = "custom model type"
+               "custom model type"
 
        :param assembly: The :class:`AsymUnit` objects that make up this model.
        :type assembly: :class:`Assembly`
@@ -30,6 +29,16 @@ class Model(ma.data.Data):
         self._atoms = []
         #: QA metrics
         self.qa_metrics = []
+
+    def _get_other_details(self):
+        if (type(self) is not Model
+                and self.model_type == Model.model_type):
+            return self.__doc__.split('\n')[0]
+
+    other_details = property(
+        _get_other_details,
+        doc="More information about a custom model type. "
+            "By default it is the first line of the docstring.")
 
     def get_atoms(self):
         for a in self._atoms:

@@ -318,7 +318,7 @@ _ma_protocol_step.output_data_group_id
     def test_model_dumper(self):
         """Test ModelDumper"""
         class CustomModel(ma.model.Model):
-            other_details = "custom model"
+            """custom model"""
 
         system = ma.System()
         e1 = ma.Entity('ACGT')
@@ -390,7 +390,7 @@ C
         """Test TargetRefDBDumper"""
 
         class CustomRef(ma.reference.TargetReference):
-            other_details = 'my custom ref'
+            """my custom ref"""
 
         system = ma.System()
         ref1 = ma.reference.UniProt(
@@ -429,7 +429,7 @@ _ma_target_ref_db_details.organism_scientific
         """Test AlignmentDumper"""
 
         class CustomRef(ma.reference.TemplateReference):
-            other_details = 'my custom ref'
+            """my custom ref"""
 
         class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
             pass

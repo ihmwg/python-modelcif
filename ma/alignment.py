@@ -19,11 +19,11 @@ class Identity(object):
        Use the correct subclass that corresponds to the denominator used
        when calculating the identity, for example
        :class:`ShorterSequenceIdentity`, or if the denominator is not covered
-       here, subclass this class and set the ``other_details`` attribute to
-       describe the denominator, e.g.::
+       here, subclass this class and provide a docstring to describe the
+       denominator, e.g.::
 
            class CustomIdentity(Identity):
-               other_details = "my custom sequence identity denominator"
+               "my custom sequence identity denominator"
 
        :param float value: The percent sequence identity value.
     """
@@ -31,6 +31,16 @@ class Identity(object):
 
     def __init__(self, value):
         self.value = value
+
+    def _get_other_details(self):
+        if (type(self) is not Identity
+                and self.denominator == Identity.denominator):
+            return self.__doc__.split('\n')[0]
+
+    other_details = property(
+        _get_other_details,
+        doc="More information about a custom sequence identity denominator. "
+            "By default it is the first line of the docstring.")
 
 
 class ShorterSequenceIdentity(Identity):

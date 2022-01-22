@@ -94,7 +94,8 @@ class MetricType(object):
     """Base class for the type of a quality metric.
        Generally a derived class such as :class:`ZScore` or :class:`Distance`
        is used to declare a new score, but a custom type can also be declared
-       by deriving from this class::
+       by deriving from this class and providing a docstring to describe
+       the metric type::
 
            class MPQSMetricType(ma.qa_metric.MetricType):
                 "composite score, values >1.1 are reliable"

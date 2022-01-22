@@ -4,11 +4,11 @@
 class TargetReference(object):
     """Point to the sequence of a target :class:`ma.Entity` in a sequence
        database. Typically a subclass such as :class:`UniProt` is used,
-       although to use a custom database, make a new subclass and set the
-       ``other_details`` attribute with a description, e.g.::
+       although to use a custom database, make a new subclass and provide
+       a docstring to describe the database, e.g.::
 
            class CustomRef(TargetReference):
-               other_details = "my custom database"
+               "my custom database"
 
        :param str code: The name of the sequence in the database.
        :param str accession: The database accession.
@@ -34,6 +34,16 @@ class TargetReference(object):
         self.ncbi_taxonomy_id = ncbi_taxonomy_id
         self.organism_scientific = organism_scientific
 
+    def _get_other_details(self):
+        if (type(self) is not TargetReference
+                and self.name == TargetReference.name):
+            return self.__doc__.split('\n')[0]
+
+    other_details = property(
+        _get_other_details,
+        doc="More information about a custom reference type. "
+            "By default it is the first line of the docstring.")
+
 
 class UniProt(TargetReference):
     """Point to the sequence of an :class:`ma.Entity` in UniProt.
@@ -57,11 +67,11 @@ class TemplateReference(object):
        :class:`Targeteference`).
 
        Typically a subclass such as :class:`PDB` is used,
-       although to use a custom database, make a new subclass and set the
-       ``other_details`` attribute with a description, e.g.::
+       although to use a custom database, make a new subclass and provide
+       a docstring to describe the database, e.g.::
 
            class CustomRef(TemplateReference):
-               other_details = "my custom database"
+               "my custom database"
 
        :param str accession: The database accession.
     """
@@ -69,6 +79,16 @@ class TemplateReference(object):
 
     def __init__(self, accession):
         self.accession = accession
+
+    def _get_other_details(self):
+        if (type(self) is not TemplateReference
+                and self.name == TemplateReference.name):
+            return self.__doc__.split('\n')[0]
+
+    other_details = property(
+        _get_other_details,
+        doc="More information about a custom reference type. "
+            "By default it is the first line of the docstring.")
 
 
 class PDB(TemplateReference):
