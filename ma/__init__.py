@@ -2,6 +2,7 @@ import itertools
 from ihm import Entity, AsymUnit, Software, Assembly  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import ma.data
+import sys
 
 __version__ = '0.1'
 
@@ -189,7 +190,8 @@ class System(object):
 
 
 # Provide ma-specific docs for Entity
-Entity.__doc__ = """Represent a unique molecular sequence.
+if sys.version_info[0] >= 3:
+    Entity.__doc__ = """Represent a unique molecular sequence.
 
 This can be used both for template sequences (in which case the Entity is
 then used in a :class:`Template` object) or for target (model) sequences
@@ -216,7 +218,8 @@ See `ihm.Entity <https://python-ihm.readthedocs.io/en/latest/main.html#ihm.Entit
 
 
 # Provide ma-specific docs for Software
-Software.__doc__ = """Software used as part of the modeling protocol.
+if sys.version_info[0] >= 3:
+    Software.__doc__ = """Software used as part of the modeling protocol.
 
 :param str name: The name of the software.
 :param str classification: The major function of the sofware, for
