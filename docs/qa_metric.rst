@@ -23,19 +23,13 @@ The :mod:`ma.qa_metric` Python module
    :members:
 
 .. autoclass:: ZScore
-   :members:
 
 .. autoclass:: Energy
-   :members:
 
 .. autoclass:: Distance
-   :members:
 
 .. autoclass:: NormalizedScore
-   :members:
 
 .. autoclass:: PAE
-   :members:
 
 .. autoclass:: ContactProbability
-   :members:

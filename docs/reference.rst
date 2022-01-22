@@ -11,10 +11,8 @@ The :mod:`ma.reference` Python module
    :members:
 
 .. autoclass:: UniProt
-   :members:
 
 .. autoclass:: TemplateReference
    :members:
 
 .. autoclass:: PDB
-   :members:

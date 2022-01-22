@@ -14,10 +14,8 @@ The :mod:`ma.model` Python module
    :members:
 
 .. autoclass:: HomologyModel
-   :members:
 
 .. autoclass:: AbInitioModel
-   :members:
 
 .. autoclass:: ModelGroup
    :members:

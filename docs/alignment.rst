@@ -11,10 +11,8 @@ The :mod:`ma.alignment` Python module
    :members:
 
 .. autoclass:: ShorterSequenceIdentity
-   :members:
 
 .. autoclass:: AlignedPositionsIdentity
-   :members:
 
 .. autoclass:: Pair
    :members:
