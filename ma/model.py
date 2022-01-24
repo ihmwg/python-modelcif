@@ -87,7 +87,7 @@ class Model(ma.data.Data):
            `the modbase_pdb_to_cif script <https://github.com/salilab/modbase_utils/blob/model_archive/modbase_pdb_to_cif.py>`_
            uses a custom ``MyModel`` subclass that creates Atom objects on
            the fly from PDB ATOM or HETATM lines.
-        """
+        """  # noqa: E501
         for a in self._atoms:
             yield a
 
