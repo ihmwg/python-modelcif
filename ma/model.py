@@ -1,6 +1,40 @@
+import sys
 import ihm.representation
 from ihm.model import Atom, ModelGroup  # noqa: F401
 import ma.data
+
+# Provide ma-specific docs for Atom
+if sys.version_info[0] >= 3:
+    Atom.__doc__ = """Coordinates of part of the model represented by an atom.
+
+See :meth:`Model.get_atoms` for more details.
+
+:param asym_unit: The asymmetric unit that this atom represents
+:type asym_unit: :class:`ma.AsymUnit`
+:param int seq_id: The residue index represented by this atom
+       (can be None for HETATM sites)
+:param str atom_id: The name of the atom in the residue
+:param str type_symbol: Element name
+:param float x: x coordinate of the atom
+:param float y: y coordinate of the atom
+:param float z: z coordinate of the atom
+:param bool het: True for HETATM sites, False (default) for ATOM
+:param float biso: Temperature factor or equivalent (if applicable)
+:param float occupancy: Fraction of the atom type present
+       (if applicable)
+"""
+
+# Provide ma-specific docs for ModelGroup
+if sys.version_info[0] >= 3:
+    ModelGroup.__doc__ = """A set of related models. See :class:`Model`.
+It is implemented as a simple list of the models.
+
+These objects are typically stored directly in the system; see
+:attr:`ma.System.model_groups`.
+
+:param elements: Initial set of models in the group.
+:param str name: Descriptive name for the group.
+"""
 
 
 class Model(ma.data.Data):
@@ -12,8 +46,9 @@ class Model(ma.data.Data):
            class CustomModel(Model):
                "custom model type"
 
-       :param assembly: The :class:`AsymUnit` objects that make up this model.
-       :type assembly: :class:`Assembly`
+       :param assembly: The :class:`ma.AsymUnit` objects that make up
+              this model.
+       :type assembly: :class:`ma.Assembly`
        :param str name: Short name for this model.
     """
     data_content_type = 'model coordinates'
@@ -27,7 +62,8 @@ class Model(ma.data.Data):
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
-        #: QA metrics
+        #: QA metrics (a simple list of metric objects;
+        #: see :mod:`ma.qa_metric`)
         self.qa_metrics = []
 
     def _get_other_details(self):

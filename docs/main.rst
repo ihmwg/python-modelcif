@@ -25,6 +25,9 @@ The :mod:`ma` Python module
 .. autoclass:: AsymUnit
    :members:
 
+.. autoclass:: Residue
+   :members:
+
 .. autoclass:: Assembly
    :members:
 

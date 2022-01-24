@@ -1,5 +1,5 @@
 import itertools
-from ihm import Entity, AsymUnit, Software, Assembly  # noqa: F401
+from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import ma.data
 import sys
@@ -238,6 +238,21 @@ modeling (``Software`` objects can also be used any place
 containing only a single member was used).
 
 See also :attr:`System.software`.
+"""
+
+# Provide ma-specific docs for Assembly
+if sys.version_info[0] >= 3:
+    Assembly.__doc__ = """A collection of parts of the system that were modeled
+together.
+
+:param sequence elements: Initial set of parts of the system.
+:param str name: Short text name of this assembly.
+:param str description: Longer text that describes this assembly.
+
+This is implemented as a simple list of asymmetric units (or parts of
+them), i.e. a list of :class:`AsymUnit` and/or :class:`AsymUnitRange`
+objects. An Assembly is typically passed to the :class:`ma.model.Model`
+constructor.
 """
 
 
