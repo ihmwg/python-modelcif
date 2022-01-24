@@ -33,7 +33,7 @@ class Tests(unittest.TestCase):
         a2 = ma.AsymUnit(e2)
         s.asym_units.append(a1)
 
-        asmb = ma.Assembly((a1, a2(1,2)))
+        asmb = ma.Assembly((a1, a2(1, 2)))
         s.assemblies.append(asmb)
 
         asyms = s._all_asym_units()
