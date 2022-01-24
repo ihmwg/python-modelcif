@@ -24,6 +24,23 @@ class Tests(unittest.TestCase):
         # List may contain duplicates
         self.assertEqual(list(d), [e1, e3, e1, e2])
 
+    def test_all_asym_units(self):
+        """Test _all_asym_units() method"""
+        s = ma.System()
+        e1 = ma.Entity("DDDD")
+        e2 = ma.Entity("MMMM")
+        a1 = ma.AsymUnit(e1)
+        a2 = ma.AsymUnit(e2)
+        s.asym_units.append(a1)
+
+        asmb = ma.Assembly((a1, a2(1,2)))
+        s.assemblies.append(asmb)
+
+        asyms = s._all_asym_units()
+        # List may contain duplicates and should be all AsymUnit,
+        # not AsymUnitRange
+        self.assertEqual(list(asyms), [a1, a1, a2])
+
     def test_all_data_groups(self):
         """Test _all_data_groups() method"""
         s = ma.System()

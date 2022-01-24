@@ -77,6 +77,7 @@ class System(object):
         # Populate flat lists to contain all referenced objects only once
         # We must populate these in the correct order to get all objects
         self.assemblies = list(_remove_identical(self._all_assemblies()))
+        self.asym_units = list(_remove_identical(self._all_asym_units()))
         self.alignments = list(_remove_identical(self.alignments))
         self.template_segments = list(
             _remove_identical(self._all_template_segments()))
@@ -159,6 +160,14 @@ class System(object):
             self.assemblies,
             (model.assembly for group, model in self._all_models()
              if model.assembly))
+
+    def _all_asym_units(self):
+        def _all_asym_in_assemblies():
+            for asmb in self.assemblies:
+                for a in asmb:
+                    yield a.asym if hasattr(a, 'asym') else a
+        return itertools.chain(
+            self.asym_units, _all_asym_in_assemblies())
 
     def _all_model_groups(self, only_in_states=True):
         return self.model_groups

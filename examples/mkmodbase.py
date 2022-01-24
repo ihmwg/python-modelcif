@@ -65,7 +65,6 @@ system.entities.append(model_e)
 # asymmetric units may map to the same entity (for example if there are
 # several copies of a given protein).
 asymA = ma.AsymUnit(model_e, details='Model subunit A', id='A')
-system.asym_units.append(asymA)
 
 # Next, we group asymmetric units into assemblies.
 modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
