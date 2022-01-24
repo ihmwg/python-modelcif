@@ -12,6 +12,20 @@ class System(object):
 
        :param str title: Longer text description of the system.
        :param str id: Unique identifier for this system in the mmCIF file.
+
+       The system contains a number of simple flat lists of various objects,
+       for example :attr:`alignments`. After constructing objects they should
+       usually be added to these lists so that a hierarchy of classes is
+       formed and is ultimately written out to mmCIF/BinaryCIF. After reading
+       a file the resulting ``System`` object will also populate these lists.
+
+       Most objects do not need to be explicitly added to the system since
+       they are referenced by other objects. For example :class:`Template`
+       objects are not usually added to the system because they are added
+       to alignments which in turn are added to the system. If however an
+       "orphan" Template is desired (not part of an alignment) the system does
+       maintain an appropriate list (``System.templates`` in this case) to
+       which it can be added.
     """
 
     def __init__(self, title=None, id='model'):
@@ -21,29 +35,20 @@ class System(object):
         #: the mmCIF file.
         self.comments = []
 
-        #: List of all software used in the modeling. See :class:`Software`.
-        self.software = []
-
         #: List of all authors of this system, as a list of strings (last name
         #: followed by initials, e.g. "Smith AJ"). When writing out a file,
-        #: if this list is empty, the set of all citation authors (see
-        #: :attr:`ihm.Citation.authors`) is used instead.
+        #: if this list is empty, all authors from the first citation
+        #: (see :attr:`citations` and :class:`ihm.Citation`) are used instead.
         self.authors = []
 
         #: List of all grants that supported this work. See :class:`ihm.Grant`.
         self.grants = []
 
-        #: List of all citations. See :class:`ihm.Citation`.
+        #: List of all citations. By convention the first citation describes
+        #: the system itself. See :class:`ihm.Citation`.
         self.citations = []
 
-        #: All entities used in the system. See :class:`Entity`.
-        self.entities = []
-
-        #: All asymmetric units used in the system. See :class:`AsymUnit`.
-        self.asym_units = []
-
-        #: All model groups (collections of models).
-        #: See :class:`~ma.model.ModelGroup`.
+        #: All groups of models. See :class:`~ma.model.ModelGroup`.
         self.model_groups = []
 
         #: All modeling protocols.
@@ -51,14 +56,18 @@ class System(object):
         self.protocols = []
 
         #: All modeling alignments.
+        #: See :mod:`ma.alignment`.
         self.alignments = []
 
+        self.entities = []
+        self.asym_units = []
         self.target_entities = []
         self.templates = []
         self.template_segments = []
         self.template_transformations = []
         self.data = []
         self.data_groups = []
+        self.software = []
         self.software_groups = []
         self.assemblies = []
 

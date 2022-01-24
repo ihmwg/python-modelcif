@@ -62,8 +62,8 @@ class Model(ma.data.Data):
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
-        #: QA metrics (a simple list of metric objects;
-        #: see :mod:`ma.qa_metric`)
+        #: Quality scores for the model or part of it (a simple list of
+        #: metric objects; see :mod:`ma.qa_metric`)
         self.qa_metrics = []
 
     def _get_other_details(self):
@@ -77,6 +77,17 @@ class Model(ma.data.Data):
             "By default it is the first line of the docstring.")
 
     def get_atoms(self):
+        """Yield :class:`Atom` objects that represent this model.
+
+           The default implementation simply iterates over an internal
+           list of atoms, but this is not very memory-efficient, particularly
+           if the atoms are already stored somewhere else, e.g. in the
+           software's own data structures. It is recommended to subclass
+           and provide a more efficient implementation. For example,
+           `the modbase_pdb_to_cif script <https://github.com/salilab/modbase_utils/blob/model_archive/modbase_pdb_to_cif.py>`_
+           uses a custom ``MyModel`` subclass that creates Atom objects on
+           the fly from PDB ATOM or HETATM lines.
+        """
         for a in self._atoms:
             yield a
 

@@ -3,8 +3,10 @@
    To use, first declare a class for the desired score by deriving
    from both a subclass of :class:`MetricMode` (which defines the part
    of the system the metric applies to) and a subclass of :class:`MetricType`
-   (which describes the meaning of the score value). For example to declare
-   a global distance score::
+   (which describes the meaning of the score value). Set the ``software``
+   attribute to point to the software used to calculate the metric
+   (as a :class:`ma.SoftwareGroup` or :class:`ma.Software` object).
+   For example to declare a global distance score::
 
        class MyScore(ma.qa_metric.Global, ma.qa_metric.Distance):
            "My distance-based quality score"
@@ -15,7 +17,7 @@
    :attr:`MetricMode.name` or :attr:`MetricMode.description` attributes are
    overridden in the subclass.
 
-   QA metric objects should be added to :attr:`ma.Model.qa_metrics`.
+   QA metric objects should be added to :attr:`ma.model.Model.qa_metrics`.
 """
 
 
