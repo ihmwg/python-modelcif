@@ -51,14 +51,12 @@ modeller_software = ma.Software(
 # Next, we define "entities", unique sequences in the system, as ma.Entity
 # objects. First, the template sequence:
 template_e = ma.Entity('DMACDTFIKCC', description='Template subunit')
-system.entities.append(template_e)
 
 # Next, the target (model) sequence, together with a link to the reference
 # sequence (in UniProt):
 s = ma.reference.UniProt(code='MED1_YEAST', accession='Q12321')
 model_e = ma.Entity('DSYVETLDCC', description='Model subunit',
                     references=[s])
-system.entities.append(model_e)
 
 # Next, we define asymmetric units for everything we modeled.
 # These roughly correspond to chains in a traditional PDB file. Multiple
@@ -137,6 +135,8 @@ protocol.steps.append(ma.protocol.ModelingStep(
     software=modeller_software, input_data=aln, output_data=model))
 protocol.steps.append(ma.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
+# Protocols aren't used by any other objects; they should be added directly
+# to the System:
 system.protocols.append(protocol)
 
 

@@ -82,6 +82,7 @@ class System(object):
         self.template_segments = list(
             _remove_identical(self._all_template_segments()))
         self.templates = list(_remove_identical(self._all_templates()))
+        self.entities = list(_remove_identical(self._all_entities()))
         self.template_transformations = list(_remove_identical(
             self._all_template_transformations()))
         self.target_entities = list(_remove_identical(
@@ -168,6 +169,12 @@ class System(object):
                     yield a.asym if hasattr(a, 'asym') else a
         return itertools.chain(
             self.asym_units, _all_asym_in_assemblies())
+
+    def _all_entities(self):
+        return itertools.chain(
+            self.entities,
+            (asym.entity for asym in self.asym_units),
+            (template.entity for template in self.templates))
 
     def _all_model_groups(self, only_in_states=True):
         return self.model_groups

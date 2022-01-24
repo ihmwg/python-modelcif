@@ -41,6 +41,23 @@ class Tests(unittest.TestCase):
         # not AsymUnitRange
         self.assertEqual(list(asyms), [a1, a1, a2])
 
+    def test_all_entities(self):
+        """Test _all_entities() method"""
+        s = ma.System()
+        e1 = ma.Entity("DDDD")
+        e2 = ma.Entity("MMMM")
+        s.entities.append(e1)
+
+        a1 = ma.AsymUnit(e1)
+        s.asym_units.append(a1)
+
+        t2 = ma.Template(e2, asym_id='A', model_num=1, transformation=None)
+        s.templates.append(t2)
+
+        es = s._all_entities()
+        # List may contain duplicates
+        self.assertEqual(list(es), [e1, e1, e2])
+
     def test_all_data_groups(self):
         """Test _all_data_groups() method"""
         s = ma.System()
