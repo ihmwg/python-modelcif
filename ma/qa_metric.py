@@ -14,6 +14,8 @@
    the name and docstring of the Python class, unless the
    :attr:`MetricMode.name` or :attr:`MetricMode.description` attributes are
    overridden in the subclass.
+
+   QA metric objects should be added to :attr:`ma.Model.qa_metrics`.
 """
 
 
