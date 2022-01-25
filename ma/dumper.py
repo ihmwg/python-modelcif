@@ -20,6 +20,14 @@ class _AuditConformDumper(Dumper):
                      dict_location=self.URL % "8b46f31")
 
 
+class _DatabaseDumper(Dumper):
+    def dump(self, system, writer):
+        if system.database:
+            with writer.category("_database_2") as lp:
+                lp.write(database_id=system.database.id,
+                         database_code=system.database.code)
+
+
 class _TargetRefDBDumper(Dumper):
     def dump(self, system, writer):
         # Since target_entities is a *subset* of all entities, they may not
@@ -530,7 +538,7 @@ class ModelArchiveVariant(Variant):
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
-        _AuditConformDumper, ihm.dumper._CitationDumper,
+        _AuditConformDumper, _DatabaseDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
         ihm.dumper._AuditAuthorDumper,
         ihm.dumper._GrantDumper, ihm.dumper._ChemCompDumper,

@@ -105,6 +105,13 @@ class _SystemReader(object):
             e.sequence = tuple(e.sequence)
 
 
+class _DatabaseHandler(Handler):
+    category = '_database_2'
+
+    def __call__(self, database_code, database_id):
+        self.system.database = ma.Database(id=database_id, code=database_code)
+
+
 class _SoftwareGroupHandler(Handler):
     category = '_ma_software_group'
 
@@ -569,7 +576,7 @@ class ModelArchiveVariant(Variant):
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
-        _SoftwareParameterHandler,
+        _DatabaseHandler, _SoftwareParameterHandler,
         _DataHandler, _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,

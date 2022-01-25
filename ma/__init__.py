@@ -12,6 +12,9 @@ class System(object):
 
        :param str title: Longer text description of the system.
        :param str id: Unique identifier for this system in the mmCIF file.
+       :param database: If this system is part of an official database
+              (e.g. SwissModel, ModBase), details of the database identifiers.
+       :type database: :class:`Database`
 
        The system contains a number of simple flat lists of various objects,
        for example :attr:`alignments`. After constructing objects they should
@@ -30,8 +33,9 @@ class System(object):
 
     structure_determination_methodology = "computational"
 
-    def __init__(self, title=None, id='model'):
+    def __init__(self, title=None, id='model', database=None):
         self.id, self.title = id, title
+        self.database = database
 
         #: List of plain text comments. These will be added to the top of
         #: the mmCIF file.
@@ -281,6 +285,20 @@ them), i.e. a list of :class:`AsymUnit` and/or :class:`AsymUnitRange`
 objects. An Assembly is typically passed to the :class:`ma.model.Model`
 constructor.
 """
+
+
+class Database(object):
+    """Information about a System that is part of an official database.
+
+       If a :class:`System` is part of an official database (e.g. SwissModel,
+       ModBase), this class contains details of the database identifiers.
+       It should be passed to the :class:`System` constructor.
+
+       :param str id: Abbreviated name of the database (e.g. PDB)
+       :param str code: Identifier from the database (e.g. 1abc)
+       """
+    def __init__(self, id, code):
+        self.id, self.code = id, code
 
 
 class SoftwareGroup(list):

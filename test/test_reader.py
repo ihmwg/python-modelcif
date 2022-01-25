@@ -127,6 +127,16 @@ _ma_software_group.parameter_group_id
         self.assertEqual(custom.name, 'Other')
         self.assertEqual(custom.other_details, "custom type 2")
 
+    def test_database_handler(self):
+        """Test DatabaseHandler"""
+        cif = """
+_database_2.database_id                'PDB'
+_database_2.database_code              '5HVP'
+"""
+        s, = ma.reader.read(StringIO(cif))
+        self.assertEqual(s.database.id, 'PDB')
+        self.assertEqual(s.database.code, '5HVP')
+
     def test_target_ref_db_handler(self):
         """Test TargetRefDBHander"""
         cif = """

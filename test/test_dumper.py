@@ -52,6 +52,19 @@ class Tests(unittest.TestCase):
                          "_audit_conform.dict_name mmcif_ma.dic")
         self.assertEqual(lines[3].split()[0], "_audit_conform.dict_version")
 
+    def test_database_dumper(self):
+        """Test DatabaseDumper"""
+        system = ma.System()
+        dumper = ma.dumper._DatabaseDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, '')
+
+        system = ma.System(database=ma.Database(id='foo', code='bar'))
+        dumper = ma.dumper._DatabaseDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, "_database_2.database_code bar\n"
+                              "_database_2.database_id foo\n")
+
     def test_software_group_dumper(self):
         """Test SoftwareGroupDumper"""
         class MockObject(object):

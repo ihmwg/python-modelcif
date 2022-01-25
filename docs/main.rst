@@ -10,6 +10,9 @@ The :mod:`ma` Python module
 .. autoclass:: System
    :members:
 
+.. autoclass:: Database
+   :members:
+
 .. autoclass:: Software
    :members:
 
