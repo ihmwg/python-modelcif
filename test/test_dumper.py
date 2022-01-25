@@ -34,8 +34,12 @@ class Tests(unittest.TestCase):
         ma.dumper.write(fh, [sys1, sys2])
         lines = fh.getvalue().split('\n')
         self.assertEqual(lines[:2], ["data_system1", "_entry.id system1"])
-        self.assertEqual(lines[7:9],
-                         ["data_system23", "_entry.id 'system 2+3'"])
+        if lines[7] == 'data_system23':
+            self.assertEqual(lines[7:9],
+                             ["data_system23", "_entry.id 'system 2+3'"])
+        else:
+            self.assertEqual(lines[8:10],
+                             ["data_system23", "_entry.id 'system 2+3'"])
 
     def test_audit_conform_dumper(self):
         """Test AuditConformDumper"""
