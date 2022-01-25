@@ -28,6 +28,8 @@ class System(object):
        which it can be added.
     """
 
+    structure_determination_methodology = "computational"
+
     def __init__(self, title=None, id='model'):
         self.id, self.title = id, title
 
