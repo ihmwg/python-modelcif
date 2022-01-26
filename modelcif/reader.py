@@ -1,11 +1,11 @@
 """Utility classes to read in information in mmCIF or BinaryCIF format"""
 
-import ma
-import ma.model
-import ma.protocol
-import ma.qa_metric
-import ma.alignment
-import ma.reference
+import modelcif
+import modelcif.model
+import modelcif.protocol
+import modelcif.qa_metric
+import modelcif.alignment
+import modelcif.reference
 import ihm
 import ihm.source
 import ihm.reader
@@ -26,17 +26,17 @@ class _AuditConformHandler(Handler):
                 major, minor, _ = [int(x) for x in dict_version.split('.')]
                 if (major, minor) < (1, 3):
                     raise OldFileError(
-                        "This version of python-ma only supports reading "
-                        "files that conform to version 1.3 or later of the "
-                        "MA extension dictionary. This file conforms to "
-                        "version %s." % dict_version)
+                        "This version of python-modelcif only supports "
+                        "reading files that conform to version 1.3 or later "
+                        "of the ModelCIF extension dictionary. This file "
+                        "conforms to version %s." % dict_version)
             except ValueError:
                 pass
 
 
 class _SystemReader(object):
     def __init__(self, model_class, starting_model_class):
-        self.system = ma.System()
+        self.system = modelcif.System()
 
         #: Mapping from ID to :class:`ihm.Software` objects
         self.software = IDMapper(self.system.software, ihm.Software,
@@ -65,29 +65,32 @@ class _SystemReader(object):
         self.chem_comps = _ChemCompIDMapper(None, ihm.ChemComp, *(None,) * 3)
 
         self.software_groups = IDMapper(self.system.software_groups,
-                                        ma.SoftwareGroup)
+                                        modelcif.SoftwareGroup)
 
         self.default_data_by_id = {}
         self.data_by_id = {}
-        self.data_groups = IDMapper(self.system.data_groups, ma.data.DataGroup)
+        self.data_groups = IDMapper(self.system.data_groups,
+                                    modelcif.data.DataGroup)
 
         self.transformations = IDMapper(self.system.template_transformations,
-                                        ma.Transformation, *(None,) * 2)
+                                        modelcif.Transformation, *(None,) * 2)
 
-        self.templates = IDMapper(self.system.templates, ma.Template,
+        self.templates = IDMapper(self.system.templates, modelcif.Template,
                                   *(None,) * 4)
 
         self.template_segments = IDMapper(
-            self.system.template_segments, ma.TemplateSegment, *(None,) * 4)
+            self.system.template_segments, modelcif.TemplateSegment,
+            *(None,) * 4)
 
         self.models = IDMapper(None, model_class, [], None)
 
         self.model_groups = IDMapper(self.system.model_groups,
-                                     ma.model.ModelGroup)
+                                     modelcif.model.ModelGroup)
 
-        self.assemblies = IDMapper(self.system.assemblies, ma.Assembly)
+        self.assemblies = IDMapper(self.system.assemblies, modelcif.Assembly)
 
-        self.protocols = IDMapper(self.system.protocols, ma.protocol.Protocol)
+        self.protocols = IDMapper(self.system.protocols,
+                                  modelcif.protocol.Protocol)
 
         self.qa_by_id = {}
 
@@ -109,7 +112,8 @@ class _DatabaseHandler(Handler):
     category = '_database_2'
 
     def __call__(self, database_code, database_id):
-        self.system.database = ma.Database(id=database_id, code=database_code)
+        self.system.database = modelcif.Database(
+            id=database_id, code=database_code)
 
 
 class _SoftwareGroupHandler(Handler):
@@ -132,8 +136,8 @@ class _SoftwareParameterHandler(Handler):
                     "boolean": self.get_bool, "string": str}
         pg = self.sysr.software_parameters[group_id]
         converter = type_map.get(data_type, str)
-        p = ma.SoftwareParameter(name=name, value=converter(value),
-                                 description=description)
+        p = modelcif.SoftwareParameter(name=name, value=converter(value),
+                                       description=description)
         pg.append(p)
 
 
@@ -141,7 +145,7 @@ class _DataHandler(Handler):
     category = '_ma_data'
 
     def __call__(self, id, name, content_type_other_details):
-        d = ma.data.Data(name=name, details=content_type_other_details)
+        d = modelcif.data.Data(name=name, details=content_type_other_details)
         d._data_id = id
         self.sysr.default_data_by_id[id] = d
 
@@ -222,9 +226,9 @@ class _TargetRefDBHandler(Handler):
 
     def __init__(self, *args):
         super(_TargetRefDBHandler, self).__init__(*args)
-        # Map db_name to subclass of ma.reference.TargetReference
-        self.type_map = _EnumerationMapper(ma.reference,
-                                           ma.reference.TargetReference)
+        # Map db_name to subclass of modelcif.reference.TargetReference
+        self.type_map = _EnumerationMapper(modelcif.reference,
+                                           modelcif.reference.TargetReference)
 
     def __call__(self, target_entity_id, db_name, db_name_other_details,
                  db_code, db_accession, seq_db_isoform, seq_db_align_begin,
@@ -273,9 +277,9 @@ class _TemplateRefDBHandler(Handler):
 
     def __init__(self, *args):
         super(_TemplateRefDBHandler, self).__init__(*args)
-        # Map db_name to subclass of ma.reference.TemplateReference
-        self.type_map = _EnumerationMapper(ma.reference,
-                                           ma.reference.TemplateReference)
+        # Map db_name to subclass of modelcif.reference.TemplateReference
+        self.type_map = _EnumerationMapper(
+            modelcif.reference, modelcif.reference.TemplateReference)
 
     def __call__(self, template_id, db_name, db_name_other_details,
                  db_accession_code):
@@ -311,27 +315,27 @@ class _AlignmentInfoHandler(Handler):
 
     def __init__(self, *args):
         super(_AlignmentInfoHandler, self).__init__(*args)
-        # Map type to subclass of ma.alignment.AlignmentType
+        # Map type to subclass of modelcif.alignment.AlignmentType
         self._type_map = dict(
             (x[1].type.upper(), x[1])
-            for x in inspect.getmembers(ma.alignment, inspect.isclass)
-            if issubclass(x[1], ma.alignment.AlignmentType)
-            and x[1] is not ma.alignment.AlignmentType)
-        # Map mode to subclass of ma.alignment.AlignmentMode
+            for x in inspect.getmembers(modelcif.alignment, inspect.isclass)
+            if issubclass(x[1], modelcif.alignment.AlignmentType)
+            and x[1] is not modelcif.alignment.AlignmentType)
+        # Map mode to subclass of modelcif.alignment.AlignmentMode
         self._mode_map = dict(
             (x[1].mode.upper(), x[1])
-            for x in inspect.getmembers(ma.alignment, inspect.isclass)
-            if issubclass(x[1], ma.alignment.AlignmentMode)
-            and x[1] is not ma.alignment.AlignmentMode)
+            for x in inspect.getmembers(modelcif.alignment, inspect.isclass)
+            if issubclass(x[1], modelcif.alignment.AlignmentMode)
+            and x[1] is not modelcif.alignment.AlignmentMode)
         # Cache created Alignment classes
         self._align_class_map = {}
 
     def __call__(self, alignment_id, data_id, software_group_id,
                  alignment_type, alignment_mode):
         type_class = self._type_map.get(
-            alignment_type.upper(), ma.alignment.AlignmentType)
+            alignment_type.upper(), modelcif.alignment.AlignmentType)
         mode_class = self._mode_map.get(
-            alignment_mode.upper(), ma.alignment.AlignmentMode)
+            alignment_mode.upper(), modelcif.alignment.AlignmentMode)
         software = self.sysr.software_groups.get_by_id_or_none(
             software_group_id)
         align_class = _get_align_class(type_class, mode_class,
@@ -371,12 +375,13 @@ class _AlignmentDetailsHandler(Handler):
 
     def __init__(self, *args):
         super(_AlignmentDetailsHandler, self).__init__(*args)
-        # Map denom to subclass of ma.alignment.Identity
+        # Map denom to subclass of modelcif.alignment.Identity
         self._ident_map = _EnumerationMapper(
-            ma.alignment, ma.alignment.Identity, attr='denominator')
-        # Map score_type to subclass of ma.alignment.Score
-        self._score_map = _EnumerationMapper(ma.alignment,
-                                             ma.alignment.Score, attr='type')
+            modelcif.alignment, modelcif.alignment.Identity,
+            attr='denominator')
+        # Map score_type to subclass of modelcif.alignment.Score
+        self._score_map = _EnumerationMapper(
+            modelcif.alignment, modelcif.alignment.Score, attr='type')
 
     def __call__(self, alignment_id, template_segment_id, target_asym_id,
                  score_type, score_type_other_details, score_value,
@@ -395,8 +400,8 @@ class _AlignmentDetailsHandler(Handler):
         # tables)
         tgt_seg = asym.segment(gapped_sequence=None, seq_id_begin=None,
                                seq_id_end=None)
-        p = ma.alignment.Pair(template=template, target=tgt_seg,
-                              identity=ident, score=score)
+        p = modelcif.alignment.Pair(template=template, target=tgt_seg,
+                                    identity=ident, score=score)
         # Cannot add to alignment yet as it might not exist; remember for
         # now and we'll add in finalize() of AlignmentInfoHandler
         self.sysr.alignment_pairs[alignment_id].append(p)
@@ -429,7 +434,7 @@ class _AssemblyHandler(Handler):
             a[:] = [self._handle_component(x) for x in a]
 
     def _handle_component(self, comp):
-        if isinstance(comp, ma.AsymUnitRange) \
+        if isinstance(comp, modelcif.AsymUnitRange) \
            and comp.seq_id_range == comp.asym.seq_id_range:
             return comp.asym
         else:
@@ -466,17 +471,18 @@ class _ProtocolHandler(Handler):
 
     def __init__(self, *args):
         super(_ProtocolHandler, self).__init__(*args)
-        # Map method_type to subclass of ma.protocol.Step
+        # Map method_type to subclass of modelcif.protocol.Step
         self._method_map = dict(
             (x[1].method_type.upper(), x[1])
-            for x in inspect.getmembers(ma.protocol, inspect.isclass)
-            if issubclass(x[1], ma.protocol.Step)
-            and x[1] is not ma.protocol.Step)
+            for x in inspect.getmembers(modelcif.protocol, inspect.isclass)
+            if issubclass(x[1], modelcif.protocol.Step)
+            and x[1] is not modelcif.protocol.Step)
 
     def __call__(self, protocol_id, method_type, step_name, details,
                  software_group_id, input_data_group_id, output_data_group_id):
         p = self.sysr.protocols.get_by_id(protocol_id)
-        stepcls = self._method_map.get(method_type.upper(), ma.protocol.Step)
+        stepcls = self._method_map.get(method_type.upper(),
+                                       modelcif.protocol.Step)
         indata = self.sysr.data_groups.get_by_id(input_data_group_id)
         outdata = self.sysr.data_groups.get_by_id(output_data_group_id)
         software = self.sysr.software_groups.get_by_id_or_none(
@@ -501,21 +507,22 @@ class _QAMetricHandler(Handler):
 
     def __init__(self, *args):
         super(_QAMetricHandler, self).__init__(*args)
-        # Map mode to subclass of ma.qa_metric.MetricMode
+        # Map mode to subclass of modelcif.qa_metric.MetricMode
         self._mode_map = dict(
             (x[1].mode.upper(), x[1])
-            for x in inspect.getmembers(ma.qa_metric, inspect.isclass)
-            if issubclass(x[1], ma.qa_metric.MetricMode)
-            and x[1] is not ma.qa_metric.MetricMode)
-        # Map type to subclass of ma.qa_metric.MetricType
+            for x in inspect.getmembers(modelcif.qa_metric, inspect.isclass)
+            if issubclass(x[1], modelcif.qa_metric.MetricMode)
+            and x[1] is not modelcif.qa_metric.MetricMode)
+        # Map type to subclass of modelcif.qa_metric.MetricType
         # (also allow user-defined "other" classes)
         self._type_map = _EnumerationMapper(
-            ma.qa_metric, ma.qa_metric.MetricType, attr="type")
+            modelcif.qa_metric, modelcif.qa_metric.MetricType, attr="type")
 
     def __call__(self, id, name, description, type, mode, type_other_details,
                  software_group_id):
         type_class = self._type_map.get(type, type_other_details)
-        mode_class = self._mode_map.get(mode.upper(), ma.qa_metric.MetricMode)
+        mode_class = self._mode_map.get(mode.upper(),
+                                        modelcif.qa_metric.MetricMode)
         software = self.sysr.software_groups.get_by_id_or_none(
             software_group_id)
         self.sysr.qa_by_id[id] = _make_qa_class(
@@ -562,8 +569,8 @@ class _QAMetricPairwiseHandler(Handler):
                                              self.get_float(metric_value)))
 
 
-class ModelArchiveVariant(Variant):
-    """Used to select typical PDBx/MA file input.
+class ModelCIFVariant(Variant):
+    """Used to select typical PDBx/ModelCIF file input.
        See :func:`read` and :class:`ihm.reader.Variant`."""
     system_reader = _SystemReader
 
@@ -594,16 +601,16 @@ class ModelArchiveVariant(Variant):
         return _AuditConformHandler(sysr)
 
 
-def read(fh, model_class=ma.model.Model, format='mmCIF', handlers=[],
+def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
          warn_unknown_category=False, warn_unknown_keyword=False,
-         reject_old_file=False, variant=ModelArchiveVariant):
+         reject_old_file=False, variant=ModelCIFVariant):
     """Read data from the file handle `fh`.
 
        See :func:`ihm.reader.read` for more information. The function
        here behaves similarly but reads in files compliant with the
-       MA extension directory rather than IHM.
+       ModelCIF extension directory rather than IHM.
 
-      :return: A list of :class:`ma.System` objects.
+      :return: A list of :class:`modelcif.System` objects.
     """
     return ihm.reader.read(
         fh, model_class=model_class, format=format, handlers=handlers,

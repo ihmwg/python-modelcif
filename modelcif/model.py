@@ -1,7 +1,7 @@
 import sys
 import ihm.representation
 from ihm.model import Atom, ModelGroup  # noqa: F401
-import ma.data
+import modelcif.data
 
 # Provide ma-specific docs for Atom
 if sys.version_info[0] >= 3:
@@ -10,7 +10,7 @@ if sys.version_info[0] >= 3:
 See :meth:`Model.get_atoms` for more details.
 
 :param asym_unit: The asymmetric unit that this atom represents
-:type asym_unit: :class:`ma.AsymUnit`
+:type asym_unit: :class:`modelcif.AsymUnit`
 :param int seq_id: The residue index represented by this atom
        (can be None for HETATM sites)
 :param str atom_id: The name of the atom in the residue
@@ -30,14 +30,14 @@ if sys.version_info[0] >= 3:
 It is implemented as a simple list of the models.
 
 These objects are typically stored directly in the system; see
-:attr:`ma.System.model_groups`.
+:attr:`modelcif.System.model_groups`.
 
 :param elements: Initial set of models in the group.
 :param str name: Descriptive name for the group.
 """
 
 
-class Model(ma.data.Data):
+class Model(modelcif.data.Data):
     """Base class for coordinates of a single structure.
        Use a subclass such as :class:`HomologyModel` or
        :class:`AbInitioModel`, or represent a custom model type by
@@ -46,24 +46,24 @@ class Model(ma.data.Data):
            class CustomModel(Model):
                "custom model type"
 
-       :param assembly: The :class:`ma.AsymUnit` objects that make up
+       :param assembly: The :class:`modelcif.AsymUnit` objects that make up
               this model.
-       :type assembly: :class:`ma.Assembly`
+       :type assembly: :class:`modelcif.Assembly`
        :param str name: Short name for this model.
     """
     data_content_type = 'model coordinates'
     model_type = "Other"
 
     def __init__(self, assembly, name=None):
-        ma.data.Data.__init__(self, name)
+        modelcif.data.Data.__init__(self, name)
         self.assembly = assembly
-        # Assume everything is atomic for MA models
+        # Assume everything is atomic for ModelCIF models
         self.representation = ihm.representation.Representation(
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
         #: Quality scores for the model or part of it (a simple list of
-        #: metric objects; see :mod:`ma.qa_metric`)
+        #: metric objects; see :mod:`modelcif.qa_metric`)
         self.qa_metrics = []
 
     def _get_other_details(self):

@@ -2,10 +2,10 @@
 
 .. _protocol_module:
 
-The :mod:`ma.protocol` Python module
-====================================
+The :mod:`modelcif.protocol` Python module
+==========================================
 
-.. automodule:: ma.protocol
+.. automodule:: modelcif.protocol
 
 .. autoclass:: Step
    :members:

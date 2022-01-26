@@ -2,10 +2,10 @@
 
 .. _data_module:
 
-The :mod:`ma.data` Python module
-================================
+The :mod:`modelcif.data` Python module
+======================================
 
-.. automodule:: ma.data
+.. automodule:: modelcif.data
 
 .. autoclass:: Data
    :members:

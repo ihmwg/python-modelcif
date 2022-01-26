@@ -9,8 +9,8 @@ else:
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
-import ma.reader
-import ma.reference
+import modelcif.reader
+import modelcif.reference
 import ihm
 
 
@@ -25,7 +25,7 @@ _audit_conform.dict_version
 mmcif_pdbx.dic  5.311
 mmcif_ma.dic    0.14
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
 
     def test_old_file_read_fail(self):
         """Test failure reading old files"""
@@ -36,8 +36,9 @@ _audit_conform.dict_version
 mmcif_pdbx.dic  5.311
 mmcif_ma.dic    0.1.3
 """
-        self.assertRaises(ma.reader.OldFileError,
-                          ma.reader.read, StringIO(cif), reject_old_file=True)
+        self.assertRaises(modelcif.reader.OldFileError,
+                          modelcif.reader.read, StringIO(cif),
+                          reject_old_file=True)
 
     def test_new_file_read_ok(self):
         """Test success reading not-old files"""
@@ -51,7 +52,7 @@ _audit_conform.dict_version
 mmcif_pdbx.dic  5.311
 mmcif_ma.dic    %s
 """ % ver
-            s, = ma.reader.read(StringIO(cif), reject_old_file=True)
+            s, = modelcif.reader.read(StringIO(cif), reject_old_file=True)
 
     def test_software_group_handler(self):
         """Test SoftwareGroupHandler and SoftwareParameterHandler"""
@@ -76,7 +77,7 @@ _ma_software_group.parameter_group_id
 2 1 2 .
 3 2 3 1
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         s1, s2, s3 = s.software
         g1, g2 = s.software_groups
         self.assertEqual(len(g1), 2)
@@ -98,11 +99,11 @@ _ma_software_group.parameter_group_id
 
     def test_enumeration_mapper(self):
         """Test EnumerationMapper class"""
-        m = ma.reader._EnumerationMapper(
-            ma.reference, ma.reference.TargetReference)
+        m = modelcif.reader._EnumerationMapper(
+            modelcif.reference, modelcif.reference.TargetReference)
         # Check get of a handled enumeration value
         unp = m.get('UNP', None)
-        self.assertIs(unp, ma.reference.UniProt)
+        self.assertIs(unp, modelcif.reference.UniProt)
         self.assertEqual(unp.name, 'UNP')
         self.assertIsNone(unp.other_details)
         # We should get the same class each time (case insensitive)
@@ -133,7 +134,7 @@ _ma_software_group.parameter_group_id
 _database_2.database_id                'PDB'
 _database_2.database_code              '5HVP'
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         self.assertEqual(s.database.id, 'PDB')
         self.assertEqual(s.database.code, '5HVP')
 
@@ -156,10 +157,10 @@ _ma_target_ref_db_details.organism_scientific
 1 other bar . . ? 1 10 . .
 1 MIS baz . . ? 1 10 . .
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         e, = s.entities
         r1, r2, r3, r4 = e.references
-        self.assertIsInstance(r1, ma.reference.UniProt)
+        self.assertIsInstance(r1, modelcif.reference.UniProt)
         self.assertEqual(r1.code, 'MED1_YEAST')
         self.assertEqual(r1.accession, 'Q12321')
         self.assertEqual(r1.isoform, 'test_iso')
@@ -194,7 +195,7 @@ _ma_template_trans_matrix.tr_vector[3]
 1 1.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000
 1.000000 0.000 0.000 0.000
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         t, = s.template_transformations
         self.assertAlmostEqual(t.rot_matrix[0][0], 1.0, delta=1e-6)
         self.assertAlmostEqual(t.tr_vector[0], 0.0, delta=1e-6)
@@ -215,7 +216,7 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 1 1 'reference database' polymer 1 2 A B 3 4
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
         self.assertEqual(t.entity._id, '3')
         self.assertEqual(t.model_num, 4)
@@ -233,10 +234,10 @@ _ma_template_ref_db_details.db_accession_code
 1 MIS . testacc
 1 Other foo acc2
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
         r1, r2, r3 = t.references
-        self.assertIsInstance(r1, ma.reference.PDB)
+        self.assertIsInstance(r1, modelcif.reference.PDB)
         self.assertEqual(r1.accession, '3nc1')
         self.assertEqual(r2.name, 'MIS')
         self.assertIsNone(r2.other_details)
@@ -260,7 +261,7 @@ _ma_model_list.model_type_other_details
 1 2 1 '2nd best scoring model' 'All models' 99 5 'Homology model' .
 1 3 2 'Best scoring model' 'group2' 99 6 'Homology model' .
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         mg1, mg2 = s.model_groups
         self.assertEqual(mg1.name, 'All models')
         m1, m2 = list(mg1)
@@ -303,15 +304,15 @@ _ma_struct_assembly_details.assembly_name
 _ma_struct_assembly_details.assembly_description
 1 foo bar
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         a, = s.assemblies
         self.assertEqual(a.name, 'foo')
         self.assertEqual(a.description, 'bar')
         self.assertEqual(len(a), 2)
         # Complete asym
-        self.assertIsInstance(a[0], ma.AsymUnit)
+        self.assertIsInstance(a[0], modelcif.AsymUnit)
         # asym range
-        self.assertIsInstance(a[1], ma.AsymUnitRange)
+        self.assertIsInstance(a[1], modelcif.AsymUnitRange)
         self.assertEqual(a[1].seq_id_range, (1, 1))
 
     def test_template_poly_segment_handler(self):
@@ -324,7 +325,7 @@ _ma_template_poly_segment.residue_number_begin
 _ma_template_poly_segment.residue_number_end
 1 42 2 9
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         seg, = s.template_segments
         self.assertEqual(seg.template._id, '42')
         self.assertEqual(seg.seq_id_range, (2, 9))
@@ -366,12 +367,12 @@ _ma_model_list.model_type
 _ma_model_list.model_type_other_details
 1 1 1 'Model name' 'All models' 1 3 'Homology model' .
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         d1, d2, d3 = s.data
-        self.assertIsInstance(d1, ma.Template)
+        self.assertIsInstance(d1, modelcif.Template)
         # d2 is not referenced by any other table, so gets Data base class
-        self.assertIsInstance(d2, ma.data.Data)
-        self.assertIsInstance(d3, ma.model.Model)
+        self.assertIsInstance(d2, modelcif.data.Data)
+        self.assertIsInstance(d3, modelcif.model.Model)
         # Name not given in template_details so taken from ma_data
         self.assertEqual(d1.name, 'Template Structure')
         self.assertEqual(d2.name, 'Model subunit')
@@ -410,12 +411,12 @@ _ma_data_group.data_id
 2 1 2
 3 2 3
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         g1, g2, = s.data_groups
         self.assertEqual(len(g1), 2)
-        self.assertIsInstance(g1[0], ma.Template)
+        self.assertIsInstance(g1[0], modelcif.Template)
         self.assertEqual(g1[0]._data_id, '1')
-        self.assertIsInstance(g1[1], ma.data.Data)
+        self.assertIsInstance(g1[1], modelcif.data.Data)
         self.assertEqual(g1[1]._data_id, '2')
         self.assertEqual(len(g2), 1)
         self.assertIsNone(g2[0])
@@ -438,14 +439,14 @@ _ma_protocol_step.output_data_group_id
 3 1 3 'model selection' . . 1 1 1
 4 1 4 other testname testdetails 42 99 66
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         p, = s.protocols
         self.assertEqual(len(p.steps), 4)
         s1, s2, s3, s4 = p.steps
-        self.assertIsInstance(s1, ma.protocol.TemplateSearchStep)
-        self.assertIsInstance(s2, ma.protocol.ModelingStep)
-        self.assertIsInstance(s3, ma.protocol.ModelSelectionStep)
-        self.assertIsInstance(s4, ma.protocol.Step)
+        self.assertIsInstance(s1, modelcif.protocol.TemplateSearchStep)
+        self.assertIsInstance(s2, modelcif.protocol.ModelingStep)
+        self.assertIsInstance(s3, modelcif.protocol.ModelSelectionStep)
+        self.assertIsInstance(s4, modelcif.protocol.Step)
         self.assertEqual(s4.method_type, "other")
         self.assertEqual(s4.name, "testname")
         self.assertEqual(s4.details, "testdetails")
@@ -462,7 +463,7 @@ _ma_target_entity.data_id
 _ma_target_entity.origin
 1 2 'reference database'
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         e, = s.entities
         self.assertEqual(e._data_id, '2')
 
@@ -506,11 +507,11 @@ _ma_qa_metric_global.metric_value
 3 1 3 3.0
 4 1 4 4.0
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         mg, = s.model_groups
         m, = mg
         q1, q2, q3, q4 = m.qa_metrics
-        self.assertIsInstance(q1, ma.qa_metric.Global)
+        self.assertIsInstance(q1, modelcif.qa_metric.Global)
         self.assertEqual(q1.type, "other")
         self.assertEqual(q1.name, "MPQS")
         self.assertEqual(type(q1).__name__, "MPQS")
@@ -519,16 +520,16 @@ _ma_qa_metric_global.metric_value
         self.assertEqual(q1.software._id, '1')
         self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
 
-        self.assertIsInstance(q2, ma.qa_metric.Global)
-        self.assertIsInstance(q2, ma.qa_metric.ZScore)
+        self.assertIsInstance(q2, modelcif.qa_metric.Global)
+        self.assertIsInstance(q2, modelcif.qa_metric.ZScore)
         self.assertAlmostEqual(q2.value, 2.0, delta=1e-6)
 
-        self.assertIsInstance(q3, ma.qa_metric.Global)
-        self.assertIsInstance(q3, ma.qa_metric.Distance)
+        self.assertIsInstance(q3, modelcif.qa_metric.Global)
+        self.assertIsInstance(q3, modelcif.qa_metric.Distance)
         self.assertAlmostEqual(q3.value, 3.0, delta=1e-6)
 
-        self.assertIsInstance(q4, ma.qa_metric.Global)
-        self.assertIsInstance(q4, ma.qa_metric.NormalizedScore)
+        self.assertIsInstance(q4, modelcif.qa_metric.Global)
+        self.assertIsInstance(q4, modelcif.qa_metric.NormalizedScore)
 
     def test_qa_metric_local_handler(self):
         """Test _QAMetricLocalHandler"""
@@ -565,12 +566,12 @@ _ma_qa_metric_local.metric_id
 _ma_qa_metric_local.metric_value
 1 1 A 2 CYS 1 1.0
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         mg, = s.model_groups
         m, = mg
         q1, = m.qa_metrics
-        self.assertIsInstance(q1, ma.qa_metric.Local)
-        self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
+        self.assertIsInstance(q1, modelcif.qa_metric.Local)
+        self.assertIsInstance(q1, modelcif.qa_metric.NormalizedScore)
         self.assertEqual(q1.type, "normalized score")
         self.assertEqual(q1.name, "test local")
         self.assertEqual(q1.description, "some local score")
@@ -617,12 +618,12 @@ _ma_qa_metric_local_pairwise.metric_id
 _ma_qa_metric_local_pairwise.metric_value
 1 1 A 2 CYS B 4 GLY 1 1.0
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         mg, = s.model_groups
         m, = mg
         q1, = m.qa_metrics
-        self.assertIsInstance(q1, ma.qa_metric.LocalPairwise)
-        self.assertIsInstance(q1, ma.qa_metric.NormalizedScore)
+        self.assertIsInstance(q1, modelcif.qa_metric.LocalPairwise)
+        self.assertIsInstance(q1, modelcif.qa_metric.NormalizedScore)
         self.assertEqual(q1.type, "normalized score")
         self.assertEqual(q1.name, "test pair")
         self.assertEqual(q1.description, "some pair score")
@@ -676,18 +677,19 @@ _ma_target_template_poly_mapping.target_seq_id_begin
 _ma_target_template_poly_mapping.target_seq_id_end
 1 1 A 1 8
 """
-        s, = ma.reader.read(StringIO(cif))
+        s, = modelcif.reader.read(StringIO(cif))
         a1, a2, = s.alignments
         self.assertIs(a1.__class__, a2.__class__)
-        self.assertIsInstance(a1, ma.alignment.Global)
-        self.assertIsInstance(a1, ma.alignment.Pairwise)
+        self.assertIsInstance(a1, modelcif.alignment.Global)
+        self.assertIsInstance(a1, modelcif.alignment.Pairwise)
         self.assertEqual(len(a2.pairs), 0)
         p, = a1.pairs
-        self.assertIsInstance(p.score, ma.alignment.BLASTEValue)
+        self.assertIsInstance(p.score, modelcif.alignment.BLASTEValue)
         self.assertAlmostEqual(p.score.value, 1.0, delta=1e-6)
-        self.assertIsInstance(p.identity, ma.alignment.ShorterSequenceIdentity)
+        self.assertIsInstance(p.identity,
+                              modelcif.alignment.ShorterSequenceIdentity)
         self.assertAlmostEqual(p.identity.value, 45.0, delta=1e-6)
-        self.assertIsInstance(p.template, ma.TemplateSegment)
+        self.assertIsInstance(p.template, modelcif.TemplateSegment)
         self.assertEqual(p.template._id, '1')
         self.assertEqual(p.template.gapped_sequence, 'DMACDTFIK')
         self.assertIsInstance(p.target, ihm.AsymUnitSegment)

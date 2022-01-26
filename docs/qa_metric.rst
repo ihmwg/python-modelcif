@@ -2,10 +2,10 @@
 
 .. _qa_metric_module:
 
-The :mod:`ma.qa_metric` Python module
-=====================================
+The :mod:`modelcif.qa_metric` Python module
+===========================================
 
-.. automodule:: ma.qa_metric
+.. automodule:: modelcif.qa_metric
 
 .. autoclass:: MetricMode
    :members:

@@ -1,6 +1,6 @@
 .. _changes:
 
-.. currentmodule:: ma
+.. currentmodule:: modelcif
 
 Change history
 **************

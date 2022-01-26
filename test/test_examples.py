@@ -7,7 +7,7 @@ import subprocess
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 
-import ma.reader
+import modelcif.reader
 import ihm
 
 
@@ -46,7 +46,7 @@ class Tests(unittest.TestCase):
             else:
                 self.assertEqual(len(contents), 440)
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
-                s, = ma.reader.read(fh)
+                s, = modelcif.reader.read(fh)
 
 
 if __name__ == '__main__':

@@ -2,10 +2,10 @@
 
 .. _main_module:
 
-The :mod:`ma` Python module
-==================================
+The :mod:`modelcif` Python module
+=================================
 
-.. automodule:: ma
+.. automodule:: modelcif
 
 .. autoclass:: System
    :members:

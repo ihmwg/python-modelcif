@@ -2,10 +2,10 @@
 
 .. _alignment_module:
 
-The :mod:`ma.alignment` Python module
-=====================================
+The :mod:`modelcif.alignment` Python module
+===========================================
 
-.. automodule:: ma.alignment
+.. automodule:: modelcif.alignment
 
 .. autoclass:: Identity
    :members:

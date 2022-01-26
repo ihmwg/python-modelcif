@@ -2,11 +2,11 @@
 
 .. _dumper_module:
 
-The :mod:`ma.dumper` Python module
-==================================
+The :mod:`modelcif.dumper` Python module
+========================================
 
-.. automodule:: ma.dumper
+.. automodule:: modelcif.dumper
 
 .. autofunction:: write
 
-.. autoclass:: ModelArchiveVariant
+.. autoclass:: ModelCIFVariant

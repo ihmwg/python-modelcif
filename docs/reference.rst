@@ -2,10 +2,10 @@
 
 .. _reference_module:
 
-The :mod:`ma.reference` Python module
-=====================================
+The :mod:`modelcif.reference` Python module
+===========================================
 
-.. automodule:: ma.reference
+.. automodule:: modelcif.reference
 
 .. autoclass:: TargetReference
    :members:

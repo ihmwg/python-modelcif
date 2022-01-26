@@ -2,7 +2,7 @@
 
 
 class TargetReference(object):
-    """Point to the sequence of a target :class:`ma.Entity` in a sequence
+    """Point to the sequence of a target :class:`modelcif.Entity` in a sequence
        database. Typically a subclass such as :class:`UniProt` is used,
        although to use a custom database, make a new subclass and provide
        a docstring to describe the database, e.g.::
@@ -46,9 +46,9 @@ class TargetReference(object):
 
 
 class UniProt(TargetReference):
-    """Point to the sequence of an :class:`ma.Entity` in UniProt.
+    """Point to the sequence of an :class:`modelcif.Entity` in UniProt.
 
-       These objects are typically passed to the :class:`ma.Entity`
+       These objects are typically passed to the :class:`modelcif.Entity`
        constructor for target sequences (for templates, see
        :class:`TemplateReference`).
 
@@ -59,10 +59,10 @@ class UniProt(TargetReference):
 
 
 class TemplateReference(object):
-    """Point to the structure of a :class:`ma.Template` in a structure
+    """Point to the structure of a :class:`modelcif.Template` in a structure
        database.
 
-       These objects are typically passed to the :class:`ma.Template`
+       These objects are typically passed to the :class:`modelcif.Template`
        constructor for template sequences (for target sequences, see
        :class:`Targeteference`).
 
@@ -92,9 +92,9 @@ class TemplateReference(object):
 
 
 class PDB(TemplateReference):
-    """Point to the structure of a :class:`ma.Template` in PDB.
+    """Point to the structure of a :class:`modelcif.Template` in PDB.
 
-       These objects are typically passed to the :class:`ma.Template`
+       These objects are typically passed to the :class:`modelcif.Template`
        constructor.
 
        See :class:`TemplateReference` for a description of the parameters.

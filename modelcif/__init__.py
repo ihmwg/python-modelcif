@@ -1,7 +1,7 @@
 import itertools
 from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
-import ma.data
+import modelcif.data
 import sys
 
 __version__ = '0.1'
@@ -54,15 +54,15 @@ class System(object):
         #: the system itself. See :class:`ihm.Citation`.
         self.citations = []
 
-        #: All groups of models. See :class:`~ma.model.ModelGroup`.
+        #: All groups of models. See :class:`~modelcif.model.ModelGroup`.
         self.model_groups = []
 
         #: All modeling protocols.
-        #: See :class:`~ma.protocol.Protocol`.
+        #: See :class:`~modelcif.protocol.Protocol`.
         self.protocols = []
 
         #: All modeling alignments.
-        #: See :mod:`ma.alignment`.
+        #: See :mod:`modelcif.alignment`.
         self.alignments = []
 
         self.entities = []
@@ -282,7 +282,7 @@ together.
 
 This is implemented as a simple list of asymmetric units (or parts of
 them), i.e. a list of :class:`AsymUnit` and/or :class:`AsymUnitRange`
-objects. An Assembly is typically passed to the :class:`ma.model.Model`
+objects. An Assembly is typically passed to the :class:`modelcif.model.Model`
 constructor.
 """
 
@@ -306,9 +306,9 @@ class SoftwareGroup(list):
 
        This class can be used to group together multiple :class:`Software`
        objects if multiple pieces of software were used together to generate
-       a single alignment (see :class:`ma.alignment.AlignmentMode`), to
-       run a modeling step (see :class:`ma.protocol.Step`), or to calculate
-       a model quality score (see :mod:`ma.qa_metric`).
+       a single alignment (see :class:`modelcif.alignment.AlignmentMode`), to
+       run a modeling step (see :class:`modelcif.protocol.Step`), or to
+       calculate a model quality score (see :mod:`modelcif.qa_metric`).
        It behaves like a regular Python list.
 
        :param sequence elements: Initial set of :class:`Software` objects.
@@ -367,13 +367,13 @@ class Transformation(object):
 
 
 class TemplateSegment(object):
-    """An aligned part of a template (see :class:`ma.alignment.Pair`).
+    """An aligned part of a template (see :class:`modelcif.alignment.Pair`).
 
        Usually these objects are created from
        a :class:`Template` using :meth:`Template.segment`, e.g. to get a
        segment covering residues 1 through 3 in `tmpl` use::
 
-           tmpl = ma.Template(entity, ...)
+           tmpl = modelcif.Template(entity, ...)
            seg = tmpl.segment('--ACG', 1, 3)
     """
     def __init__(self, template, gapped_sequence, seq_id_begin, seq_id_end):
@@ -382,14 +382,14 @@ class TemplateSegment(object):
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
 
-class Template(ma.data.Data):
+class Template(modelcif.data.Data):
     """A single chain that was used as a template structure for modeling.
 
        After creating a template, use :meth:`segment` to denote the part of
        its sequence used in any modeling alignments
-       (see :class:`ma.alignment.Pair`).
+       (see :class:`modelcif.alignment.Pair`).
        Template objects can also be used as inputs or outputs in modeling
-       protocol steps; see :class:`ma.protocol.Step`.
+       protocol steps; see :class:`modelcif.protocol.Step`.
 
        :param entity: The sequence of the chain.
        :type entity: :class:`Entity`
@@ -401,7 +401,7 @@ class Template(ma.data.Data):
        :param str name: A short name for this template.
        :param references: A list of pointers to reference databases (such as
               PDB) from which the template structure was taken.
-       :type references: list of :class:`ma.reference.TemplateReference`
+       :type references: list of :class:`modelcif.reference.TemplateReference`
              objects
     """
     data_content_type = "template structure"

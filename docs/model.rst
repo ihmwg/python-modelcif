@@ -2,10 +2,10 @@
 
 .. _model_module:
 
-The :mod:`ma.model` Python module
-=================================
+The :mod:`modelcif.model` Python module
+=======================================
 
-.. automodule:: ma.model
+.. automodule:: modelcif.model
 
 .. autoclass:: Atom
    :members:

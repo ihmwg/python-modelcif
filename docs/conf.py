@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Python-MA documentation build configuration file, created by
+# Python-ModelCIF documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar  1 14:05:33 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Python-MA'
+project = u'Python-ModelCIF'
 copyright = u'2021-2022, Benjamin Webb'
 author = u'Benjamin Webb'
 
@@ -109,7 +109,7 @@ html_sidebars = {}
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Python-MAdoc'
+htmlhelp_basename = 'Python-ModelCIFdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -136,7 +136,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Python-MA.tex', u'Python-MA Documentation',
+    (master_doc, 'Python-ModelCIF.tex', u'Python-ModelCIF Documentation',
      u'Benjamin Webb', 'manual'),
 ]
 
@@ -146,7 +146,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'python-ma', u'Python-MA Documentation',
+    (master_doc, 'python-ma', u'Python-ModelCIF Documentation',
      [author], 1)
 ]
 
@@ -157,7 +157,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Python-MA', u'Python-MA Documentation',
-     author, 'Python-MA', 'One line description of project.',
+    (master_doc, 'Python-ModelCIF', u'Python-ModelCIF Documentation',
+     author, 'Python-ModelCIF', 'One line description of project.',
      'Miscellaneous'),
 ]

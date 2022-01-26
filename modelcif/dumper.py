@@ -5,17 +5,18 @@ import operator
 import ihm.dumper
 import ihm
 from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
-import ma.qa_metric
-import ma.data
+import modelcif.qa_metric
+import modelcif.data
 
 
 class _AuditConformDumper(Dumper):
     URL = ("https://raw.githubusercontent.com/" +
-           "ihmwg/MA-dictionary/%s/mmcif_ma.dic")
+           "ihmwg/ModelCIF/%s/mmcif_ma.dic")
 
     def dump(self, system, writer):
         with writer.category("_audit_conform") as lp:
-            # Update to match the version of the MA dictionary we support:
+            # Update to match the version of the ModelCIF dictionary
+            # we support:
             lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
                      dict_location=self.URL % "8b46f31")
 
@@ -85,7 +86,7 @@ class _SoftwareGroupDumper(Dumper):
             # Use _group_id rather than _id as the "group" might be a
             # singleton Software, which already has its own id
             s._group_id = n + 1
-            if (isinstance(s, ma.SoftwareGroup) and s.parameters
+            if (isinstance(s, modelcif.SoftwareGroup) and s.parameters
                     and id(s.parameters) not in self._param_groups):
                 self._param_groups.append(s.parameters)
                 self._param_group_id[id(s.parameters)] \
@@ -102,7 +103,7 @@ class _SoftwareGroupDumper(Dumper):
                 ["ordinal_id", "group_id", "software_id",
                  "parameter_group_id"]) as lp:
             for g in system.software_groups:
-                if isinstance(g, ma.Software):
+                if isinstance(g, modelcif.Software):
                     # If a singleton Software, write a group containing one
                     # member
                     lp.write(ordinal_id=next(ordinal), group_id=g._group_id,
@@ -145,7 +146,7 @@ class _DataDumper(Dumper):
                 ["id", "name", "content_type",
                  "content_type_other_details"]) as lp:
             for d in system.data:
-                # ihm.Entity isn't a subclass of ma.Data, so we need
+                # ihm.Entity isn't a subclass of Data, so we need
                 # to fill in missing attributes here
                 if isinstance(d, ihm.Entity):
                     lp.write(id=d._data_id, name=d.description,
@@ -170,7 +171,7 @@ class _DataGroupDumper(Dumper):
                 "_ma_data_group",
                 ["ordinal_id", "group_id", "data_id"]) as lp:
             for g in system.data_groups:
-                if isinstance(g, (ma.data.Data, ihm.Entity)):
+                if isinstance(g, (modelcif.data.Data, ihm.Entity)):
                     # If a singleton Data (or ihm.Entity, which isn't a
                     # subclass of Data), write a group containing one member
                     lp.write(ordinal_id=next(ordinal),
@@ -487,7 +488,7 @@ class _QAMetricDumper(Dumper):
                 ["ordinal_id", "model_id", "metric_id", "metric_value"]) as lp:
             for group, model in system._all_models():
                 for m in model.qa_metrics:
-                    if not isinstance(m, ma.qa_metric.Global):
+                    if not isinstance(m, modelcif.qa_metric.Global):
                         continue
                     lp.write(ordinal_id=next(ordinal), model_id=model._id,
                              metric_id=m._id, metric_value=m.value)
@@ -500,7 +501,7 @@ class _QAMetricDumper(Dumper):
                  "label_comp_id", "metric_id", "metric_value"]) as lp:
             for group, model in system._all_models():
                 for m in model.qa_metrics:
-                    if not isinstance(m, ma.qa_metric.Local):
+                    if not isinstance(m, modelcif.qa_metric.Local):
                         continue
                     seq = m.residue.asym.entity.sequence
                     lp.write(ordinal_id=next(ordinal), model_id=model._id,
@@ -518,7 +519,7 @@ class _QAMetricDumper(Dumper):
                  "label_comp_id_2", "metric_id", "metric_value"]) as lp:
             for group, model in system._all_models():
                 for m in model.qa_metrics:
-                    if not isinstance(m, ma.qa_metric.LocalPairwise):
+                    if not isinstance(m, modelcif.qa_metric.LocalPairwise):
                         continue
                     seq1 = m.residue1.asym.entity.sequence
                     seq2 = m.residue2.asym.entity.sequence
@@ -532,8 +533,8 @@ class _QAMetricDumper(Dumper):
                              metric_id=m._id, metric_value=m.value)
 
 
-class ModelArchiveVariant(Variant):
-    """Used to select typical PDBx/MA file output.
+class ModelCIFVariant(Variant):
+    """Used to select typical PDBx/ModelCIF file output.
        See :func:`write` and :class:`ihm.dumper.Variant`."""
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
@@ -557,10 +558,10 @@ class ModelArchiveVariant(Variant):
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],
-          variant=ModelArchiveVariant):
+          variant=ModelCIFVariant):
     """Write out all `systems` to the file handle `fh`.
 
        See :func:`ihm.dumper.write` for more information. The function
        here behaves similarly but writes out files compliant with the
-       MA extension directory rather than IHM."""
+       ModelCIF extension directory rather than IHM."""
     return ihm.dumper.write(fh, systems, format, dumpers, variant)

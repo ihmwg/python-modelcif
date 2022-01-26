@@ -4,23 +4,23 @@ import unittest
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
-import ma.model
+import modelcif.model
 
 
 class Tests(unittest.TestCase):
     def test_model(self):
         """Test Model classes"""
-        m = ma.model.HomologyModel([])
+        m = modelcif.model.HomologyModel([])
         self.assertEqual(m.model_type, "Homology model")
         self.assertIsNone(m.other_details)
 
         # generic "other" model
-        m = ma.model.Model([])
+        m = modelcif.model.Model([])
         self.assertEqual(m.model_type, "Other")
         self.assertIsNone(m.other_details)
 
         # custom "other" model
-        class CustomRef(ma.model.Model):
+        class CustomRef(modelcif.model.Model):
             """foo
                bar"""
 

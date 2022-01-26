@@ -11,18 +11,21 @@ class Step(object):
        :class:`ModelSelectionStep`.
 
        :param input_data: Any objects that this step takes as input.
-              Any individual :class:`ma.data.Data` object (such as a template
-              structure, target sequence, alignment, or model coordinates)
-              can be given here, or a group of such objects (as a
-              :class:`ma.data.DataGroup` object) can be passed.
-       :type input_data: :class:`ma.data.DataGroup` or :class:`ma.data.Data`
+              Any individual :class:`modelcif.data.Data` object (such as
+              a template structure, target sequence, alignment, or model
+              coordinates) can be given here, or a group of such objects (as a
+              :class:`modelcif.data.DataGroup` object) can be passed.
+       :type input_data: :class:`modelcif.data.DataGroup`
+             or :class:`modelcif.data.Data`
        :param output_data: Any objects that this step creates as output,
               similarly to ``input_data``.
-       :type output_data: :class:`ma.data.DataGroup` or :class:`ma.data.Data`
+       :type output_data: :class:`modelcif.data.DataGroup`
+             or :class:`modelcif.data.Data`
        :param str name: A short name for this step.
        :param str details: Longer description of this step.
        :param software: The software that was employed in this modeling step.
-       :type software: :class:`ma.Software` or :class:`ma.SoftwareGroup`
+       :type software: :class:`modelcif.Software`
+             or :class:`modelcif.SoftwareGroup`
     """
     method_type = "other"
 

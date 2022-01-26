@@ -15,10 +15,11 @@ a set of Python objects. This includes, if applicable
 
 Once created, this set of Python objects can be written to an mmCIF file
 that is compliant with the
-`Model Archive extension <https://github.com/ihmwg/MA-dictionary>`_
+`ModelCIF extension <https://github.com/ihmwg/ModelCIF>`_
 to the `PDBx/mmCIF dictionary <http://mmcif.wwpdb.org/>`_,
 suitable for deposition in a repository such as
 `ModelArchive <https://modelarchive.org/>`_. The files can be viewed in any
 regular PDBx mmCIF viewer, such as
 `UCSF ChimeraX <https://www.cgl.ucsf.edu/chimerax/>`_ (although most viewers
-to date will only show the model coordinates, not the MA-specific metadata).
+to date will only show the model coordinates, not the ModelCIF-specific
+metadata).

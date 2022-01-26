@@ -4,25 +4,25 @@ import unittest
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
-import ma.alignment
+import modelcif.alignment
 
 
 class Tests(unittest.TestCase):
     def test_identity(self):
         """Test sequence identity classes"""
-        ident = ma.alignment.ShorterSequenceIdentity(42.0)
+        ident = modelcif.alignment.ShorterSequenceIdentity(42.0)
         self.assertEqual(ident.denominator, "Length of the shorter sequence")
         self.assertIsNone(ident.other_details)
         self.assertAlmostEqual(ident.value, 42.0, delta=1e-4)
-        ident = ma.alignment.AlignedPositionsIdentity(42.0)
+        ident = modelcif.alignment.AlignedPositionsIdentity(42.0)
 
         # generic "other" identity
-        ident = ma.alignment.Identity(42.0)
+        ident = modelcif.alignment.Identity(42.0)
         self.assertEqual(ident.denominator, "Other")
         self.assertIsNone(ident.other_details)
 
         # custom "other" identity
-        class CustomIdentity(ma.alignment.Identity):
+        class CustomIdentity(modelcif.alignment.Identity):
             """foo
                bar"""
 

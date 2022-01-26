@@ -1,8 +1,8 @@
-Python-MA documentation
-=======================
+Python-ModelCIF documentation
+=============================
 
 This is a Python package to assist in handling mmCIF files compliant
-with the Model Archive (MA) extension.
+with the ModelCIF extension.
 
 The documentation below documents the library API. For complete worked examples,
 see `the examples directory at GitHub <https://github.com/ihmwg/python-ma/tree/main/examples>`_.

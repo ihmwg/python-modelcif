@@ -1,6 +1,6 @@
 # This example demonstrates the use of the Python IHM library's validator.
 # A structure is downloaded from the ModBase database and checked against
-# the PDBx and MA dictionaries for compliance. This validator can be used
+# the PDBx and ModelCIF dictionaries for compliance. This validator can be used
 # to perform basic integrity checking against any mmCIF dictionary.
 
 import io
@@ -17,19 +17,19 @@ fh = urllib2.urlopen(
 d_pdbx = ihm.dictionary.read(fh)
 fh.close()
 
-# Also read in the MA dictionary
+# Also read in the ModelCIF dictionary
 fh = urllib2.urlopen('https://mmcif.wwpdb.org/dictionaries/ascii/mmcif_ma.dic')
-d_ma = ihm.dictionary.read(fh)
+d_mc = ihm.dictionary.read(fh)
 fh.close()
 
 # Deposited theoretical models should conform to both the PDBx dictionary
 # (used to define basic structural information such as residues and chains)
-# and the MA dictionary (used for information specific to theoretical
-# models). Make a dictionary that combines the PDBx and MA dictionaries
+# and the ModelCIF dictionary (used for information specific to theoretical
+# models). Make a dictionary that combines the PDBx and ModelCIF dictionaries
 # using the + operator.
-pdbx_ma = d_pdbx + d_ma
+pdbx_mc = d_pdbx + d_mc
 
-# Validate a structure against PDBx+MA.
+# Validate a structure against PDBx+ModelCIF.
 # A correct structure here should result in no output; an invalid structure
 # will result in a ValidatorError Python exception.
 # Here, a structure from ModBase (which should be valid) is used.
@@ -48,4 +48,4 @@ if sys.version_info[0] >= 3:
 else:
     fh = io.BytesIO(cif.decode('ascii', errors='ignore').encode('ascii'))
 
-pdbx_ma.validate(fh)
+pdbx_mc.validate(fh)

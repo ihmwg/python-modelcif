@@ -9,11 +9,11 @@ else:
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
-import ma.dumper
-import ma.protocol
-import ma.model
-import ma.reference
-import ma.alignment
+import modelcif.dumper
+import modelcif.protocol
+import modelcif.model
+import modelcif.reference
+import modelcif.alignment
 import ihm.format
 import ihm.dumper
 
@@ -28,10 +28,10 @@ def _get_dumper_output(dumper, system):
 class Tests(unittest.TestCase):
     def test_write(self):
         """Test write() function"""
-        sys1 = ma.System(id='system1')
-        sys2 = ma.System(id='system 2+3')
+        sys1 = modelcif.System(id='system1')
+        sys2 = modelcif.System(id='system 2+3')
         fh = StringIO()
-        ma.dumper.write(fh, [sys1, sys2])
+        modelcif.dumper.write(fh, [sys1, sys2])
         lines = fh.getvalue().split('\n')
         self.assertEqual(lines[:2], ["data_system1", "_entry.id system1"])
         if lines[7] == 'data_system23':
@@ -43,8 +43,8 @@ class Tests(unittest.TestCase):
 
     def test_audit_conform_dumper(self):
         """Test AuditConformDumper"""
-        system = ma.System()
-        dumper = ma.dumper._AuditConformDumper()
+        system = modelcif.System()
+        dumper = modelcif.dumper._AuditConformDumper()
         out = _get_dumper_output(dumper, system)
         lines = sorted(out.split('\n'))
         self.assertEqual(lines[1].split()[0], "_audit_conform.dict_location")
@@ -54,13 +54,14 @@ class Tests(unittest.TestCase):
 
     def test_database_dumper(self):
         """Test DatabaseDumper"""
-        system = ma.System()
-        dumper = ma.dumper._DatabaseDumper()
+        system = modelcif.System()
+        dumper = modelcif.dumper._DatabaseDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, '')
 
-        system = ma.System(database=ma.Database(id='foo', code='bar'))
-        dumper = ma.dumper._DatabaseDumper()
+        system = modelcif.System(
+            database=modelcif.Database(id='foo', code='bar'))
+        dumper = modelcif.dumper._DatabaseDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, "_database_2.database_code bar\n"
                               "_database_2.database_id foo\n")
@@ -69,37 +70,38 @@ class Tests(unittest.TestCase):
         """Test SoftwareGroupDumper"""
         class MockObject(object):
             pass
-        p1 = ma.SoftwareParameter(name='foo', value=42)
-        p2 = ma.SoftwareParameter(name='bar', value=True)
-        p3 = ma.SoftwareParameter(name='baz', value='ok')
-        s1 = ma.Software(
+        p1 = modelcif.SoftwareParameter(name='foo', value=42)
+        p2 = modelcif.SoftwareParameter(name='bar', value=True)
+        p3 = modelcif.SoftwareParameter(name='baz', value='ok')
+        s1 = modelcif.Software(
             name='s1', classification='test code',
             description='Some test program',
             version=1, location='http://test.org')
         s1._id = 1
-        s2 = ma.Software(
+        s2 = modelcif.Software(
             name='s2', classification='test code',
             description='Some test program',
             version=1, location='http://test.org')
         s2._id = 2
-        s3 = ma.Software(
+        s3 = modelcif.Software(
             name='s3', classification='test code',
             description='Some test program',
             version=1, location='http://test.org')
         s3._id = 3
-        system = ma.System()
+        system = modelcif.System()
         aln1 = MockObject()
         aln1.pairs = []
-        aln1.software = ma.SoftwareGroup((s1, s2))
+        aln1.software = modelcif.SoftwareGroup((s1, s2))
         aln2 = MockObject()
         aln2.pairs = []
         aln2.software = s3
         aln3 = MockObject()
         aln3.pairs = []
-        aln3.software = ma.SoftwareGroup((s2, s3), parameters=[p1, p2, p3])
+        aln3.software = modelcif.SoftwareGroup(
+            (s2, s3), parameters=[p1, p2, p3])
         system.alignments.extend((aln1, aln2, aln3))
         system._before_write()  # populate system.software_groups
-        dumper = ma.dumper._SoftwareGroupDumper()
+        dumper = modelcif.dumper._SoftwareGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         # Should have two groups (s1, s2) and (s2, s3) and another
@@ -132,18 +134,18 @@ _ma_software_group.parameter_group_id
 
     def test_data_dumper(self):
         """Test DataDumper"""
-        system = ma.System()
-        entity = ma.Entity("DMA", description='test entity')
+        system = modelcif.System()
+        entity = modelcif.Entity("DMA", description='test entity')
         system.target_entities.append(entity)
         # Template and target use same entity here (but different data IDs)
-        template = ma.Template(entity, asym_id="A", model_num=1,
-                               name="test template",
-                               transformation=ma.Transformation.identity())
+        template = modelcif.Template(
+            entity, asym_id="A", model_num=1, name="test template",
+            transformation=modelcif.Transformation.identity())
         system.templates.append(template)
-        system.data.append(ma.data.Data(name="test other",
-                                        details="test details"))
+        system.data.append(modelcif.data.Data(name="test other",
+                                              details="test details"))
         system._before_write()  # populate system.data
-        dumper = ma.dumper._DataDumper()
+        dumper = modelcif.dumper._DataDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -160,21 +162,21 @@ _ma_data.content_type_other_details
 
     def test_data_group_dumper(self):
         """Test DataGroupDumper"""
-        system = ma.System()
-        tgt_e1 = ma.Entity("D")
-        tgt_e2 = ma.Entity("M")
-        tgt_e3 = ma.Entity("A")
+        system = modelcif.System()
+        tgt_e1 = modelcif.Entity("D")
+        tgt_e2 = modelcif.Entity("M")
+        tgt_e3 = modelcif.Entity("A")
         tgt_e1._data_id = 1
         tgt_e2._data_id = 2
         tgt_e3._data_id = 3
         system.target_entities.extend((tgt_e1, tgt_e2, tgt_e3))
-        dg12 = ma.data.DataGroup((tgt_e1, tgt_e2))
-        p = ma.protocol.Protocol()
-        p.steps.append(ma.protocol.ModelingStep(
+        dg12 = modelcif.data.DataGroup((tgt_e1, tgt_e2))
+        p = modelcif.protocol.Protocol()
+        p.steps.append(modelcif.protocol.ModelingStep(
             input_data=dg12, output_data=tgt_e3))
         system.protocols.append(p)
         system._before_write()  # populate system.data_groups
-        dumper = ma.dumper._DataGroupDumper()
+        dumper = modelcif.dumper._DataGroupDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         # First group (tgt_e1,tgt_e2); second group contains just tgt_e3
@@ -191,8 +193,8 @@ _ma_data_group.data_id
 
     def test_qa_metric_dumper(self):
         """Test QAMetricDumper"""
-        system = ma.System()
-        s1 = ma.Software(
+        system = modelcif.System()
+        s1 = modelcif.Software(
             name='s1', classification='test code',
             description='Some test program',
             version=1, location='http://test.org')
@@ -201,26 +203,28 @@ _ma_data_group.data_id
         class MockObject(object):
             pass
 
-        class CustomMetricType(ma.qa_metric.MetricType):
+        class CustomMetricType(modelcif.qa_metric.MetricType):
             """my custom type"""
 
-        class DistanceScore(ma.qa_metric.Global, ma.qa_metric.Distance):
+        class DistanceScore(modelcif.qa_metric.Global,
+                            modelcif.qa_metric.Distance):
             """test description"""
             name = "test score"
             software = s1
 
-        class CustomScore(ma.qa_metric.Global, CustomMetricType):
+        class CustomScore(modelcif.qa_metric.Global, CustomMetricType):
             """Description does not match docstring"""
             description = "custom description"
             software = None
 
-        class LocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
+        class LocalScore(modelcif.qa_metric.Local, modelcif.qa_metric.ZScore):
             """custom local description
                Second line of docstring (ignored)"""
             name = "custom local score"
             software = None
 
-        class PairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Energy):
+        class PairScore(modelcif.qa_metric.LocalPairwise,
+                        modelcif.qa_metric.Energy):
             """custom pair description"""
             name = "custom pair score"
             software = None
@@ -228,17 +232,17 @@ _ma_data_group.data_id
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
         m3 = DistanceScore(60.)
-        e1 = ma.Entity('ACGT')
-        asym = ma.AsymUnit(e1, 'foo')
+        e1 = modelcif.Entity('ACGT')
+        asym = modelcif.AsymUnit(e1, 'foo')
         asym._id = 'Z'
         m4 = LocalScore(asym.residue(2), 20.)
         m5 = PairScore(asym.residue(1), asym.residue(3), 30.)
         model = MockObject()
         model._id = 18
         model.qa_metrics = [m1, m2, m3, m4, m5]
-        mg = ma.model.ModelGroup((model,))
+        mg = modelcif.model.ModelGroup((model,))
         system.model_groups.append(mg)
-        dumper = ma.dumper._QAMetricDumper()
+        dumper = modelcif.dumper._QAMetricDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -300,20 +304,20 @@ _ma_qa_metric_local_pairwise.metric_value
         indat._data_group_id = 1
         outdat = MockObject()
         outdat._data_group_id = 2
-        system = ma.System()
-        s1 = ma.Software(
+        system = modelcif.System()
+        s1 = modelcif.Software(
             name='s1', classification='test code',
             description='Some test program',
             version=1, location='http://test.org')
         s1._group_id = 42
-        p = ma.protocol.Protocol()
-        p.steps.append(ma.protocol.TemplateSearchStep(
+        p = modelcif.protocol.Protocol()
+        p.steps.append(modelcif.protocol.TemplateSearchStep(
             name='tsstep', details="some details", software=s1,
             input_data=indat, output_data=outdat))
-        p.steps.append(ma.protocol.ModelingStep(
+        p.steps.append(modelcif.protocol.ModelingStep(
             name='modstep', input_data=indat, output_data=outdat))
         system.protocols.append(p)
-        dumper = ma.dumper._ProtocolDumper()
+        dumper = modelcif.dumper._ProtocolDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -334,29 +338,31 @@ _ma_protocol_step.output_data_group_id
 
     def test_model_dumper(self):
         """Test ModelDumper"""
-        class CustomModel(ma.model.Model):
+        class CustomModel(modelcif.model.Model):
             """custom model"""
 
-        system = ma.System()
-        e1 = ma.Entity('ACGT')
+        system = modelcif.System()
+        e1 = modelcif.Entity('ACGT')
         e1._id = 9
         system.entities.append(e1)
-        asym = ma.AsymUnit(e1, 'foo')
+        asym = modelcif.AsymUnit(e1, 'foo')
         asym._id = 'A'
         system.asym_units.append(asym)
-        asmb = ma.Assembly((asym,))
+        asmb = modelcif.Assembly((asym,))
         asmb._id = 2
-        model1 = ma.model.HomologyModel(assembly=asmb, name='test model')
+        model1 = modelcif.model.HomologyModel(assembly=asmb, name='test model')
         model1._data_id = 42
-        model1._atoms = [ma.model.Atom(asym_unit=asym, seq_id=1, atom_id='C',
-                                       type_symbol='C', x=1.0, y=2.0, z=3.0)]
-        model2 = ma.model.AbInitioModel(assembly=asmb, name='model2')
+        model1._atoms = [modelcif.model.Atom(asym_unit=asym, seq_id=1,
+                                             atom_id='C', type_symbol='C',
+                                             x=1.0, y=2.0, z=3.0)]
+        model2 = modelcif.model.AbInitioModel(assembly=asmb, name='model2')
         model2._data_id = 43
         model3 = CustomModel(assembly=asmb, name='model3')
         model3._data_id = 44
-        mg = ma.model.ModelGroup((model1, model2, model3), name='test group')
+        mg = modelcif.model.ModelGroup((model1, model2, model3),
+                                       name='test group')
         system.model_groups.append(mg)
-        dumper = ma.dumper._ModelDumper()
+        dumper = modelcif.dumper._ModelDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -406,22 +412,22 @@ C
     def test_target_ref_db_dumper(self):
         """Test TargetRefDBDumper"""
 
-        class CustomRef(ma.reference.TargetReference):
+        class CustomRef(modelcif.reference.TargetReference):
             """my custom ref"""
 
-        system = ma.System()
-        ref1 = ma.reference.UniProt(
+        system = modelcif.System()
+        ref1 = modelcif.reference.UniProt(
             code='testcode', accession='testacc', align_begin=4, align_end=8,
             isoform='testiso', ncbi_taxonomy_id='1234',
             organism_scientific='testorg')
-        ref2 = ma.reference.UniProt(code='c2', accession='a2')
+        ref2 = modelcif.reference.UniProt(code='c2', accession='a2')
         ref3 = CustomRef(code='c3', accession='a3')
 
-        e1 = ma.Entity('ACGT', references=[ref1, ref2, ref3])
+        e1 = modelcif.Entity('ACGT', references=[ref1, ref2, ref3])
         e1._id = 1
         system.target_entities.append(e1)
 
-        dumper = ma.dumper._TargetRefDBDumper()
+        dumper = modelcif.dumper._TargetRefDBDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -445,39 +451,40 @@ _ma_target_ref_db_details.organism_scientific
     def test_alignment_dumper(self):
         """Test AlignmentDumper"""
 
-        class CustomRef(ma.reference.TemplateReference):
+        class CustomRef(modelcif.reference.TemplateReference):
             """my custom ref"""
 
-        class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
+        class Alignment(modelcif.alignment.Global,
+                        modelcif.alignment.Pairwise):
             pass
 
-        system = ma.System()
-        tmp_e = ma.Entity('ACG')
+        system = modelcif.System()
+        tmp_e = modelcif.Entity('ACG')
         tmp_e._id = 1
-        tgt_e = ma.Entity('ACE')
+        tgt_e = modelcif.Entity('ACE')
         tgt_e._id = 1
         system.entities.extend((tmp_e, tgt_e))
-        asym = ma.AsymUnit(tgt_e, id='A')
+        asym = modelcif.AsymUnit(tgt_e, id='A')
         asym._id = 'A'
         system.asym_units.append(asym)
-        ref1 = ma.reference.PDB('1abc')
+        ref1 = modelcif.reference.PDB('1abc')
         ref2 = CustomRef('2xyz')
-        tr = ma.Transformation.identity()
+        tr = modelcif.Transformation.identity()
         tr._id = 42
-        t = ma.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
-                        transformation=tr, references=[ref1, ref2])
+        t = modelcif.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
+                              transformation=tr, references=[ref1, ref2])
         t._data_id = 99
-        p = ma.alignment.Pair(
+        p = modelcif.alignment.Pair(
             template=t.segment('AC-G', 1, 3),
             target=asym.segment('ACE-', 1, 3),
-            score=ma.alignment.BLASTEValue("1e-15"),
-            identity=ma.alignment.ShorterSequenceIdentity(42.))
+            score=modelcif.alignment.BLASTEValue("1e-15"),
+            identity=modelcif.alignment.ShorterSequenceIdentity(42.))
         aln = Alignment(name='testaln', pairs=[p])
         aln._data_id = 100
         system.alignments.append(aln)
         system._before_write()  # populate system.templates
 
-        dumper = ma.dumper._AlignmentDumper()
+        dumper = modelcif.dumper._AlignmentDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -564,13 +571,13 @@ _ma_alignment.sequence
 
     def test_template_transform_dumper(self):
         """Test TemplateTransformDumper"""
-        system = ma.System()
-        tr1 = ma.Transformation(
+        system = modelcif.System()
+        tr1 = modelcif.Transformation(
             rot_matrix=[[-0.64, 0.09, 0.77], [0.76, -0.12, 0.64],
                         [0.15, 0.99, 0.01]],
             tr_vector=[1., 2., 3.])
         system.template_transformations.append(tr1)
-        dumper = ma.dumper._TemplateTransformDumper()
+        dumper = modelcif.dumper._TemplateTransformDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -595,17 +602,17 @@ _ma_template_trans_matrix.tr_vector[3]
 
     def test_target_entity_dumper(self):
         """Test TargetEntityDumper"""
-        system = ma.System()
-        e1 = ma.Entity("D")
+        system = modelcif.System()
+        e1 = modelcif.Entity("D")
         e1._id = 42
         e1._data_id = 99
         system.target_entities.append(e1)
 
-        a1 = ma.AsymUnit(e1, 'foo')
+        a1 = modelcif.AsymUnit(e1, 'foo')
         a1._id = 'X'
         system.asym_units.append(a1)
 
-        dumper = ma.dumper._TargetEntityDumper()
+        dumper = modelcif.dumper._TargetEntityDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
@@ -626,19 +633,19 @@ X 42 foo
 
     def test_assembly_dumper(self):
         """Test AssemblyDumper"""
-        system = ma.System()
-        e1 = ma.Entity('ACGT')
+        system = modelcif.System()
+        e1 = modelcif.Entity('ACGT')
         e1._id = 42
         system.entities.append(e1)
-        asym = ma.AsymUnit(e1, 'foo')
+        asym = modelcif.AsymUnit(e1, 'foo')
         system.asym_units.append(asym)
-        asmb = ma.Assembly((asym,), name='foo', description='bar')
+        asmb = modelcif.Assembly((asym,), name='foo', description='bar')
         system.assemblies.append(asmb)
 
         dumper = ihm.dumper._StructAsymDumper()  # Assign _ordinal_id
         dumper.finalize(system)
 
-        dumper = ma.dumper._AssemblyDumper()
+        dumper = modelcif.dumper._AssemblyDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#

@@ -1,6 +1,6 @@
 """Classes to track inputs/outputs of modeling protocols.
 
-   See also :class:`ma.protocol.Step`.
+   See also :class:`modelcif.protocol.Step`.
 """
 
 
@@ -8,13 +8,13 @@ class Data(object):
     """Some part of the system that is input or output by part of
        the modeling protocol.
 
-       Usually a subclass is passed to :class:`ma.protocol.Step` to describe
-       the input or output:
+       Usually a subclass is passed to :class:`modelcif.protocol.Step`
+       to describe the input or output:
 
-        - A template structure (:class:`ma.Template`)
-        - The sequence of the target (:class:`ma.Entity`)
-        - A target-template alignment (:mod:`ma.alignment`)
-        - Target structure coordinates (:class:`ma.model.Model`)
+        - A template structure (:class:`modelcif.Template`)
+        - The sequence of the target (:class:`modelcif.Entity`)
+        - A target-template alignment (:mod:`modelcif.alignment`)
+        - Target structure coordinates (:class:`modelcif.model.Model`)
 
        However, this class can also be used directly to describe other kinds
        of input/output data.
@@ -35,7 +35,7 @@ class DataGroup(list):
 
        This class can be used to group together multiple :class:`Data`
        objects if a given modeling protocol step consumes or generates
-       multiple pieces of data. See :class:`ma.protocol.Step`. It behaves
+       multiple pieces of data. See :class:`modelcif.protocol.Step`. It behaves
        like a regular Python list.
     """
     pass

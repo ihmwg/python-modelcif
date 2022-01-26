@@ -5,19 +5,20 @@
    of the system the metric applies to) and a subclass of :class:`MetricType`
    (which describes the meaning of the score value). Set the ``software``
    attribute to point to the software used to calculate the metric
-   (as a :class:`ma.SoftwareGroup` or :class:`ma.Software` object).
+   (as a :class:`modelcif.SoftwareGroup` or :class:`modelcif.Software` object).
    For example to declare a global distance score::
 
-       class MyScore(ma.qa_metric.Global, ma.qa_metric.Distance):
+       class MyScore(modelcif.qa_metric.Global, modelcif.qa_metric.Distance):
            "My distance-based quality score"
-           software = ma.Software(...)
+           software = modelcif.Software(...)
 
    The name and description of the score in the mmCIF file will be taken from
    the name and docstring of the Python class, unless the
    :attr:`MetricMode.name` or :attr:`MetricMode.description` attributes are
    overridden in the subclass.
 
-   QA metric objects should be added to :attr:`ma.model.Model.qa_metrics`.
+   QA metric objects should be added to
+   :attr:`modelcif.model.Model.qa_metrics`.
 """
 
 
@@ -56,7 +57,7 @@ class Local(MetricMode):
     """A score that is calculated on a single residue.
 
        :param residue: The residue that is scored.
-       :type residue: :class:`ma.Residue`
+       :type residue: :class:`modelcif.Residue`
        :param float value: The score value (see :class:`MetricType`).
     """
 
@@ -75,9 +76,9 @@ class LocalPairwise(MetricMode):
     """A score that is calculated between two residues.
 
        :param residue1: The first residue that is scored.
-       :type residue1: :class:`ma.Residue`
+       :type residue1: :class:`modelcif.Residue`
        :param residue2: The second residue that is scored.
-       :type residue2: :class:`ma.Residue`
+       :type residue2: :class:`modelcif.Residue`
        :param float value: The score value (see :class:`MetricType`).
     """
 
@@ -101,7 +102,7 @@ class MetricType(object):
        by deriving from this class and providing a docstring to describe
        the metric type::
 
-           class MPQSMetricType(ma.qa_metric.MetricType):
+           class MPQSMetricType(modelcif.qa_metric.MetricType):
                 "composite score, values >1.1 are reliable"
     """
 

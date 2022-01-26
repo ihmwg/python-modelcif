@@ -8,30 +8,30 @@
 # https://github.com/salilab/modbase_utils/blob/model_archive/modbase_pdb_to_cif.py
 
 # Import used classes.
-import ma
-import ma.protocol
-import ma.model
-import ma.dumper
-import ma.reference
-import ma.qa_metric
-import ma.alignment
+import modelcif
+import modelcif.protocol
+import modelcif.model
+import modelcif.dumper
+import modelcif.reference
+import modelcif.qa_metric
+import modelcif.alignment
 # Different methods measure "sequence identity" in different ways, so import
 # the class that matches the way Modeller understands it (number of identical
 # aligned residues, divided by the length of the shorter sequence)
-from ma.alignment import ShorterSequenceIdentity as SequenceIdentity
+from modelcif.alignment import ShorterSequenceIdentity as SequenceIdentity
 import ihm.citations
-import ma.reader
+import modelcif.reader
 
 # First, we create a system, which contains everything we know about the
 # modeling. A single mmCIF file can contain multiple Systems, but in most
 # cases we use just one:
-system = ma.System(title='S54091 hypothetical protein YPR070w')
+system = modelcif.System(title='S54091 hypothetical protein YPR070w')
 
 # List the authors of this file (here these are the ModBase authors)
 system.authors.extend(('Pieper U', 'Webb B', 'Narayanan E', 'Sali A'))
 
 # Describe the software that was used in the modeling
-modpipe_software = ma.Software(
+modpipe_software = modelcif.Software(
     name='ModPipe', classification='comparative modeling',
     location='https://salilab.org/modpipe/', type='program',
     version='SVN.r1703', description='Comparative modeling pipeline')
@@ -42,46 +42,46 @@ modpipe_software = ma.Software(
 # we're going to use these Software objects further on in the script, so
 # don't need to explicitly add them here.
 
-modeller_software = ma.Software(
+modeller_software = modelcif.Software(
     name='MODELLER', classification='comparative modeling',
     location='https://salilab.org/modeller/', type='program',
     version='SVN', citation=ihm.citations.modeller,
     description='Comparative modeling by satisfaction of spatial restraints')
 
-# Next, we define "entities", unique sequences in the system, as ma.Entity
+# Next, we define "entities", unique sequences in the system, as Entity
 # objects. First, the template sequence:
-template_e = ma.Entity('DMACDTFIKCC', description='Template subunit')
+template_e = modelcif.Entity('DMACDTFIKCC', description='Template subunit')
 
 # Next, the target (model) sequence, together with a link to the reference
 # sequence (in UniProt):
-s = ma.reference.UniProt(code='MED1_YEAST', accession='Q12321')
-model_e = ma.Entity('DSYVETLDCC', description='Model subunit',
-                    references=[s])
+s = modelcif.reference.UniProt(code='MED1_YEAST', accession='Q12321')
+model_e = modelcif.Entity('DSYVETLDCC', description='Model subunit',
+                          references=[s])
 
 # Next, we define asymmetric units for everything we modeled.
 # These roughly correspond to chains in a traditional PDB file. Multiple
 # asymmetric units may map to the same entity (for example if there are
 # several copies of a given protein).
-asymA = ma.AsymUnit(model_e, details='Model subunit A', id='A')
+asymA = modelcif.AsymUnit(model_e, details='Model subunit A', id='A')
 
 # Next, we group asymmetric units into assemblies.
-modeled_assembly = ma.Assembly((asymA,), name='Modeled assembly')
+modeled_assembly = modelcif.Assembly((asymA,), name='Modeled assembly')
 
 # In a similar fashion, we declare a Template for each chain that we used
 # as a template structure, with a link to the reference structure database
 # (PDB).
-s = ma.reference.PDB('3nc1')
-template = ma.Template(entity=template_e, asym_id='A', model_num=1,
-                       name="Template Structure",
-                       transformation=ma.Transformation.identity(),
-                       references=[s])
+s = modelcif.reference.PDB('3nc1')
+template = modelcif.Template(
+    entity=template_e, asym_id='A', model_num=1, name="Template Structure",
+    transformation=modelcif.Transformation.identity(),
+    references=[s])
 
 
 # Now, we describe the alignment between target and template.
 # python-ma provides various subclasses to use here. All ModBase structures
 # use a simple pairwise global alignment between target and template, so
 # declare a suitable class:
-class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
+class Alignment(modelcif.alignment.Global, modelcif.alignment.Pairwise):
     pass
 
 
@@ -89,10 +89,10 @@ class Alignment(ma.alignment.Global, ma.alignment.Pairwise):
 # Here we provide the residue ranges and the actual alignment, including gaps,
 # between the two, together with the sequence identity and any score available
 # for the alignment (here we have the BLAST e-value):
-p = ma.alignment.Pair(
+p = modelcif.alignment.Pair(
     template=template.segment("DMACDTFIK", 1, 9),
     target=asymA.segment("DSYV-ETLD", 1, 8),
-    score=ma.alignment.BLASTEValue(1e-15),
+    score=modelcif.alignment.BLASTEValue(1e-15),
     identity=SequenceIdentity(45.0))
 aln = Alignment(name="Modeling alignment", software=modpipe_software,
                 pairs=[p])
@@ -112,28 +112,28 @@ atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
          ('A', 3, 'C', 'CA', 7., 8., 9.)]
 
 
-class MyModel(ma.model.HomologyModel):
-    # Map our asym unit names to MA asym_unit objects:
+class MyModel(modelcif.model.HomologyModel):
+    # Map our asym unit names to ModelCIF asym_unit objects:
     asym_unit_map = {'A': asymA}
 
     def get_atoms(self):
         for asym, seq_id, type_symbol, atom_id, x, y, z in atoms:
-            yield ma.model.Atom(asym_unit=self.asym_unit_map[asym],
-                                type_symbol=type_symbol, seq_id=seq_id,
-                                atom_id=atom_id, x=x, y=y, z=z)
+            yield modelcif.model.Atom(
+                asym_unit=self.asym_unit_map[asym], type_symbol=type_symbol,
+                seq_id=seq_id, atom_id=atom_id, x=x, y=y, z=z)
 
 
 # Link the model to the Assembly that describes all subunits
 model = MyModel(assembly=modeled_assembly, name='Best scoring model')
 
 # Next, we describe the modeling protocol:
-protocol = ma.protocol.Protocol()
-protocol.steps.append(ma.protocol.TemplateSearchStep(
+protocol = modelcif.protocol.Protocol()
+protocol.steps.append(modelcif.protocol.TemplateSearchStep(
     name='ModPipe Seq-Prf (0001)', software=modpipe_software,
     input_data=model_e, output_data=aln))
-protocol.steps.append(ma.protocol.ModelingStep(
+protocol.steps.append(modelcif.protocol.ModelingStep(
     software=modeller_software, input_data=aln, output_data=model))
-protocol.steps.append(ma.protocol.ModelSelectionStep(
+protocol.steps.append(modelcif.protocol.ModelSelectionStep(
     software=modpipe_software, input_data=model, output_data=model))
 # Protocols aren't used by any other objects; they should be added directly
 # to the System:
@@ -146,26 +146,27 @@ system.protocols.append(protocol)
 # Here we define the quality scores used by the ModPipe pipeline that is used
 # by ModBase. Note that one score (MPQS) uses a custom metric type, while
 # another (zDOPE) is a simple global z-score:
-class MPQSMetricType(ma.qa_metric.MetricType):
+class MPQSMetricType(modelcif.qa_metric.MetricType):
     """composite score, values >1.1 are considered reliable"""
 
 
-class MPQS(ma.qa_metric.Global, MPQSMetricType):
+class MPQS(modelcif.qa_metric.Global, MPQSMetricType):
     """ModPipe Quality Score"""
     software = modpipe_software
 
 
-class zDOPE(ma.qa_metric.Global, ma.qa_metric.ZScore):
+class zDOPE(modelcif.qa_metric.Global, modelcif.qa_metric.ZScore):
     """Normalized DOPE"""
     software = modeller_software
 
 
-class TSVModRMSD(ma.qa_metric.Global, ma.qa_metric.Distance):
+class TSVModRMSD(modelcif.qa_metric.Global, modelcif.qa_metric.Distance):
     """TSVMod predicted RMSD (MSALL)"""
     software = None
 
 
-class TSVModNO35(ma.qa_metric.Global, ma.qa_metric.NormalizedScore):
+class TSVModNO35(modelcif.qa_metric.Global,
+                 modelcif.qa_metric.NormalizedScore):
     """TSVMod predicted native overlap (MSALL)"""
     software = None
 
@@ -180,12 +181,13 @@ model.qa_metrics.extend((MPQS(0.853452), zDOPE(0.31), TSVModRMSD(12.996),
 # score between the 1st and 3rd residues:
 
 
-class SomeLocalScore(ma.qa_metric.Local, ma.qa_metric.ZScore):
+class SomeLocalScore(modelcif.qa_metric.Local, modelcif.qa_metric.ZScore):
     """A per-residue z-score"""
     software = None
 
 
-class SomePairScore(ma.qa_metric.LocalPairwise, ma.qa_metric.Distance):
+class SomePairScore(modelcif.qa_metric.LocalPairwise,
+                    modelcif.qa_metric.Distance):
     """A distance score between two residues"""
     software = None
 
@@ -195,16 +197,16 @@ model.qa_metrics.append(SomePairScore(asymA.residue(1), asymA.residue(3), 1.0))
 
 # Similar models can be grouped together. Here we only have a single model
 # in the group
-model_group = ma.model.ModelGroup([model], name='All models')
+model_group = modelcif.model.ModelGroup([model], name='All models')
 system.model_groups.append(model_group)
 
 # Once the system is complete, we can write it out to an mmCIF file:
 with open('output.cif', 'w') as fh:
-    ma.dumper.write(fh, [system])
+    modelcif.dumper.write(fh, [system])
 
 # We can also *read* an mmCIF file and create a set of Python objects from it.
 # Here we read in the file we just created:
 with open('output.cif') as fh:
-    s, = ma.reader.read(fh)
+    s, = modelcif.reader.read(fh)
 for e in s.entities:
     print(e.description, "".join(c.id for c in e.sequence))

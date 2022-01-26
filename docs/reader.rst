@@ -2,11 +2,11 @@
 
 .. _reader_module:
 
-The :mod:`ma.reader` Python module
-==================================
+The :mod:`modelcif.reader` Python module
+========================================
 
-.. automodule:: ma.reader
+.. automodule:: modelcif.reader
 
 .. autofunction:: read
 
-.. autoclass:: ModelArchiveVariant
+.. autoclass:: ModelCIFVariant
