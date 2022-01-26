@@ -110,7 +110,7 @@ class Tests(unittest.TestCase):
     def test_transformation(self):
         """Test Transformation class"""
         _ = modelcif.Transformation([[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-                                     [1, 2, 3])
+                                    [1, 2, 3])
 
     def test_identity_transformation(self):
         """Test identity transformation"""
