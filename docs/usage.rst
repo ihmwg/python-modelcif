@@ -58,8 +58,8 @@ Metadata can also be added to the system, such as
    or the methods used in it.
  - :class:`ma.Software`: software packages used at any stage in the modeling.
  - :attr:`ma.System.grants`: funding support for the modeling.
- - :class:`ma.reference.TargetReference`: or
-   :class:`ma.reference.TemplateReference`: information on a template
+ - :class:`ma.reference.TemplateReference`: or
+   :class:`ma.reference.TargetReference`: information on a template
    structure, or a target sequence.
 
 Residue numbering
