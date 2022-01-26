@@ -542,7 +542,7 @@ _ma_alignment_info.software_group_id
 _ma_alignment_info.alignment_length
 _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
-1 100 . . 'target-template pairwise alignment' global
+1 100 . 4 'target-template pairwise alignment' global
 #
 #
 loop_
