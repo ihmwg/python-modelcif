@@ -15,6 +15,7 @@ Contents
 
    introduction
    usage
+   limitations
    changes
 
 API Reference:
