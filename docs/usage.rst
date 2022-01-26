@@ -44,7 +44,7 @@ Model coordinates
 :class:`ma.model.Model` objects give the actual coordinates of the final
 generated models. These point to the :class:`~ma.Assembly` of what was
 modeled. Quality scores can also be assigned to each model (see the
-:mod:`ma.qa_metrics` module) or to individual residues or pairs of residues.
+:mod:`ma.qa_metric` module) or to individual residues or pairs of residues.
 
 Models can also be grouped together for any purpose using the
 :class:`ma.model.ModelGroup` class.
@@ -54,10 +54,10 @@ Metadata
 
 Metadata can also be added to the system, such as
 
- - :class:`ma.Citation`: publication(s) that describe this modeling or the
-   methods used in it.
+ - :attr:`ma.System.citations`: publication(s) that describe this modeling
+   or the methods used in it.
  - :class:`ma.Software`: software packages used at any stage in the modeling.
- - :class:`ma.Grant`: funding support for the modeling.
+ - :attr:`ma.System.grants`: funding support for the modeling.
  - :class:`ma.reference.TargetReference`: or
    :class:`ma.reference.TemplateReference`: information on a template
    structure, or a target sequence.
