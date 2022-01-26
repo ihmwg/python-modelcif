@@ -34,6 +34,18 @@ class Tests(unittest.TestCase):
         self.assertEqual(x.type, "other")
         self.assertEqual(x.other_details, "foo")
 
+        # MetricType in the enumeration should have no "other_details"
+
+        class EnumMetricType(modelcif.qa_metric.MetricType):
+            """foo"""
+            type = "enum"
+
+        class Custom3(modelcif.qa_metric.Global, EnumMetricType):
+            """Custom 3"""
+        x = Custom3(42)
+        self.assertEqual(x.type, "enum")
+        self.assertIsNone(x.other_details)
+
     def test_global_metric(self):
         """Test Global MetricMode"""
         class MyScore(modelcif.qa_metric.Global, modelcif.qa_metric.Energy):
