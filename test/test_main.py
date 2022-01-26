@@ -161,6 +161,14 @@ class Tests(unittest.TestCase):
         self.assertIsNone(p.description)
         _ = repr(p)
 
+    def test_template(self):
+        """Test Template class"""
+        e1 = modelcif.Entity("DDDD")
+        t1 = modelcif.Template(e1, asym_id='A', model_num=1,
+                               transformation=None)
+        self.assertEqual(t1.seq_id_range, (1, 4))
+        self.assertEqual(t1.template, t1)
+
 
 if __name__ == '__main__':
     unittest.main()
