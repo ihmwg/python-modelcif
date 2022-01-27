@@ -82,6 +82,7 @@ class _SystemReader(object):
             self.system.template_segments, modelcif.TemplateSegment,
             *(None,) * 4)
 
+        self.default_model_class = model_class is modelcif.model.Model
         self.models = IDMapper(None, model_class, [], None)
 
         self.model_groups = IDMapper(self.system.model_groups,
@@ -453,17 +454,29 @@ class _AssemblyDetailsHandler(Handler):
 class _ModelListHandler(Handler):
     category = '_ma_model_list'
 
+    def __init__(self, *args):
+        super(_ModelListHandler, self).__init__(*args)
+        # Map model_type to subclass of modelcif.model.Model
+        self._type_map = _EnumerationMapper(
+            modelcif.model, modelcif.model.Model,
+            attr='model_type')
+
     def __call__(self, model_id, model_group_id, model_name, model_group_name,
                  assembly_id, data_id, model_type, model_type_other_details):
+        if self.sysr.default_model_class:
+            model_type = self._type_map.get(
+                model_type, model_type_other_details)
+            model = self.sysr.models.get_by_id(model_id, model_type)
+        else:
+            model = self.sysr.models.get_by_id(model_id)
+            model.model_type = model_type
         mg = self.sysr.model_groups.get_by_id(model_group_id)
         mg.name = model_group_name
-        model = self.sysr.models.get_by_id(model_id)
         model.name = model_name
         self.sysr.data_by_id[data_id] = model
         model._data_id = data_id
         model.assembly = self.sysr.assemblies.get_by_id(assembly_id)
         mg.append(model)
-        # todo: handle other fields
 
 
 class _ProtocolHandler(Handler):
@@ -609,6 +622,11 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
        See :func:`ihm.reader.read` for more information. The function
        here behaves similarly but reads in files compliant with the
        ModelCIF extension directory rather than IHM.
+
+       Note that if a custom ``model_class`` is provided, any models present
+       in the file will be returned as that type, regardless of their type
+       stated in the mmCIF file (e.g. homology model, ab initio model).
+       (However, the ``model_type`` attribute will be set appropriately.)
 
       :return: A list of :class:`modelcif.System` objects.
     """

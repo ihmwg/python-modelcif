@@ -244,8 +244,7 @@ _ma_template_ref_db_details.db_accession_code
         self.assertEqual(r3.name, 'Other')
         self.assertEqual(r3.other_details, 'foo')
 
-    def test_model_list_handler(self):
-        """Test _ModelListHandler"""
+    def _get_models_cif(self):
         cif = """
 loop_
 _ma_model_list.ordinal_id
@@ -258,19 +257,51 @@ _ma_model_list.data_id
 _ma_model_list.model_type
 _ma_model_list.model_type_other_details
 1 1 1 'Best scoring model' 'All models' 99 4 'Homology model' .
-1 2 1 '2nd best scoring model' 'All models' 99 5 'Homology model' .
-1 3 2 'Best scoring model' 'group2' 99 6 'Homology model' .
+1 2 1 '2nd best scoring model' 'All models' 99 5 'Ab initio model' .
+1 3 2 'Best scoring model' 'group2' 99 6 'Other' 'Custom other model'
 """
+        return cif
+
+    def test_model_list_handler_default(self):
+        """Test _ModelListHandler with default model class"""
+        cif = self._get_models_cif()
         s, = modelcif.reader.read(StringIO(cif))
         mg1, mg2 = s.model_groups
         self.assertEqual(mg1.name, 'All models')
         m1, m2 = list(mg1)
+        self.assertIsInstance(m1, modelcif.model.HomologyModel)
+        self.assertEqual(m1.model_type, 'Homology model')
+        self.assertIsNone(m1.other_details)
+        self.assertIsInstance(m2, modelcif.model.AbInitioModel)
+        self.assertEqual(m2.model_type, 'Ab initio model')
+        self.assertIsNone(m2.other_details)
         self.assertEqual(m1.name, 'Best scoring model')
         self.assertEqual(m2.name, '2nd best scoring model')
         self.assertEqual(mg2.name, 'group2')
         m1, = list(mg2)
+        self.assertEqual(m1.model_type, 'Other')
+        self.assertEqual(m1.other_details, 'Custom other model')
         self.assertEqual(m1.name, 'Best scoring model')
         self.assertEqual(m1.assembly._id, '99')
+
+    def test_model_list_handler_custom(self):
+        """Test _ModelListHandler with custom model class"""
+        class MyModel(modelcif.model.Model):
+            """Custom model type"""
+            pass
+        cif = self._get_models_cif()
+        s, = modelcif.reader.read(StringIO(cif), model_class=MyModel)
+        mg1, mg2 = s.model_groups
+        m1, m2 = list(mg1)
+        m3, = list(mg2)
+        # Custom model type should always be returned, regardless of what
+        # the mmCIF file says it is, but model_type should be set
+        self.assertIsInstance(m1, MyModel)
+        self.assertIsInstance(m2, MyModel)
+        self.assertIsInstance(m3, MyModel)
+        self.assertEqual(m1.model_type, 'Homology model')
+        self.assertEqual(m2.model_type, 'Ab initio model')
+        self.assertEqual(m3.model_type, 'Other')
 
     def test_assembly_handler(self):
         """Test _AssemblyHandler and _AssemblyDetailsHandler"""
