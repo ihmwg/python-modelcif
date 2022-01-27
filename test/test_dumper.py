@@ -34,11 +34,11 @@ class Tests(unittest.TestCase):
         modelcif.dumper.write(fh, [sys1, sys2])
         lines = fh.getvalue().split('\n')
         self.assertEqual(lines[:2], ["data_system1", "_entry.id system1"])
-        if lines[7] == 'data_system23':
-            self.assertEqual(lines[7:9],
+        if lines[9] == 'data_system23':
+            self.assertEqual(lines[9:11],
                              ["data_system23", "_entry.id 'system 2+3'"])
         else:
-            self.assertEqual(lines[8:10],
+            self.assertEqual(lines[10:12],
                              ["data_system23", "_entry.id 'system 2+3'"])
 
     def test_audit_conform_dumper(self):
@@ -65,6 +65,14 @@ class Tests(unittest.TestCase):
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, "_database_2.database_code bar\n"
                               "_database_2.database_id foo\n")
+
+    def test_exptl_dumper(self):
+        """Test ExptlDumper"""
+        system = modelcif.System(id='foo')
+        dumper = modelcif.dumper._ExptlDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, "_exptl.entry_id foo\n"
+                              "_exptl.method 'THEORETICAL MODEL'\n")
 
     def test_software_group_dumper(self):
         """Test SoftwareGroupDumper"""
