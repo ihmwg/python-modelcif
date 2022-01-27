@@ -13,7 +13,7 @@ copy_args = sys.argv[1:]
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(name='ma',
+setup(name='modelcif',
       version=VERSION,
       script_args=copy_args,
       description='Package for handling ModelCIF mmCIF and BinaryCIF files',
