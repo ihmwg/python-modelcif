@@ -10,8 +10,7 @@ and [BinaryCIF](https://github.com/dsehnal/BinaryCIF) files compliant with the
 [ModelCIF](https://mmcif.wwpdb.org/dictionaries/mmcif_ma.dic/Index/)
 extension. It works with Python 2.7 or Python 3.
 
-Please [see the documentation](https://python-modelcif.readthedocs.org/)
-(currently incomplete) or some
+Please [see the documentation](https://python-modelcif.readthedocs.org/) or some
 [worked examples](https://github.com/ihmwg/python-modelcif/tree/main/examples)
 for more details.
 
