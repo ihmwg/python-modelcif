@@ -32,3 +32,10 @@ not supported:
  - ``ma_poly_template_library_components``
  - ``ma_entry_associated_files``
  - ``ma_associated_archive_file_details``
+
+Note that currently the library is only well-tested with single-chain
+homology models generated from a single template (such as those in the
+`ModBase database <https://modbase.compbio.ucsf.edu>`_).
+
+Please `open an issue <https://github.com/ihmwg/python-modelcif/issues>`_
+if library support is lacking.
