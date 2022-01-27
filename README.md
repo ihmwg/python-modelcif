@@ -1,4 +1,6 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5908678.svg)](https://doi.org/10.5281/zenodo.5908678)
 [![docs](https://readthedocs.org/projects/python-modelcif/badge/)](https://python-modelcif.readthedocs.org/)
+[![pypi package](https://badge.fury.io/py/modelcif.svg)](https://badge.fury.io/py/modelcif)
 [![Linux Build Status](https://github.com/ihmwg/python-modelcif/workflows/build/badge.svg)](https://github.com/ihmwg/python-modelcif/actions?query=workflow%3Abuild)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/5o28oe477ii8ur4h?svg=true)](https://ci.appveyor.com/project/benmwebb/python-modelcif)
 [![codecov](https://codecov.io/gh/ihmwg/python-modelcif/branch/main/graph/badge.svg)](https://codecov.io/gh/ihmwg/python-modelcif)
