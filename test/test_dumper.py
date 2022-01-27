@@ -488,6 +488,10 @@ _ma_target_ref_db_details.organism_scientific
         aln = Alignment(name='testaln', pairs=[p])
         aln._data_id = 100
         system.alignments.append(aln)
+        # Alignment with no pairs
+        aln2 = Alignment(name='testaln2', pairs=[])
+        aln2._data_id = 101
+        system.alignments.append(aln2)
         system._before_write()  # populate system.templates
 
         dumper = modelcif.dumper._AlignmentDumper()
@@ -549,6 +553,7 @@ _ma_alignment_info.alignment_length
 _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
 1 100 . 4 'target-template pairwise alignment' global
+2 101 . . 'target-template pairwise alignment' global
 #
 #
 loop_

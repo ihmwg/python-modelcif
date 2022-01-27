@@ -350,8 +350,11 @@ class _AlignmentDumper(Dumper):
                  "alignment_length", "alignment_type",
                  "alignment_mode"]) as lp:
             for a in system.alignments:
-                align_len = max(len(s.gapped_sequence) for pair in a.pairs
-                                for s in (pair.template, pair.target))
+                if a.pairs:
+                    align_len = max(len(s.gapped_sequence) for pair in a.pairs
+                                    for s in (pair.template, pair.target))
+                else:
+                    align_len = None
                 lp.write(alignment_id=a._id, data_id=a._data_id,
                          software_group_id=a.software._group_id if a.software
                          else None,
