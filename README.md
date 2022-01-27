@@ -16,9 +16,15 @@ for more details.
 
 # Installation
 
-This module is still a work in progress and currently works only with
-version 0.26 or later of the [python-ihm](https://github.com/ihmwg/python-ihm)
-module. To use, first build and install python-ihm. Then, build with
+Install with pip:
+
+```
+pip install modelcif
+```
+
+Alternatively, to build and install from a clone of the GitHub repository,
+first build and install version 0.26 or later of the
+[python-ihm](https://github.com/ihmwg/python-ihm) module. Then run:
 
 ```
 python setup.py build
