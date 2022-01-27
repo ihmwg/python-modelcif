@@ -83,7 +83,8 @@ class _SystemReader(object):
             *(None,) * 4)
 
         self.default_model_class = model_class is modelcif.model.Model
-        self.models = IDMapper(None, model_class, [], None)
+        self._all_seen_models = []
+        self.models = IDMapper(self._all_seen_models, model_class, [], None)
 
         self.model_groups = IDMapper(self.system.model_groups,
                                      modelcif.model.ModelGroup)
@@ -465,8 +466,9 @@ class _ModelListHandler(Handler):
         # Put all models not in a group in their own group
         models_in_groups = frozenset(m._id for mg in self.system.model_groups
                                      for m in mg)
-        ungrouped = [m for mid, m in self.sysr.models._obj_by_id.items()
-                     if mid not in models_in_groups]
+        # Get ungrouped models in the order encountered in the file
+        ungrouped = [m for m in self.sysr._all_seen_models
+                     if m._id not in models_in_groups]
         if ungrouped:
             mg = modelcif.model.ModelGroup(ungrouped)
             self.system.model_groups.append(mg)
