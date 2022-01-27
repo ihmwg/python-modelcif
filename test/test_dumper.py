@@ -362,6 +362,11 @@ _ma_protocol_step.output_data_group_id
         mg = modelcif.model.ModelGroup((model1, model2, model3),
                                        name='test group')
         system.model_groups.append(mg)
+        # model1 is in both groups. We should see it twice in model_list
+        # but only once in atom_site.
+        mg = modelcif.model.ModelGroup((model1,),
+                                       name='second group')
+        system.model_groups.append(mg)
         dumper = modelcif.dumper._ModelDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
@@ -379,6 +384,7 @@ _ma_model_list.model_type_other_details
 1 1 1 'test model' 'test group' 2 42 'Homology model' .
 2 2 1 model2 'test group' 2 43 'Ab initio model' .
 3 3 1 model3 'test group' 2 44 Other 'custom model'
+4 1 2 'test model' 'second group' 2 42 'Homology model' .
 #
 #
 loop_

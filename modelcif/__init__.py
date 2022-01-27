@@ -79,13 +79,13 @@ class System(object):
 
     def _all_models(self):
         """Iterate over all Models in the system"""
-        # todo: raise an error if a model is present in multiple groups
+        # todo: raise an error if a model is present in multiple groups?
+        seen_models = set()
         for group in self._all_model_groups():
-            seen_models = {}
             for model in group:
                 if model in seen_models:
                     continue
-                seen_models[model] = None
+                seen_models.add(model)
                 yield group, model
 
     def _before_write(self):

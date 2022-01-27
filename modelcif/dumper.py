@@ -440,14 +440,15 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                           "model_name", "model_group_name", "assembly_id",
                           "data_id", "model_type",
                           "model_type_other_details"]) as lp:
-            for group, model in system._all_models():
-                lp.write(ordinal_id=next(ordinal), model_id=model._id,
-                         model_group_id=group._id, model_name=model.name,
-                         model_group_name=group.name,
-                         assembly_id=model.assembly._id,
-                         data_id=model._data_id,
-                         model_type=model.model_type,
-                         model_type_other_details=model.other_details)
+            for group in system.model_groups:
+                for model in group:
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             model_group_id=group._id, model_name=model.name,
+                             model_group_name=group.name,
+                             assembly_id=model.assembly._id,
+                             data_id=model._data_id,
+                             model_type=model.model_type,
+                             model_type_other_details=model.other_details)
 
 
 class _QAMetricDumper(Dumper):
