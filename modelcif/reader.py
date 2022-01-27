@@ -461,6 +461,16 @@ class _ModelListHandler(Handler):
             modelcif.model, modelcif.model.Model,
             attr='model_type')
 
+    def finalize(self):
+        # Put all models not in a group in their own group
+        models_in_groups = frozenset(m._id for mg in self.system.model_groups
+                                     for m in mg)
+        ungrouped = [m for mid, m in self.sysr.models._obj_by_id.items()
+                     if mid not in models_in_groups]
+        if ungrouped:
+            mg = modelcif.model.ModelGroup(ungrouped)
+            self.system.model_groups.append(mg)
+
     def __call__(self, model_id, model_group_id, model_name, model_group_name,
                  assembly_id, data_id, model_type, model_type_other_details):
         if self.sysr.default_model_class:

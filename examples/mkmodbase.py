@@ -195,8 +195,8 @@ class SomePairScore(modelcif.qa_metric.LocalPairwise,
 model.qa_metrics.append(SomeLocalScore(asymA.residue(4), -0.1))
 model.qa_metrics.append(SomePairScore(asymA.residue(1), asymA.residue(3), 1.0))
 
-# Similar models can be grouped together. Here we only have a single model
-# in the group
+# Models should be grouped together using ModelGroup and then added to the
+# top-level System. Here we only have a single model in the group:
 model_group = modelcif.model.ModelGroup([model], name='All models')
 system.model_groups.append(model_group)
 
