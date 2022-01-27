@@ -362,8 +362,10 @@ class Transformation(object):
     """
     @classmethod
     def identity(cls):
-        # todo: cache, so as not to create copies
-        return cls([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]], [0., 0., 0.])
+        if not hasattr(cls, '_identity_obj'):
+            cls._identity_obj = cls(
+                [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]], [0., 0., 0.])
+        return cls._identity_obj
 
 
 class TemplateSegment(object):

@@ -121,6 +121,10 @@ class Tests(unittest.TestCase):
                 self.assertAlmostEqual(t.rot_matrix[i][j],
                                        1. if i == j else 0., delta=0.1)
 
+        # Should always get the same object
+        t2 = modelcif.Transformation.identity()
+        self.assertIs(t, t2)
+
     def test_all_software_groups(self):
         """Test _all_software_groups() method"""
         s = modelcif.System()
