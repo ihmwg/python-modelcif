@@ -23,7 +23,7 @@ pip install modelcif
 ```
 
 Alternatively, to build and install from a clone of the GitHub repository,
-first build and install version 0.26 or later of the
+first build and install version 0.27 or later of the
 [python-ihm](https://github.com/ihmwg/python-ihm) module. Then run:
 
 ```
