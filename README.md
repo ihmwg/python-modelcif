@@ -1,5 +1,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5908678.svg)](https://doi.org/10.5281/zenodo.5908678)
 [![docs](https://readthedocs.org/projects/python-modelcif/badge/)](https://python-modelcif.readthedocs.org/)
+[![conda package](https://img.shields.io/conda/vn/conda-forge/modelcif.svg)](https://anaconda.org/conda-forge/modelcif)
 [![pypi package](https://badge.fury.io/py/modelcif.svg)](https://badge.fury.io/py/modelcif)
 [![Linux Build Status](https://github.com/ihmwg/python-modelcif/workflows/build/badge.svg)](https://github.com/ihmwg/python-modelcif/actions?query=workflow%3Abuild)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/5o28oe477ii8ur4h?svg=true)](https://ci.appveyor.com/project/benmwebb/python-modelcif)
@@ -14,15 +15,23 @@ Please [see the documentation](https://python-modelcif.readthedocs.org/) or some
 [worked examples](https://github.com/ihmwg/python-modelcif/tree/main/examples)
 for more details.
 
-# Installation
+# Installation with conda or pip
 
-Install with pip:
+If you are using [Anaconda Python](https://www.anaconda.com/), install with
+
+```
+conda install -c conda-forge modelcif
+```
+
+Alternatively, install with pip:
 
 ```
 pip install modelcif
 ```
 
-Alternatively, to build and install from a clone of the GitHub repository,
+# Installation from source code
+
+To build and install from a clone of the GitHub repository,
 first build and install version 0.27 or later of the
 [python-ihm](https://github.com/ihmwg/python-ihm) module. Then run:
 
