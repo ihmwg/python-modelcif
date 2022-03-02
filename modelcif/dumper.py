@@ -56,7 +56,7 @@ class _TargetRefDBDumper(Dumper):
                     lp.write(target_entity_id=e._id, db_name=r.name,
                              db_name_other_details=r.other_details,
                              db_code=r.code, db_accession=r.accession,
-                             seq_db_isoform=r.isoform or ihm.unknown,
+                             seq_db_isoform=r.isoform,
                              seq_db_align_begin=db_begin,
                              seq_db_align_end=db_end,
                              ncbi_taxonomy_id=r.ncbi_taxonomy_id,

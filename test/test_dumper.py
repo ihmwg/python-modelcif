@@ -435,7 +435,7 @@ C
             isoform='testiso', ncbi_taxonomy_id='1234',
             organism_scientific='testorg')
         ref2 = modelcif.reference.UniProt(code='c2', accession='a2')
-        ref3 = CustomRef(code='c3', accession='a3')
+        ref3 = CustomRef(code='c3', accession='a3', isoform=ihm.unknown)
 
         e1 = modelcif.Entity('ACGT', references=[ref1, ref2, ref3])
         e1._id = 1
@@ -457,7 +457,7 @@ _ma_target_ref_db_details.seq_db_align_end
 _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
 1 UNP . testcode testacc testiso 4 8 1234 testorg
-1 UNP . c2 a2 ? 1 4 . .
+1 UNP . c2 a2 . 1 4 . .
 1 Other 'my custom ref' c3 a3 ? 1 4 . .
 #
 """)
