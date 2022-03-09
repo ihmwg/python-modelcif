@@ -594,14 +594,14 @@ _ma_alignment.sequence
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
-        t1 = modelcif.Template(e1, asym_id="A", model_num=1,
-            name="test template",
+        t1 = modelcif.Template(
+            e1, asym_id="A", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
         t1._id = 1
         # Non-polymeric entity
         e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
-        t2 = modelcif.Template(e2, asym_id="B", model_num=1,
-            name="test template",
+        t2 = modelcif.Template(
+            e2, asym_id="B", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
         t2._id = 2
         system.templates.extend((t1, t2))
