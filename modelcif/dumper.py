@@ -255,6 +255,7 @@ class _AlignmentDumper(Dumper):
         self.dump_template_details(system, writer)
         self.dump_template_poly(system, writer)
         self.dump_template_poly_segment(system, writer)
+        self.dump_template_non_poly(system, writer)
         self.dump_template_ref_db(system, writer)
         self.dump_target_template_poly_mapping(system, writer)
         self.dump_info(system, writer)
@@ -310,6 +311,8 @@ class _AlignmentDumper(Dumper):
                  "seq_one_letter_code_can"]) as lp:
             for tmpl in system.templates:
                 entity = tmpl.entity
+                if not entity.is_polymeric():
+                    continue
                 lp.write(template_id=tmpl._id,
                          seq_one_letter_code=self._get_sequence(entity),
                          seq_one_letter_code_can=self._get_canon(entity))
@@ -323,6 +326,17 @@ class _AlignmentDumper(Dumper):
                     id=s._segment_id, template_id=s.template._id,
                     residue_number_begin=s.seq_id_range[0],
                     residue_number_end=s.seq_id_range[1])
+
+    def dump_template_non_poly(self, system, writer):
+        with writer.loop(
+                "_ma_template_non_poly",
+                ["template_id", "comp_id", "details"]) as lp:
+            for tmpl in system.templates:
+                entity = tmpl.entity
+                if entity.is_polymeric():
+                    continue
+                lp.write(template_id=tmpl._id, comp_id=entity.sequence[0].id,
+                         details=entity.description)
 
     def dump_template_ref_db(self, system, writer):
         with writer.loop(

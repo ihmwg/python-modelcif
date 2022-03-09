@@ -588,6 +588,41 @@ _ma_alignment.sequence
 #
 """)
 
+    def test_non_poly_template(self):
+        """Test AlignmentDumper with nonpolymeric template"""
+
+        system = modelcif.System()
+        # Polymeric entity
+        e1 = ihm.Entity('ACGT')
+        t1 = modelcif.Template(e1, asym_id="A", model_num=1,
+            name="test template",
+            transformation=modelcif.Transformation.identity())
+        t1._id = 1
+        # Non-polymeric entity
+        e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
+        t2 = modelcif.Template(e2, asym_id="B", model_num=1,
+            name="test template",
+            transformation=modelcif.Transformation.identity())
+        t2._id = 2
+        system.templates.extend((t1, t2))
+        dumper = modelcif.dumper._AlignmentDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_poly.template_id
+_ma_template_poly.seq_one_letter_code
+_ma_template_poly.seq_one_letter_code_can
+1 ACGT ACGT
+#
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+2 HEM heme
+#
+""")
+
     def test_template_transform_dumper(self):
         """Test TemplateTransformDumper"""
         system = modelcif.System()
