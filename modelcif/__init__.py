@@ -383,6 +383,8 @@ class TemplateSegment(object):
         self.gapped_sequence = gapped_sequence
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
+    entity = property(lambda self: self.template.entity)
+
 
 class Template(modelcif.data.Data):
     """A single chain that was used as a template structure for modeling.

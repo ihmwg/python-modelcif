@@ -66,10 +66,14 @@ class Pair(object):
 
        :param template: The template segment that is aligned, i.e. the
               seq_id range for the template and the sequence (including gaps)
-              of one-letter codes.
+              of one-letter codes, as a :class:`modelcif.TemplateSegment`
+              object. If the template is non-polymeric, then a seq_id range
+              makes no sense; a plain :class:`modelcif.Template` can be
+              passed instead in this case.
        :type template: :class:`modelcif.TemplateSegment`
+             or :class:`modelcif.Template`
        :param target: The target segment that is aligned.
-       :type target: :class:`ihm.AsymUnitSegment`
+       :type target: :class:`ihm.AsymUnitSegment` or :class:`ihm.AsymUnit`
        :param identity: The sequence identity between target and template.
        :type identity: :class:`Identity`
        :param score: A measure of the quality of the alignment.
