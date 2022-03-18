@@ -486,7 +486,8 @@ _ma_target_ref_db_details.organism_scientific
         tr = modelcif.Transformation.identity()
         tr._id = 42
         t = modelcif.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
-                              transformation=tr, references=[ref1, ref2])
+                              transformation=tr, references=[ref1, ref2],
+                              strand_id='Z')
         t._data_id = 99
         p = modelcif.alignment.Pair(
             template=t.segment('AC-G', 1, 3),
@@ -517,7 +518,8 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 'reference database' polymer 42 99 A H 1 1
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 42 99 A H 1 1 Z
 #
 #
 loop_
@@ -633,7 +635,8 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 customized polymer 42 99 A H 1 1
+_ma_template_details.template_auth_asym_id
+1 1 customized polymer 42 99 A H 1 1 H
 #
 #
 loop_
@@ -717,7 +720,8 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 customized non-polymer 42 99 A H 1 1
+_ma_template_details.template_auth_asym_id
+1 1 customized non-polymer 42 99 A H 1 1 H
 #
 #
 loop_

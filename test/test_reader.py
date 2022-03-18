@@ -214,13 +214,15 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 'reference database' polymer 1 2 A B 3 4
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 1 2 A B 3 4 Z
 """
         s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
         self.assertEqual(t.entity._id, '3')
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
+        self.assertEqual(t.strand_id, 'Z')
 
     def test_template_ref_db_handler(self):
         """Test _TemplateRefDBHandler"""
@@ -419,7 +421,8 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 'reference database' polymer 1 1 A A 1 1
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 1 1 A A 1 1 Z
 #
 loop_
 _ma_model_list.ordinal_id
@@ -467,7 +470,8 @@ _ma_template_details.target_asym_id
 _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
-1 1 'reference database' polymer 1 1 A A 1 1
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 1 1 A A 1 1 Z
 #
 loop_
 _ma_data_group.ordinal_id

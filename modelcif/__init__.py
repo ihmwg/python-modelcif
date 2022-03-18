@@ -407,17 +407,20 @@ class Template(modelcif.data.Data):
               PDB) from which the template structure was taken.
        :type references: list of :class:`modelcif.reference.TemplateReference`
              objects
+       :param str strand_id: PDB or "author-provided" strand/chain ID.
+              If not specified, it will be the same as the regular asym_id.
     """
     data_content_type = "template structure"
 
     def __init__(self, entity, asym_id, model_num, transformation,
-                 name=None, references=[]):
+                 name=None, references=[], strand_id=None):
         super(Template, self).__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
         self.transformation = transformation
         self.references = []
         self.references.extend(references)
+        self._strand_id = strand_id
 
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
         """Get an object representing the alignment of part of this sequence.
@@ -431,4 +434,8 @@ class Template(modelcif.data.Data):
 
     seq_id_range = property(lambda self: self.entity.seq_id_range,
                             doc="Sequence range")
+
     template = property(lambda self: self)
+
+    strand_id = property(lambda self: self._strand_id or self.asym_id,
+                         doc="PDB or author-provided strand/chain ID")

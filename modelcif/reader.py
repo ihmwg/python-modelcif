@@ -261,7 +261,8 @@ class _TemplateDetailsHandler(Handler):
 
     def __call__(self, template_id, template_trans_matrix_id,
                  template_data_id, target_asym_id, template_label_asym_id,
-                 template_label_entity_id, template_model_num):
+                 template_label_entity_id, template_model_num,
+                 template_auth_asym_id):
         template = self.sysr.templates.get_by_id(template_id)
         template.transformation = self.sysr.transformations.get_by_id(
             template_trans_matrix_id)
@@ -269,6 +270,7 @@ class _TemplateDetailsHandler(Handler):
             template_label_entity_id)
         template.asym_id = template_label_asym_id
         template.model_num = self.get_int(template_model_num)
+        template._strand_id = template_auth_asym_id
         self.sysr.data_by_id[template_data_id] = template
         template._data_id = template_data_id
         # todo: fill in target_asym_id in alignment

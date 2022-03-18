@@ -42,7 +42,7 @@ class Tests(unittest.TestCase):
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 contents = fh.readlines()
             if hasattr(ihm.System, 'structure_determination_methodology'):
-                self.assertEqual(len(contents), 443)
+                self.assertEqual(len(contents), 444)
             else:
                 self.assertEqual(len(contents), 442)
             with open(os.path.join(tmpdir, 'output.cif')) as fh:

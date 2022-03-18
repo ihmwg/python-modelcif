@@ -278,7 +278,8 @@ class _AlignmentDumper(Dumper):
                  "template_entity_type", "template_trans_matrix_id",
                  "template_data_id", "target_asym_id",
                  "template_label_asym_id",
-                 "template_label_entity_id", "template_model_num"]) as lp:
+                 "template_label_entity_id", "template_model_num",
+                 "template_auth_asym_id"]) as lp:
             for a in system.alignments:
                 for s in a.pairs:
                     # get Template from TemplateSegment
@@ -297,7 +298,8 @@ class _AlignmentDumper(Dumper):
                              target_asym_id=tgt_asym._id,
                              template_label_asym_id=tmpl.asym_id,
                              template_label_entity_id=tmpl.entity._id,
-                             template_model_num=tmpl.model_num)
+                             template_model_num=tmpl.model_num,
+                             template_auth_asym_id=tmpl.strand_id)
 
     def _get_sequence(self, entity):
         """Get the sequence for an entity as a string"""
