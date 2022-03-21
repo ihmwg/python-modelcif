@@ -8,7 +8,6 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 
 import modelcif.reader
-import ihm
 
 
 def get_example_dir():
@@ -41,10 +40,7 @@ class Tests(unittest.TestCase):
             # can read it
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 contents = fh.readlines()
-            if hasattr(ihm.System, 'structure_determination_methodology'):
-                self.assertEqual(len(contents), 444)
-            else:
-                self.assertEqual(len(contents), 442)
+            self.assertEqual(len(contents), 444)
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 s, = modelcif.reader.read(fh)
 
