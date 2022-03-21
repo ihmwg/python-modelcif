@@ -742,6 +742,79 @@ _ma_alignment_info.alignment_mode
 #
 """)
 
+    def test_alignment_non_poly_with_poly_alignment(self):
+        """Test AlignmentDumper with nonpolymeric template, poly alignment"""
+
+        class Alignment(modelcif.alignment.Global,
+                        modelcif.alignment.Pairwise):
+            pass
+
+        system = modelcif.System()
+        e1 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
+        e1._id = 1
+        system.entities.append(e1)
+        asym = modelcif.AsymUnit(e1)
+        asym._id = 'A'
+        system.asym_units.append(asym)
+        tr = modelcif.Transformation.identity()
+        tr._id = 42
+        t = modelcif.Template(e1, asym_id='H', model_num=1, name='testtmp',
+                              transformation=tr, references=[])
+        t._data_id = 99
+        system.templates.append(t)
+        # A TemplateSegment doesn't make a lot of sense for a nonpoly template,
+        # but allow it; just don't write out ma_template_poly_segment for it
+        p = modelcif.alignment.Pair(
+            template=t.segment('X', 1, 1), target=asym,
+            score=None, identity=None)
+        aln = Alignment(name='testaln', pairs=[p])
+        aln._data_id = 100
+        system.alignments.append(aln)
+        dumper = modelcif.dumper._AlignmentDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 customized non-polymer 42 99 A H 1 1 H
+#
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+1 HEM heme
+#
+#
+loop_
+_ma_alignment_info.alignment_id
+_ma_alignment_info.data_id
+_ma_alignment_info.software_group_id
+_ma_alignment_info.alignment_length
+_ma_alignment_info.alignment_type
+_ma_alignment_info.alignment_mode
+1 100 . 1 'target-template pairwise alignment' global
+#
+#
+loop_
+_ma_alignment.ordinal_id
+_ma_alignment.alignment_id
+_ma_alignment.target_template_flag
+_ma_alignment.sequence
+1 1 2 X
+#
+""")
+
     def test_non_poly_template_no_aln(self):
         """Test AlignmentDumper with nonpolymeric template, no alignments"""
         system = modelcif.System()
