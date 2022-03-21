@@ -223,6 +223,13 @@ _ma_template_details.template_auth_asym_id
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
+        # An 'alignment' should have been created for the implied
+        # template - target_asym_id correspondence
+        a, = s.alignments
+        p, = a.pairs
+        self.assertEqual(p.template._id, '1')
+        self.assertIs(p.template, t)
+        self.assertEqual(p.target._id, 'A')
 
     def test_template_ref_db_handler(self):
         """Test _TemplateRefDBHandler"""

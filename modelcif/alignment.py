@@ -1,5 +1,9 @@
-"""Classes to handle alignments between template structure(s)
-   and target sequence(s).
+"""Classes to handle correspondence between template structure(s)
+   and target sequence(s). These may include complete sequence alignments
+   indicating which residues in the target are aligned with which
+   template residues, or simply map a given target onto a given
+   template without a sequence alignment (as is typical for a nonpolymeric
+   chain, such as a ligand).
 
    To create an alignment, first declare a class for the given kind of
    alignment by deriving from subclasses of :class:`AlignmentMode`
@@ -60,9 +64,9 @@ class AlignedPositionsIdentity(Identity):
 
 
 class Pair(object):
-    """A single pairwise alignment between a single target and template chain.
-       See :class:`AlignmentMode`. An alignment consists of one or more of
-       these pairs.
+    """A single pairwise correspondence between a single target and
+       template chain. See :class:`AlignmentMode`. An alignment consists
+       of one or more of these pairs.
 
        :param template: The template segment that is aligned, i.e. the
               seq_id range for the template and the sequence (including gaps)

@@ -102,7 +102,11 @@ class _SystemReader(object):
 
         self.alignment_seqs = collections.defaultdict(list)
 
-        self.target_template_mapping = {}
+        # Correspondence between target and template sequence ranges
+        self.target_template_poly_mapping = {}
+
+        # Correspondence between target and template chains
+        self.target_asym_for_template = {}
 
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
@@ -273,7 +277,7 @@ class _TemplateDetailsHandler(Handler):
         template._strand_id = template_auth_asym_id
         self.sysr.data_by_id[template_data_id] = template
         template._data_id = template_data_id
-        # todo: fill in target_asym_id in alignment
+        self.sysr.target_asym_for_template[template_id] = target_asym_id
 
 
 class _TemplateRefDBHandler(Handler):
@@ -351,11 +355,13 @@ class _AlignmentInfoHandler(Handler):
         self.sysr.system.alignments.append(alignment)
 
     def finalize(self):
+        seen_pairs = set()
         for aln in self.sysr.system.alignments:
             for pair in self.sysr.alignment_pairs[aln._id]:
                 k = (pair.template._id, pair.target.asym._id)
+                seen_pairs.add(k)
                 pair.target.seq_id_range = \
-                    self.sysr.target_template_mapping.get(k)
+                    self.sysr.target_template_poly_mapping.get(k)
                 aln.pairs.append(pair)
             # todo: handle multiple alignments, multiple templates
             for flag, sequence in self.sysr.alignment_seqs[aln._id]:
@@ -363,6 +369,23 @@ class _AlignmentInfoHandler(Handler):
                     aln.pairs[0].template.gapped_sequence = sequence
                 else:  # target
                     aln.pairs[0].target.gapped_sequence = sequence
+        # Handle templates without explicit sequence alignments
+        for tmpl_target in self.sysr.target_asym_for_template.items():
+            if tmpl_target in seen_pairs:
+                continue
+            template_id, target_asym_id = tmpl_target
+            template = self.sysr.templates.get_by_id(template_id)
+            asym = self.sysr.asym_units.get_by_id(target_asym_id)
+            p = modelcif.alignment.Pair(template=template, target=asym,
+                                        identity=None, score=None)
+
+            class Alignment(modelcif.alignment.Global,
+                            modelcif.alignment.Pairwise):
+                pass
+
+            # We have to make a new Alignment since there is no alignment_id
+            aln = Alignment(name="Modeling alignment", pairs=[p])
+            self.sysr.system.alignments.append(aln)
 
 
 class _AlignmentHandler(Handler):
@@ -420,7 +443,7 @@ class _TargetTemplatePolyMappingHandler(Handler):
         rng = (self.get_int(target_seq_id_begin),
                self.get_int(target_seq_id_end))
         # Remember for now and we'll add in finalize() of AlignmentInfoHandler
-        self.sysr.target_template_mapping[k] = rng
+        self.sysr.target_template_poly_mapping[k] = rng
 
 
 class _AssemblyHandler(Handler):
