@@ -771,6 +771,7 @@ _ma_alignment_info.alignment_mode
         aln._data_id = 100
         system.alignments.append(aln)
         dumper = modelcif.dumper._AlignmentDumper()
+        system._before_write()  # populate system.template_segments
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
