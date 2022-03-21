@@ -1,3 +1,11 @@
+0.3 - 2022-03-21
+================
+ - Add a package to conda-forge so the library can be installed using
+   ``conda install -c conda-forge modelcif``
+ - :class:`modelcif.Template` now takes a ``strand_id`` argument which can
+   be used to provided the author-provided (e.g. PDB) chain ID.
+ - Non-polymers can now be used as templates.
+
 0.2 - 2022-01-27
 ================
  - Minor packaging and documentation improvements.

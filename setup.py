@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 import sys
 
-VERSION = "0.2"
+VERSION = "0.3"
 
 copy_args = sys.argv[1:]
 
@@ -23,7 +23,7 @@ setup(name='modelcif',
       author_email='ben@salilab.org',
       url='https://github.com/ihmwg/python-modelcif',
       packages=['modelcif'],
-      install_requires=['ihm>=0.27'],
+      install_requires=['ihm>=0.28'],
       classifiers=[
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3",

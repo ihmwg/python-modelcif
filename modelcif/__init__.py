@@ -4,7 +4,7 @@ from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
 import sys
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 
 class System(object):
