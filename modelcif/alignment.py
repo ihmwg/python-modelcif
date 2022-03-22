@@ -136,7 +136,7 @@ class Score(object):
 
        :param float value: The actual score value.
     """
-    type = "other"
+    type = "Other"
 
     def __init__(self, value):
         self.value = value
