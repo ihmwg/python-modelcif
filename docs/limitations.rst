@@ -16,7 +16,6 @@ In particular, many PDBx categories pertaining to experimentally-determined
 structures are ignored. Also, the following ModelCIF categories are currently
 not supported:
 
- - ``ma_template_non_poly``
  - ``ma_template_customized``
  - ``ma_template_coord``
  - ``ma_coevolution_seq_db_ref``
