@@ -164,3 +164,10 @@ class ContactProbability(MetricType):
        See :class:`MetricType` for more information."""
     type = "contact probability"
     other_details = None
+
+
+class PLDDT(MetricType):
+    """Predicted lDDT-CA score in [0,100] (higher score, means better accuracy).
+       See :class:`MetricType` for more information."""
+    type = "pLDDT"
+    other_details = None
