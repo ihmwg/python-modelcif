@@ -17,8 +17,8 @@ class _AuditConformDumper(Dumper):
         with writer.category("_audit_conform") as lp:
             # Update to match the version of the ModelCIF dictionary
             # we support:
-            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
-                     dict_location=self.URL % "8b46f31")
+            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.6",
+                     dict_location=self.URL % "21aa734")
 
 
 class _ExptlDumper(Dumper):
