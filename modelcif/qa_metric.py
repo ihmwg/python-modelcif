@@ -171,3 +171,17 @@ class PLDDT(MetricType):
        See :class:`MetricType` for more information."""
     type = "pLDDT"
     other_details = None
+
+
+class PTM(MetricType):
+    """Predicted TM-score in [0,1] (higher value means higher confidence).
+    See :class:`MetricType` for more information."""
+    type = "pTM"
+    other_details = None
+
+
+class IpTM(MetricType):
+    """Protein-protein interface score, based on TM-score in [0,1].
+    See :class:`MetricType` for more information."""
+    type = "ipTM"
+    other_details = None
