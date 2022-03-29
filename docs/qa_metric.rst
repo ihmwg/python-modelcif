@@ -33,3 +33,9 @@ The :mod:`modelcif.qa_metric` Python module
 .. autoclass:: PAE
 
 .. autoclass:: ContactProbability
+
+.. autoclass:: PLDDT
+
+.. autoclass:: PTM
+
+.. autoclass:: IpTM
