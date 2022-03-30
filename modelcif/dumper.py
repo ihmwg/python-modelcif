@@ -503,6 +503,52 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                              model_type_other_details=model.other_details)
 
 
+class _AssociatedDumper(Dumper):
+    def finalize(self, system):
+        file_id = itertools.count(1)
+        in_archive_file_id = itertools.count(1)
+        for repo in system.repositories:
+            for f in repo.files:
+                f._id = next(file_id)
+                if hasattr(f, 'files'):
+                    for af in f.files:
+                        if hasattr(af, 'files'):
+                            raise ValueError(
+                                "An archive cannot contain another archive")
+                        af._id = next(in_archive_file_id)
+
+    def dump(self, system, writer):
+        self.dump_files(system, writer)
+        self.dump_archive_files(system, writer)
+
+    def dump_files(self, system, writer):
+        with writer.loop(
+                "_ma_associated_file_details",
+                ["id", "entry_id", "file_url", "file_type", "file_format",
+                 "file_content", "details"]) as lp:
+            for repo in system.repositories:
+                for f in repo.files:
+                    lp.write(id=f._id, entry_id=system.id,
+                             file_url=repo.get_url(f), file_type=f.file_type,
+                             file_format=f.file_format,
+                             file_content=f.file_content, details=f.details)
+
+    def dump_archive_files(self, system, writer):
+        with writer.loop(
+                "_ma_associated_archive_file_details",
+                ["id", "archive_file_id", "file_path", "file_format",
+                 "file_content", "description"]) as lp:
+            for repo in system.repositories:
+                for f in repo.files:
+                    if not hasattr(f, 'files'):
+                        continue
+                    for af in f.files:
+                        lp.write(id=af._id, archive_file_id=f._id,
+                                 file_path=af.path, file_format=af.file_format,
+                                 file_content=af.file_content,
+                                 description=af.details)
+
+
 class _QAMetricDumper(Dumper):
     def finalize(self, system):
         # Get all metric classes used by all systems
@@ -607,7 +653,7 @@ class ModelCIFVariant(Variant):
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper, _DataGroupDumper, _TargetEntityDumper, _AssemblyDumper,
         _TemplateTransformDumper, _AlignmentDumper,
-        _ProtocolDumper, _ModelDumper, _QAMetricDumper]
+        _ProtocolDumper, _ModelDumper, _AssociatedDumper, _QAMetricDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]

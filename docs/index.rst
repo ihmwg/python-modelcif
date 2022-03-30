@@ -30,6 +30,7 @@ API Reference:
    protocol
    model
    qa_metric
+   associated
    dumper
    reader
    

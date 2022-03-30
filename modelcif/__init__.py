@@ -65,6 +65,10 @@ class System(object):
         #: See :mod:`modelcif.alignment`.
         self.alignments = []
 
+        #: Any additional files with extra data about this system.
+        #: See :class:`modelcif.associated.Repository`.
+        self.repositories = []
+
         self.entities = []
         self.asym_units = []
         self.target_entities = []

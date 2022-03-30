@@ -14,6 +14,7 @@ import modelcif.protocol
 import modelcif.model
 import modelcif.reference
 import modelcif.alignment
+import modelcif.associated
 import ihm.format
 import ihm.dumper
 
@@ -947,6 +948,50 @@ _ma_struct_assembly_details.assembly_description
 1 foo bar
 #
 """)
+
+    def test_associated_dumper(self):
+        """Test AssociatedDumper"""
+        system = modelcif.System()
+        # File in a repository
+        f1 = modelcif.associated.File(path='foo.txt', details='test file')
+        # File in an archive
+        f2 = modelcif.associated.File(path='bar.txt', details='test file2')
+        zf = modelcif.associated.ZipFile(path='t.zip', files=[f2])
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f1, zf])
+        system.repositories.append(r)
+
+        dumper = modelcif.dumper._AssociatedDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_associated_file_details.id
+_ma_associated_file_details.entry_id
+_ma_associated_file_details.file_url
+_ma_associated_file_details.file_type
+_ma_associated_file_details.file_format
+_ma_associated_file_details.file_content
+_ma_associated_file_details.details
+1 model https://example.com/foo.txt file other other 'test file'
+2 model https://example.com/t.zip archive zip 'archive with multiple files' .
+#
+#
+loop_
+_ma_associated_archive_file_details.id
+_ma_associated_archive_file_details.archive_file_id
+_ma_associated_archive_file_details.file_path
+_ma_associated_archive_file_details.file_format
+_ma_associated_archive_file_details.file_content
+_ma_associated_archive_file_details.description
+1 2 bar.txt other other 'test file2'
+#
+""")
+
+        # Should be an error to put a zip file inside another zip
+        zf2 = modelcif.associated.ZipFile(path='test2.zip', files=[])
+        zf.files.append(zf2)
+        self.assertRaises(ValueError, dumper.finalize, system)
 
 
 if __name__ == '__main__':
