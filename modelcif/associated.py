@@ -14,7 +14,8 @@ class Repository(object):
        :param str url_root: URL root that prefixes each file's path.
               For example, if url_root is ``https://example.com`` then
               a :class:`File` with path ``test.txt`` can be found at
-              ``https://example.com/test.txt``.
+              ``https://example.com/test.txt``. If the files are not
+              available online, None can be used here.
        :param list files: A list of :class:`File` objects.
     """
     def __init__(self, url_root, files):
@@ -23,7 +24,7 @@ class Repository(object):
 
     def get_url(self, f):
         """Get the full URL for the given :class:`File`"""
-        return posixpath.join(self.url_root, f.path)
+        return posixpath.join(self.url_root or '', f.path)
 
 
 class File(object):

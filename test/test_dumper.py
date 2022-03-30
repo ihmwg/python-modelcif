@@ -957,9 +957,12 @@ _ma_struct_assembly_details.assembly_description
         # File in an archive
         f2 = modelcif.associated.File(path='bar.txt', details='test file2')
         zf = modelcif.associated.ZipFile(path='t.zip', files=[f2])
+        # Local file
+        f3 = modelcif.associated.File(path='baz.txt', details='test file3')
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f1, zf])
-        system.repositories.append(r)
+        r2 = modelcif.associated.Repository(url_root=None, files=[f3])
+        system.repositories.extend((r, r2))
 
         dumper = modelcif.dumper._AssociatedDumper()
         dumper.finalize(system)
@@ -975,6 +978,7 @@ _ma_associated_file_details.file_content
 _ma_associated_file_details.details
 1 model https://example.com/foo.txt file other other 'test file'
 2 model https://example.com/t.zip archive zip 'archive with multiple files' .
+3 model baz.txt file other other 'test file3'
 #
 #
 loop_
