@@ -6,11 +6,13 @@ import modelcif.protocol
 import modelcif.qa_metric
 import modelcif.alignment
 import modelcif.reference
+import modelcif.associated
 import ihm
 import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
+import posixpath
 import operator
 import inspect
 import collections
@@ -93,6 +95,8 @@ class _SystemReader(object):
 
         self.protocols = IDMapper(self.system.protocols,
                                   modelcif.protocol.Protocol)
+
+        self.assoc_by_id = {}
 
         self.qa_by_id = {}
 
@@ -542,6 +546,69 @@ class _ProtocolHandler(Handler):
         p.steps.append(step)
 
 
+class _AssociatedHandler(Handler):
+    category = '_ma_associated_file_details'
+
+    def __init__(self, *args):
+        super(_AssociatedHandler, self).__init__(*args)
+        self._repos_by_root = {}
+        # Map (file_content,file_format) to subclass of
+        # modelcif.associated.File
+        self._type_map = dict(
+            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
+            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
+            if issubclass(x[1], modelcif.associated.File)
+            and x[1] is not modelcif.associated.File)
+
+    def __call__(self, id, file_url, file_type, file_format, file_content,
+                 details):
+        filecls = self._type_map.get(
+            (file_content.upper(), file_format.upper()),
+            modelcif.associated.File)
+        # Assume everything before last slash (if any) is URL root
+        url_root, path = posixpath.split(file_url)
+        url_root = url_root or None
+        r = self._repos_by_root.get(url_root)
+        if not r:
+            r = modelcif.associated.Repository(url_root=url_root, files=[])
+            self._repos_by_root[url_root] = r
+            self.system.repositories.append(r)
+        c = filecls(path=path, details=details)
+        r.files.append(c)
+        self.sysr.assoc_by_id[id] = c
+
+
+class _AssociatedArchiveHandler(Handler):
+    category = '_ma_associated_archive_file_details'
+
+    def __init__(self, *args):
+        super(_AssociatedArchiveHandler, self).__init__(*args)
+        # Map (file_content,file_format) to subclass of
+        # modelcif.associated.File
+        self._type_map = dict(
+            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
+            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
+            if issubclass(x[1], modelcif.associated.File)
+            and x[1] is not modelcif.associated.File)
+        self._archive_files = collections.defaultdict(list)
+
+    def __call__(self, id, archive_file_id, file_path, file_format,
+                 file_content, description):
+        filecls = self._type_map.get(
+            (file_content.upper(), file_format.upper()),
+            modelcif.associated.File)
+        c = filecls(path=file_path, details=description)
+        # Top-level archive file might not exist yet
+        self._archive_files[archive_file_id].append(c)
+
+    def finalize(self):
+        # Put files in archives
+        for archive_file_id, files in self._archive_files.items():
+            archive = self.sysr.assoc_by_id.get(archive_file_id)
+            if archive:
+                archive.files = files
+
+
 def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
     """Create and return a new class to represent a QA metric"""
     class QA(type_class, mode_class):
@@ -640,7 +707,8 @@ class ModelCIFVariant(Variant):
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
-        _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
+        _ModelListHandler, _ProtocolHandler,
+        _AssociatedHandler, _AssociatedArchiveHandler, _QAMetricHandler,
         _QAMetricGlobalHandler, _QAMetricLocalHandler,
         _QAMetricPairwiseHandler]
 

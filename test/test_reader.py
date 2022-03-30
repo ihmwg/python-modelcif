@@ -774,6 +774,53 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
         self.assertEqual(p.target.seq_id_range, (1, 8))
 
+    def test_associated_files(self):
+        """Test _AssociatedHandler and _AssociatedArchiveHandler"""
+        cif = """
+loop_
+_ma_associated_file_details.id
+_ma_associated_file_details.entry_id
+_ma_associated_file_details.file_url
+_ma_associated_file_details.file_type
+_ma_associated_file_details.file_format
+_ma_associated_file_details.file_content
+_ma_associated_file_details.details
+1 model https://example.com/foo.txt file other other 'test file'
+2 model https://example.com/t.zip archive zip 'archive with multiple files' .
+3 model baz.txt file other other 'test file3'
+#
+#
+loop_
+_ma_associated_archive_file_details.id
+_ma_associated_archive_file_details.archive_file_id
+_ma_associated_archive_file_details.file_path
+_ma_associated_archive_file_details.file_format
+_ma_associated_archive_file_details.file_content
+_ma_associated_archive_file_details.description
+1 2 bar.txt other other 'test file2'
+2 99 99.txt other other 'test file99'
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        r1, r2 = s.repositories
+        self.assertEqual(r1.url_root, 'https://example.com')
+        f1, zf = r1.files
+        self.assertIsInstance(f1, modelcif.associated.File)
+        self.assertEqual(f1.path, 'foo.txt')
+        self.assertEqual(f1.details, 'test file')
+
+        self.assertIsInstance(zf, modelcif.associated.ZipFile)
+        self.assertEqual(zf.path, 't.zip')
+        self.assertIsNone(zf.details)
+
+        f2, = zf.files
+        self.assertEqual(f2.path, 'bar.txt')
+        self.assertEqual(f2.details, 'test file2')
+
+        self.assertIsNone(r2.url_root)
+        f3, = r2.files
+        self.assertEqual(f3.path, 'baz.txt')
+        self.assertEqual(f3.details, 'test file3')
+
 
 if __name__ == '__main__':
     unittest.main()
