@@ -21,6 +21,12 @@ class _AuditConformDumper(Dumper):
                      dict_location=self.URL % "21aa734")
 
 
+class _EntryLinkDumper(Dumper):
+    def dump(self, system, writer):
+        with writer.loop("_entry_link", ["id", "entry_id", "details"]) as lp:
+            lp.write(id=1, entry_id=system.id, details=system.entry_details)
+
+
 class _ExptlDumper(Dumper):
     def dump(self, system, writer):
         with writer.category("_exptl") as lp:
@@ -635,6 +641,40 @@ class _QAMetricDumper(Dumper):
                              metric_id=m._id, metric_value=m.value)
 
 
+class _SystemWriter(object):
+    """Utility class which normally just passes through to the default
+       ``base_writer``, but outputs selected categories to associated files."""
+    def __init__(self, base_writer, category_map):
+        self._base_writer = base_writer
+        self.category_map = category_map
+
+    def category(self, category):
+        w = self.category_map.get(category, self._base_writer)
+        return w.category(category)
+
+    def loop(self, category, keys):
+        w = self.category_map.get(category, self._base_writer)
+        return w.loop(category, keys)
+
+    def end_block(self):
+        # Close all file handles of associated files
+        for w in self.category_map.values():
+            if not hasattr(w, 'fh'):
+                continue
+            w.fh.close()
+            del w.fh
+
+    # Just pass through to base writer object
+    def flush(self):
+        return self._base_writer.flush()
+
+    def start_block(self, name):
+        return self._base_writer.start_block(name)
+
+    def write_comment(self, comment):
+        return self._base_writer.write_comment(comment)
+
+
 class ModelCIFVariant(Variant):
     """Used to select typical PDBx/ModelCIF file output.
        See :func:`write` and :class:`ihm.dumper.Variant`."""
@@ -657,6 +697,30 @@ class ModelCIFVariant(Variant):
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
+
+    def get_system_writer(self, system, writer_class, writer):
+        # Get a Writer-like object which outputs selected categories to
+        # associated files (the rest use the default writer)
+        category_map = {}
+        for r in system.repositories:
+            for f in r.files:
+                if not hasattr(f, 'categories') or not f.categories:
+                    continue
+                # Always output associated file in mmCIF, not BinaryCIF
+                w = ihm.format.CifWriter(open(f.path, 'w'))
+                # Write header information to the associated file
+                dumpers = (ihm.dumper._EntryDumper(), _EntryLinkDumper())
+                # We are passing the File object to the dumpers here where
+                # they expect a System object, but the interfaces are similar
+                # enough, so we don't need a facade object.
+                for d in dumpers:
+                    d.finalize(f)
+                for d in dumpers:
+                    d.dump(f, w)
+                for c in f.categories:
+                    # Allow for categories with or without leading underscore
+                    category_map['_' + c.lstrip('_').lower()] = w
+        return _SystemWriter(writer, category_map)
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],

@@ -19,6 +19,28 @@ import ihm.format
 import ihm.dumper
 
 
+def ihm_post_028_write(fh, systems):
+    # Act like calling modelcif.dumper.write() with recent python-ihm.
+    # This doesn't work with the 0.28 release because it does not include
+    # the variant.get_system_writer() call. This utility function can be
+    # removed after the python-ihm 0.29 release.
+    variant = modelcif.dumper.ModelCIFVariant()
+    dumpers = variant.get_dumpers()
+    writer_class = ihm.format.CifWriter
+    writer = writer_class(fh)
+    for system in systems:
+        w = variant.get_system_writer(system, writer_class, writer)
+        system._before_write()
+
+        for d in dumpers:
+            d.finalize(system)
+        system._check_after_write()
+        for d in dumpers:
+            d.dump(system, w)
+        w.end_block()
+    writer.flush()
+
+
 def _get_dumper_output(dumper, system):
     fh = StringIO()
     writer = ihm.format.CifWriter(fh)
@@ -996,6 +1018,31 @@ _ma_associated_archive_file_details.description
         zf2 = modelcif.associated.ZipFile(path='test2.zip', files=[])
         zf.files.append(zf2)
         self.assertRaises(ValueError, dumper.finalize, system)
+
+    def test_write_associated(self):
+        """Test write() function with associated files"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated.cif',
+            categories=['exptl', '_AUDIT_CONFORM'],
+            entry_details='test details', entry_id='testcif')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        ihm_post_028_write(fh, [s])
+        main_file = fh.getvalue()
+        with open('test_write_associated.cif') as fh:
+            assoc_file = fh.read()
+        os.unlink('test_write_associated.cif')
+        # exptl and audit_conform categories should be in associated file,
+        # not the main file
+        self.assertIn('_exptl.entry_id', assoc_file)
+        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform.dict_name', assoc_file)
+        self.assertNotIn('_audit_conform.dict_name', main_file)
 
 
 if __name__ == '__main__':
