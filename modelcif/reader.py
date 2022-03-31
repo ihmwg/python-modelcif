@@ -733,6 +733,10 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
        stated in the mmCIF file (e.g. homology model, ab initio model).
        (However, the ``model_type`` attribute will be set appropriately.)
 
+       If the input file references any associated files, they will be
+       listed in :attr:`modelcif.System.repositories`. The files will not be
+       downloaded or read in, however.
+
       :return: A list of :class:`modelcif.System` objects.
     """
     return ihm.reader.read(
