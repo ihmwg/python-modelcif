@@ -754,7 +754,11 @@ class ModelCIFVariant(Variant):
                     category_map['_' + c.lstrip('_').lower()] = w
                 for c in f.copy_categories:
                     copy_category_map['_' + c.lstrip('_').lower()] = w
-        return _SystemWriter(writer, category_map, copy_category_map)
+        if category_map or copy_category_map:
+            return _SystemWriter(writer, category_map, copy_category_map)
+        else:
+            # If no categories, we can just use the base writer
+            return writer
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],
