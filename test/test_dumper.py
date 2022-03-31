@@ -1070,6 +1070,22 @@ _ma_associated_archive_file_details.description
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertIn('_audit_conform.dict_name', main_file)
 
+    def test_write_associated_none(self):
+        """Test write() function with associated files, no categories"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated_none.cif')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        ihm_post_028_write(fh, [s])
+        main_file = fh.getvalue()
+        self.assertIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform.dict_name', main_file)
+
     def test_system_writer(self):
         """Test _SystemWriter utility class"""
         class BaseWriter(object):
