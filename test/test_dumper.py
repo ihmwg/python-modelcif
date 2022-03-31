@@ -37,7 +37,8 @@ def ihm_post_028_write(fh, systems):
         system._check_after_write()
         for d in dumpers:
             d.dump(system, w)
-        w.end_block()
+        if hasattr(w, 'end_block'):
+            w.end_block()
     writer.flush()
 
 
