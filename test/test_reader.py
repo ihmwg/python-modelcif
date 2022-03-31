@@ -778,13 +778,13 @@ _ma_target_template_poly_mapping.target_seq_id_end
         """Test _AssociatedHandler and _AssociatedArchiveHandler"""
         cif = """
 loop_
-_ma_associated_file_details.id
-_ma_associated_file_details.entry_id
-_ma_associated_file_details.file_url
-_ma_associated_file_details.file_type
-_ma_associated_file_details.file_format
-_ma_associated_file_details.file_content
-_ma_associated_file_details.details
+_ma_entry_associated_files.id
+_ma_entry_associated_files.entry_id
+_ma_entry_associated_files.file_url
+_ma_entry_associated_files.file_type
+_ma_entry_associated_files.file_format
+_ma_entry_associated_files.file_content
+_ma_entry_associated_files.details
 1 model https://example.com/foo.txt file other other 'test file'
 2 model https://example.com/t.zip archive zip 'archive with multiple files' .
 3 model baz.txt file other other 'test file3'

@@ -547,7 +547,7 @@ class _ProtocolHandler(Handler):
 
 
 class _AssociatedHandler(Handler):
-    category = '_ma_associated_file_details'
+    category = '_ma_entry_associated_files'
 
     def __init__(self, *args):
         super(_AssociatedHandler, self).__init__(*args)

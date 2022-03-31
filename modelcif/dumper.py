@@ -529,7 +529,7 @@ class _AssociatedDumper(Dumper):
 
     def dump_files(self, system, writer):
         with writer.loop(
-                "_ma_associated_file_details",
+                "_ma_entry_associated_files",
                 ["id", "entry_id", "file_url", "file_type", "file_format",
                  "file_content", "details"]) as lp:
             for repo in system.repositories:
