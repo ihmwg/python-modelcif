@@ -641,20 +641,50 @@ class _QAMetricDumper(Dumper):
                              metric_id=m._id, metric_value=m.value)
 
 
+class _CopyWriter(object):
+    """Context manager to write loop or category to two mmCIF/BinaryCIF
+       files"""
+    def __init__(self, w1, w2):
+        self.w1, self.w2 = w1, w2
+
+    def write(self, *args, **keys):
+        self.w1.write(*args, **keys)
+        self.w2.write(*args, **keys)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # This may not correctly handle exceptions raised within the loop
+        self.w1.__exit__(exc_type, exc_value, traceback)
+        self.w2.__exit__(exc_type, exc_value, traceback)
+
+
 class _SystemWriter(object):
     """Utility class which normally just passes through to the default
        ``base_writer``, but outputs selected categories to associated files."""
-    def __init__(self, base_writer, category_map):
+    def __init__(self, base_writer, category_map, copy_category_map):
         self._base_writer = base_writer
         self.category_map = category_map
+        self.copy_category_map = copy_category_map
 
     def category(self, category):
-        w = self.category_map.get(category, self._base_writer)
-        return w.category(category)
+        w = self.copy_category_map.get(category)
+        if w:
+            return _CopyWriter(w.category(category),
+                               self._base_writer.category(category))
+        else:
+            w = self.category_map.get(category, self._base_writer)
+            return w.category(category)
 
     def loop(self, category, keys):
-        w = self.category_map.get(category, self._base_writer)
-        return w.loop(category, keys)
+        w = self.copy_category_map.get(category)
+        if w:
+            return _CopyWriter(w.loop(category, keys),
+                               self._base_writer.loop(category, keys))
+        else:
+            w = self.category_map.get(category, self._base_writer)
+            return w.loop(category, keys)
 
     def end_block(self):
         # Close all file handles of associated files
@@ -702,9 +732,11 @@ class ModelCIFVariant(Variant):
         # Get a Writer-like object which outputs selected categories to
         # associated files (the rest use the default writer)
         category_map = {}
+        copy_category_map = {}
         for r in system.repositories:
             for f in r.files:
-                if not hasattr(f, 'categories') or not f.categories:
+                if (not hasattr(f, 'categories')
+                        or (not f.categories and not f.copy_categories)):
                     continue
                 # Always output associated file in mmCIF, not BinaryCIF
                 w = ihm.format.CifWriter(open(f.path, 'w'))
@@ -720,7 +752,9 @@ class ModelCIFVariant(Variant):
                 for c in f.categories:
                     # Allow for categories with or without leading underscore
                     category_map['_' + c.lstrip('_').lower()] = w
-        return _SystemWriter(writer, category_map)
+                for c in f.copy_categories:
+                    copy_category_map['_' + c.lstrip('_').lower()] = w
+        return _SystemWriter(writer, category_map, copy_category_map)
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],
