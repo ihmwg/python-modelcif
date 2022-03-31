@@ -1027,8 +1027,9 @@ _ma_associated_archive_file_details.description
             path='test_write_associated.cif',
             categories=['exptl', '_AUDIT_CONFORM'],
             entry_details='test details', entry_id='testcif')
+        f2 = modelcif.associated.File(path='foo.txt', details='test file')
         r = modelcif.associated.Repository(url_root='https://example.com',
-                                           files=[f])
+                                           files=[f, f2])
         s.repositories.append(r)
 
         fh = StringIO()
@@ -1043,6 +1044,21 @@ _ma_associated_archive_file_details.description
         self.assertNotIn('_exptl.entry_id', main_file)
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertNotIn('_audit_conform.dict_name', main_file)
+
+    def test_system_writer(self):
+        """Test _SystemWriter utility class"""
+        class BaseWriter(object):
+            def flush(self):
+                return 'flush called'
+
+            def write_comment(self, comment):
+                return 'write comment ' + comment
+
+        s = modelcif.dumper._SystemWriter(BaseWriter(), {})
+        # These methods are not usually called in ordinary operation, but
+        # we should provide them for Writer compatibility
+        self.assertEqual(s.flush(), 'flush called')
+        self.assertEqual(s.write_comment('foo'), 'write comment foo')
 
 
 if __name__ == '__main__':
