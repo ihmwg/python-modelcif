@@ -291,6 +291,7 @@ class _AlignmentDumper(Dumper):
 
     def dump_template_details(self, system, writer):
         ordinal = itertools.count(1)
+
         def write_template(tmpl, tgt_asym, lp):
             org = ("reference database" if tmpl.references
                    else "customized")
