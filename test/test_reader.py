@@ -223,13 +223,43 @@ _ma_template_details.template_auth_asym_id
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
-        # An 'alignment' should have been created for the implied
-        # template - target_asym_id correspondence
-        a, = s.alignments
-        p, = a.pairs
-        self.assertEqual(p.template._id, '1')
-        self.assertIs(p.template, t)
-        self.assertEqual(p.target._id, 'A')
+        self.assertEqual(len(s.alignments), 0)
+
+    def test_template_details_handler_nonpoly(self):
+        """Test _TemplateDetailsHandler with nonpolymeric template"""
+        cif = """
+loop_
+_pdbx_entity_nonpoly.entity_id
+_pdbx_entity_nonpoly.name
+_pdbx_entity_nonpoly.comp_id
+_pdbx_entity_nonpoly.ma_model_mode
+3 Heme HEM explicit
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' non-polymer 1 2 A B 3 4 Z
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        t, = s.templates
+        self.assertEqual(t.entity._id, '3')
+        self.assertEqual(t.model_num, 4)
+        self.assertEqual(t.asym_id, 'B')
+        self.assertEqual(t.strand_id, 'Z')
+        self.assertEqual(len(s.alignments), 0)
+        a, = s.asym_units
+        self.assertIsInstance(a, modelcif.NonPolymerFromTemplate)
+        self.assertIs(a.template, t)
+        self.assertTrue(a.explicit)
 
     def test_template_ref_db_handler(self):
         """Test _TemplateRefDBHandler"""

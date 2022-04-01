@@ -69,6 +69,27 @@ class _TargetRefDBDumper(Dumper):
                              organism_scientific=r.organism_scientific)
 
 
+class _EntityNonPolyDumper(Dumper):
+    def finalize(self, system):
+        self._ma_model_mode_map = {}
+        expmap = {True: 'explicit', False: 'implicit'}
+        for a in system.asym_units:
+            if isinstance(a, modelcif.NonPolymerFromTemplate):
+                self._ma_model_mode_map[a.template.entity] = \
+                        expmap.get(a.explicit)
+
+    def dump(self, system, writer):
+        with writer.loop("_pdbx_entity_nonpoly",
+                         ["entity_id", "name", "comp_id",
+                          "ma_model_mode"]) as lp:
+            for entity in system.entities:
+                if entity.is_polymeric():
+                    continue
+                lp.write(entity_id=entity._id, name=entity.description,
+                         comp_id=entity.sequence[0].id,
+                         ma_model_mode=self._ma_model_mode_map.get(entity))
+
+
 class _TargetEntityDumper(Dumper):
     def dump(self, system, writer):
         entities = sorted(system.target_entities,
@@ -246,14 +267,6 @@ class _TemplateTransformDumper(Dumper):
                          **_get_transform(t.rot_matrix, t.tr_vector))
 
 
-def _get_target_asym(asym_or_segment):
-    """Get AsymUnit from something that could be AsymUnit or AsymUnitSegment"""
-    if isinstance(asym_or_segment, ihm.AsymUnitSegment):
-        return asym_or_segment.asym
-    else:
-        return asym_or_segment
-
-
 class _AlignmentDumper(Dumper):
     def finalize(self, system):
         for n, tmpl in enumerate(system.templates):
@@ -278,6 +291,23 @@ class _AlignmentDumper(Dumper):
 
     def dump_template_details(self, system, writer):
         ordinal = itertools.count(1)
+        def write_template(tmpl, tgt_asym, lp):
+            org = ("reference database" if tmpl.references
+                   else "customized")
+            poly = ("polymer" if tmpl.entity.is_polymeric()
+                    else "non-polymer")
+            lp.write(ordinal_id=next(ordinal),
+                     template_id=tmpl._id,
+                     template_origin=org,
+                     template_entity_type=poly,
+                     template_trans_matrix_id=tmpl.transformation._id,
+                     template_data_id=tmpl._data_id,
+                     target_asym_id=tgt_asym._id,
+                     template_label_asym_id=tmpl.asym_id,
+                     template_label_entity_id=tmpl.entity._id,
+                     template_model_num=tmpl.model_num,
+                     template_auth_asym_id=tmpl.strand_id)
+
         with writer.loop(
                 "_ma_template_details",
                 ["ordinal_id", "template_id", "template_origin",
@@ -289,23 +319,11 @@ class _AlignmentDumper(Dumper):
             for a in system.alignments:
                 for s in a.pairs:
                     # get Template from TemplateSegment
-                    tmpl = s.template.template
-                    org = ("reference database" if tmpl.references
-                           else "customized")
-                    poly = ("polymer" if tmpl.entity.is_polymeric()
-                            else "non-polymer")
-                    tgt_asym = _get_target_asym(s.target)
-                    lp.write(ordinal_id=next(ordinal),
-                             template_id=tmpl._id,
-                             template_origin=org,
-                             template_entity_type=poly,
-                             template_trans_matrix_id=tmpl.transformation._id,
-                             template_data_id=tmpl._data_id,
-                             target_asym_id=tgt_asym._id,
-                             template_label_asym_id=tmpl.asym_id,
-                             template_label_entity_id=tmpl.entity._id,
-                             template_model_num=tmpl.model_num,
-                             template_auth_asym_id=tmpl.strand_id)
+                    write_template(s.template.template, s.target.asym, lp)
+            # Handle all non-polymer templates (not in alignments)
+            for a in system.asym_units:
+                if isinstance(a, modelcif.NonPolymerFromTemplate):
+                    write_template(a.template, a, lp)
 
     def _get_sequence(self, entity):
         """Get the sequence for an entity as a string"""
@@ -339,8 +357,6 @@ class _AlignmentDumper(Dumper):
                          ["id", "template_id", "residue_number_begin",
                           "residue_number_end"]) as lp:
             for s in system.template_segments:
-                if not s.template.entity.is_polymeric():
-                    continue
                 lp.write(
                     id=s._segment_id, template_id=s.template._id,
                     residue_number_begin=s.seq_id_range[0],
@@ -375,18 +391,12 @@ class _AlignmentDumper(Dumper):
                           "target_seq_id_begin", "target_seq_id_end"]) as lp:
             for a in system.alignments:
                 for p in a.pairs:
-                    if isinstance(p.target, ihm.AsymUnitSegment):
-                        lp.write(
-                            id=next(ordinal),
-                            template_segment_id=p.template._segment_id,
-                            target_asym_id=p.target.asym._id,
-                            target_seq_id_begin=p.target.seq_id_range[0],
-                            target_seq_id_end=p.target.seq_id_range[1])
-                    elif p.target.entity.is_polymeric():
-                        lp.write(
-                            id=next(ordinal),
-                            template_segment_id=p.template._segment_id,
-                            target_asym_id=p.target._id)
+                    lp.write(
+                        id=next(ordinal),
+                        template_segment_id=p.template._segment_id,
+                        target_asym_id=p.target.asym._id,
+                        target_seq_id_begin=p.target.seq_id_range[0],
+                        target_seq_id_end=p.target.seq_id_range[1])
 
     def dump_info(self, system, writer):
         with writer.loop(
@@ -396,10 +406,7 @@ class _AlignmentDumper(Dumper):
                  "alignment_mode"]) as lp:
             for a in system.alignments:
                 if a.pairs:
-                    align_len = max(len(s.gapped_sequence
-                                        if hasattr(s, 'gapped_sequence')
-                                        else s.entity.sequence)
-                                    for pair in a.pairs
+                    align_len = max(len(s.gapped_sequence) for pair in a.pairs
                                     for s in (pair.template, pair.target))
                 else:
                     align_len = None
@@ -422,16 +429,11 @@ class _AlignmentDumper(Dumper):
                  "sequence_identity_denominator_other_details"]) as lp:
             for a in system.alignments:
                 for s in a.pairs:
-                    # We can't populate template_segment_id for nonpolymers;
-                    # the other fields likely make no sense either
-                    if not s.template.entity.is_polymeric():
-                        continue
                     denom = s.identity.denominator
                     od = s.identity.other_details
-                    tgt_asym = _get_target_asym(s.target)
                     lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
                              template_segment_id=s.template._segment_id,
-                             target_asym_id=tgt_asym._id,
+                             target_asym_id=s.target.asym._id,
                              score_type=s.score.type,
                              score_type_other_details=s.score.other_details,
                              score_value=s.score.value,
@@ -449,14 +451,12 @@ class _AlignmentDumper(Dumper):
                 # todo: don't duplicate sequences
                 for s in a.pairs:
                     # 1=target, 2=template
-                    if hasattr(s.target, 'gapped_sequence'):
-                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
-                                 target_template_flag=1,
-                                 sequence=s.target.gapped_sequence)
-                    if hasattr(s.template, 'gapped_sequence'):
-                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
-                                 target_template_flag=2,
-                                 sequence=s.template.gapped_sequence)
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=1,
+                             sequence=s.target.gapped_sequence)
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=2,
+                             sequence=s.template.gapped_sequence)
 
 
 class _ProtocolDumper(Dumper):
@@ -718,7 +718,7 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
         ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,
-        ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
+        ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper, _DataGroupDumper, _TargetEntityDumper, _AssemblyDumper,

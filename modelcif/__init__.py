@@ -127,7 +127,9 @@ class System(object):
     def _all_templates(self):
         return itertools.chain(
             self.templates,
-            (x.template for x in self.template_segments))
+            (x.template for x in self.template_segments),
+            (x.template for x in self.asym_units
+             if isinstance(x, NonPolymerFromTemplate)))
 
     def _all_template_transformations(self):
         return itertools.chain(
@@ -387,15 +389,17 @@ class TemplateSegment(object):
         self.gapped_sequence = gapped_sequence
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
-    entity = property(lambda self: self.template.entity)
-
 
 class Template(modelcif.data.Data):
     """A single chain that was used as a template structure for modeling.
 
-       After creating a template, use :meth:`segment` to denote the part of
-       its sequence used in any modeling alignments
+       After creating a polymer template, use :meth:`segment` to denote the
+       part of its sequence used in any modeling alignments
        (see :class:`modelcif.alignment.Pair`).
+
+       Non-polymer templates do not have alignments, and should instead be
+       passed to one or more :class:`NonPolymerFromTemplate` objects.
+
        Template objects can also be used as inputs or outputs in modeling
        protocol steps; see :class:`modelcif.protocol.Step`.
 
@@ -443,3 +447,32 @@ class Template(modelcif.data.Data):
 
     strand_id = property(lambda self: self._strand_id or self.asym_id,
                          doc="PDB or author-provided strand/chain ID")
+
+
+class NonPolymerFromTemplate(AsymUnit):
+    """A non-polymer (e.g. ligand) in the model that is modeled from
+       a non-polymer template.
+
+       These objects act just like :class:`AsymUnit` and should be added
+       to :class:`Assembly`.
+
+       To represent a non-polymer that is modeled without a template, just
+       use a regular :class:`AsymUnit`.
+
+       :param template: The non-polymer template used to model
+              this non-polymer.
+       :type template: :class:`Template`
+       :param bool explicit: True iff the conformation of the template is
+              allowed to change (e.g. bond relaxation, flexible fitting)
+              during the modeling, or False if the template is treated as
+              a single rigid body.
+
+       For the other parameters, see :class:`AsymUnit`.
+    """
+
+    def __init__(self, template, explicit, details=None, auth_seq_id_map=0,
+                 id=None, strand_id=None):
+        super(NonPolymerFromTemplate, self).__init__(
+            template.entity, details=details, auth_seq_id_map=auth_seq_id_map,
+            id=id, strand_id=strand_id)
+        self.template, self.explicit = template, explicit
