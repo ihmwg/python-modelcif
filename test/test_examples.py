@@ -44,6 +44,21 @@ class Tests(unittest.TestCase):
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 s, = modelcif.reader.read(fh)
 
+    def test_ligands_example(self):
+        """Test ligands example"""
+        with utils.temporary_directory() as tmpdir:
+            subprocess.check_call([sys.executable,
+                                   get_example_path("ligands.py")],
+                                  cwd=tmpdir)
+
+            # Make sure that a complete output file was produced and that we
+            # can read it
+            with open(os.path.join(tmpdir, 'output.cif')) as fh:
+                contents = fh.readlines()
+            self.assertEqual(len(contents), 356)
+            with open(os.path.join(tmpdir, 'output.cif')) as fh:
+                s, = modelcif.reader.read(fh)
+
 
 if __name__ == '__main__':
     unittest.main()
