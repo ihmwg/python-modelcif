@@ -9,6 +9,7 @@ import modelcif
 import modelcif.model
 import modelcif.dumper
 import modelcif.reference
+import modelcif.protocol
 import modelcif.alignment
 from modelcif.alignment import ShorterSequenceIdentity as SequenceIdentity
 import ihm
@@ -82,11 +83,16 @@ class MyModel(modelcif.model.HomologyModel):
                 het=seq_id is None)
 
 
-# Add the model to the file and write it out:
+# Add the model and modeling protocol to the file and write them out:
 model = MyModel(assembly=modeled_assembly, name='Best scoring model')
 
 model_group = modelcif.model.ModelGroup([model], name='All models')
 system.model_groups.append(model_group)
+
+protocol = modelcif.protocol.Protocol()
+protocol.steps.append(modelcif.protocol.ModelingStep(
+    input_data=aln, output_data=model))
+system.protocols.append(protocol)
 
 with open('output.cif', 'w') as fh:
     modelcif.dumper.write(fh, [system])

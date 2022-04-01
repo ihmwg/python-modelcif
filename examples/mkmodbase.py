@@ -109,7 +109,8 @@ system.alignments.append(aln)
 
 atoms = [('A', 1, 'C', 'CA', 1., 2., 3.),
          ('A', 2, 'C', 'CA', 4., 5., 6.),
-         ('A', 3, 'C', 'CA', 7., 8., 9.)]
+         ('A', 3, 'C', 'CA', 7., 8., 9.),
+         ('A', 4, 'C', 'CA', 10., 11., 12.)]
 
 
 class MyModel(modelcif.model.HomologyModel):
