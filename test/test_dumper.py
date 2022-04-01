@@ -880,9 +880,13 @@ _ma_associated_archive_file_details.description
         """Test write() function with associated files, copy_categories"""
         s = modelcif.System(id='system1')
 
+        e1 = modelcif.Entity('ACGT')
+        e1._id = 42
+        s.entities.append(e1)
+
         f = modelcif.associated.CIFFile(
             path='test_write_associated_copy.cif',
-            categories=['exptl'], copy_categories=['audit_conform'],
+            categories=['exptl'], copy_categories=['entity', 'audit_conform'],
             entry_details='test details', entry_id='testcif')
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f])
@@ -897,7 +901,9 @@ _ma_associated_archive_file_details.description
         # exptl category should be in associated file, not the main file
         self.assertIn('_exptl.entry_id', assoc_file)
         self.assertNotIn('_exptl.entry_id', main_file)
-        # audit_conform category should be in *both* files
+        # entity and audit conform categories should be in *both* files
+        self.assertIn('_entity.type', assoc_file)
+        self.assertIn('_entity.type', main_file)
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertIn('_audit_conform.dict_name', main_file)
 
