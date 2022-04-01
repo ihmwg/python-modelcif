@@ -76,7 +76,7 @@ class _EntityNonPolyDumper(Dumper):
         for a in system.asym_units:
             if isinstance(a, modelcif.NonPolymerFromTemplate):
                 self._ma_model_mode_map[a.template.entity] = \
-                        expmap.get(a.explicit)
+                    expmap.get(a.explicit)
 
     def dump(self, system, writer):
         with writer.loop("_pdbx_entity_nonpoly",
