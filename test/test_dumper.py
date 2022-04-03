@@ -19,29 +19,6 @@ import ihm.format
 import ihm.dumper
 
 
-def ihm_post_028_write(fh, systems):
-    # Act like calling modelcif.dumper.write() with recent python-ihm.
-    # This doesn't work with the 0.28 release because it does not include
-    # the variant.get_system_writer() call. This utility function can be
-    # removed after the python-ihm 0.29 release.
-    variant = modelcif.dumper.ModelCIFVariant()
-    dumpers = variant.get_dumpers()
-    writer_class = ihm.format.CifWriter
-    writer = writer_class(fh)
-    for system in systems:
-        w = variant.get_system_writer(system, writer_class, writer)
-        system._before_write()
-
-        for d in dumpers:
-            d.finalize(system)
-        system._check_after_write()
-        for d in dumpers:
-            d.dump(system, w)
-        if hasattr(w, 'end_block'):
-            w.end_block()
-    writer.flush()
-
-
 def _get_dumper_output(dumper, system):
     fh = StringIO()
     writer = ihm.format.CifWriter(fh)
@@ -864,7 +841,7 @@ _ma_associated_archive_file_details.description
         s.repositories.append(r)
 
         fh = StringIO()
-        ihm_post_028_write(fh, [s])
+        modelcif.dumper.write(fh, [s])
         main_file = fh.getvalue()
         with open('test_write_associated.cif') as fh:
             assoc_file = fh.read()
@@ -893,7 +870,7 @@ _ma_associated_archive_file_details.description
         s.repositories.append(r)
 
         fh = StringIO()
-        ihm_post_028_write(fh, [s])
+        modelcif.dumper.write(fh, [s])
         main_file = fh.getvalue()
         with open('test_write_associated_copy.cif') as fh:
             assoc_file = fh.read()
@@ -918,7 +895,7 @@ _ma_associated_archive_file_details.description
         s.repositories.append(r)
 
         fh = StringIO()
-        ihm_post_028_write(fh, [s])
+        modelcif.dumper.write(fh, [s])
         main_file = fh.getvalue()
         self.assertIn('_exptl.entry_id', main_file)
         self.assertIn('_audit_conform.dict_name', main_file)
