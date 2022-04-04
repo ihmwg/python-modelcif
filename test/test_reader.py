@@ -216,9 +216,10 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 1 'reference database' polymer 1 2 A B 3 4 Z
+2 2 'reference database' polymer 2 3 . B 3 4 Z
 """
         s, = modelcif.reader.read(StringIO(cif))
-        t, = s.templates
+        t, t2 = s.templates
         self.assertEqual(t.entity._id, '3')
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')

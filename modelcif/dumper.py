@@ -303,7 +303,7 @@ class _AlignmentDumper(Dumper):
                      template_entity_type=poly,
                      template_trans_matrix_id=tmpl.transformation._id,
                      template_data_id=tmpl._data_id,
-                     target_asym_id=tgt_asym._id,
+                     target_asym_id=tgt_asym._id if tgt_asym else None,
                      template_label_asym_id=tmpl.asym_id,
                      template_label_entity_id=tmpl.entity._id,
                      template_model_num=tmpl.model_num,
@@ -317,14 +317,21 @@ class _AlignmentDumper(Dumper):
                  "template_label_asym_id",
                  "template_label_entity_id", "template_model_num",
                  "template_auth_asym_id"]) as lp:
+            seen_templates = set()
             for a in system.alignments:
                 for s in a.pairs:
                     # get Template from TemplateSegment
                     write_template(s.template.template, s.target.asym, lp)
+                    seen_templates.add(s.template.template)
             # Handle all non-polymer templates (not in alignments)
             for a in system.asym_units:
                 if isinstance(a, modelcif.NonPolymerFromTemplate):
                     write_template(a.template, a, lp)
+                    seen_templates.add(a.template)
+            # Handle all remaining non-aligned templates
+            for t in system.templates:
+                if t not in seen_templates:
+                    write_template(t, None, lp)
 
     def _get_sequence(self, entity):
         """Get the sequence for an entity as a string"""

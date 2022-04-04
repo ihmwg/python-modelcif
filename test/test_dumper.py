@@ -596,20 +596,40 @@ _ma_alignment.sequence
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
+        e1._id = 9
         t1 = modelcif.Template(
             e1, asym_id="A", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
         t1._id = 1
+        t1._data_id = 99
         # Non-polymeric entity
         e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
+        e2._id = 10
         t2 = modelcif.Template(
             e2, asym_id="B", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
         t2._id = 2
+        t2._data_id = 100
         system.templates.extend((t1, t2))
         dumper = modelcif.dumper._AlignmentDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 customized polymer 42 99 . A 9 1 A
+2 2 customized non-polymer 42 100 . B 10 1 B
+#
+#
 loop_
 _ma_template_poly.template_id
 _ma_template_poly.seq_one_letter_code
@@ -630,10 +650,12 @@ _ma_template_non_poly.details
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
+        e1._id = 8
         t1 = modelcif.Template(
             e1, asym_id="A", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
         t1._id = 1
+        t1._data_id = 98
         # Non-polymeric entity
         e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
         e2._id = 9
@@ -664,6 +686,7 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 2 customized non-polymer 42 99 X B 9 1 B
+2 1 customized polymer 42 98 . A 8 1 A
 #
 #
 loop_
