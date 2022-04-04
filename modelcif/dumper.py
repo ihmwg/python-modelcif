@@ -17,8 +17,14 @@ class _AuditConformDumper(Dumper):
         with writer.category("_audit_conform") as lp:
             # Update to match the version of the ModelCIF dictionary
             # we support:
-            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.3",
-                     dict_location=self.URL % "8b46f31")
+            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.6",
+                     dict_location=self.URL % "21aa734")
+
+
+class _EntryLinkDumper(Dumper):
+    def dump(self, system, writer):
+        with writer.loop("_entry_link", ["id", "entry_id", "details"]) as lp:
+            lp.write(id=1, entry_id=system.id, details=system.entry_details)
 
 
 class _ExptlDumper(Dumper):
@@ -61,6 +67,27 @@ class _TargetRefDBDumper(Dumper):
                              seq_db_align_end=db_end,
                              ncbi_taxonomy_id=r.ncbi_taxonomy_id,
                              organism_scientific=r.organism_scientific)
+
+
+class _EntityNonPolyDumper(Dumper):
+    def finalize(self, system):
+        self._ma_model_mode_map = {}
+        expmap = {True: 'explicit', False: 'implicit'}
+        for a in system.asym_units:
+            if isinstance(a, modelcif.NonPolymerFromTemplate):
+                self._ma_model_mode_map[a.template.entity] = \
+                    expmap.get(a.explicit)
+
+    def dump(self, system, writer):
+        with writer.loop("_pdbx_entity_nonpoly",
+                         ["entity_id", "name", "comp_id",
+                          "ma_model_mode"]) as lp:
+            for entity in system.entities:
+                if entity.is_polymeric():
+                    continue
+                lp.write(entity_id=entity._id, name=entity.description,
+                         comp_id=entity.sequence[0].id,
+                         ma_model_mode=self._ma_model_mode_map.get(entity))
 
 
 class _TargetEntityDumper(Dumper):
@@ -240,14 +267,6 @@ class _TemplateTransformDumper(Dumper):
                          **_get_transform(t.rot_matrix, t.tr_vector))
 
 
-def _get_target_asym(asym_or_segment):
-    """Get AsymUnit from something that could be AsymUnit or AsymUnitSegment"""
-    if isinstance(asym_or_segment, ihm.AsymUnitSegment):
-        return asym_or_segment.asym
-    else:
-        return asym_or_segment
-
-
 class _AlignmentDumper(Dumper):
     def finalize(self, system):
         for n, tmpl in enumerate(system.templates):
@@ -272,6 +291,24 @@ class _AlignmentDumper(Dumper):
 
     def dump_template_details(self, system, writer):
         ordinal = itertools.count(1)
+
+        def write_template(tmpl, tgt_asym, lp):
+            org = ("reference database" if tmpl.references
+                   else "customized")
+            poly = ("polymer" if tmpl.entity.is_polymeric()
+                    else "non-polymer")
+            lp.write(ordinal_id=next(ordinal),
+                     template_id=tmpl._id,
+                     template_origin=org,
+                     template_entity_type=poly,
+                     template_trans_matrix_id=tmpl.transformation._id,
+                     template_data_id=tmpl._data_id,
+                     target_asym_id=tgt_asym._id,
+                     template_label_asym_id=tmpl.asym_id,
+                     template_label_entity_id=tmpl.entity._id,
+                     template_model_num=tmpl.model_num,
+                     template_auth_asym_id=tmpl.strand_id)
+
         with writer.loop(
                 "_ma_template_details",
                 ["ordinal_id", "template_id", "template_origin",
@@ -283,23 +320,11 @@ class _AlignmentDumper(Dumper):
             for a in system.alignments:
                 for s in a.pairs:
                     # get Template from TemplateSegment
-                    tmpl = s.template.template
-                    org = ("reference database" if tmpl.references
-                           else "customized")
-                    poly = ("polymer" if tmpl.entity.is_polymeric()
-                            else "non-polymer")
-                    tgt_asym = _get_target_asym(s.target)
-                    lp.write(ordinal_id=next(ordinal),
-                             template_id=tmpl._id,
-                             template_origin=org,
-                             template_entity_type=poly,
-                             template_trans_matrix_id=tmpl.transformation._id,
-                             template_data_id=tmpl._data_id,
-                             target_asym_id=tgt_asym._id,
-                             template_label_asym_id=tmpl.asym_id,
-                             template_label_entity_id=tmpl.entity._id,
-                             template_model_num=tmpl.model_num,
-                             template_auth_asym_id=tmpl.strand_id)
+                    write_template(s.template.template, s.target.asym, lp)
+            # Handle all non-polymer templates (not in alignments)
+            for a in system.asym_units:
+                if isinstance(a, modelcif.NonPolymerFromTemplate):
+                    write_template(a.template, a, lp)
 
     def _get_sequence(self, entity):
         """Get the sequence for an entity as a string"""
@@ -333,8 +358,6 @@ class _AlignmentDumper(Dumper):
                          ["id", "template_id", "residue_number_begin",
                           "residue_number_end"]) as lp:
             for s in system.template_segments:
-                if not s.template.entity.is_polymeric():
-                    continue
                 lp.write(
                     id=s._segment_id, template_id=s.template._id,
                     residue_number_begin=s.seq_id_range[0],
@@ -369,18 +392,12 @@ class _AlignmentDumper(Dumper):
                           "target_seq_id_begin", "target_seq_id_end"]) as lp:
             for a in system.alignments:
                 for p in a.pairs:
-                    if isinstance(p.target, ihm.AsymUnitSegment):
-                        lp.write(
-                            id=next(ordinal),
-                            template_segment_id=p.template._segment_id,
-                            target_asym_id=p.target.asym._id,
-                            target_seq_id_begin=p.target.seq_id_range[0],
-                            target_seq_id_end=p.target.seq_id_range[1])
-                    elif p.target.entity.is_polymeric():
-                        lp.write(
-                            id=next(ordinal),
-                            template_segment_id=p.template._segment_id,
-                            target_asym_id=p.target._id)
+                    lp.write(
+                        id=next(ordinal),
+                        template_segment_id=p.template._segment_id,
+                        target_asym_id=p.target.asym._id,
+                        target_seq_id_begin=p.target.seq_id_range[0],
+                        target_seq_id_end=p.target.seq_id_range[1])
 
     def dump_info(self, system, writer):
         with writer.loop(
@@ -390,10 +407,7 @@ class _AlignmentDumper(Dumper):
                  "alignment_mode"]) as lp:
             for a in system.alignments:
                 if a.pairs:
-                    align_len = max(len(s.gapped_sequence
-                                        if hasattr(s, 'gapped_sequence')
-                                        else s.entity.sequence)
-                                    for pair in a.pairs
+                    align_len = max(len(s.gapped_sequence) for pair in a.pairs
                                     for s in (pair.template, pair.target))
                 else:
                     align_len = None
@@ -416,16 +430,11 @@ class _AlignmentDumper(Dumper):
                  "sequence_identity_denominator_other_details"]) as lp:
             for a in system.alignments:
                 for s in a.pairs:
-                    # We can't populate template_segment_id for nonpolymers;
-                    # the other fields likely make no sense either
-                    if not s.template.entity.is_polymeric():
-                        continue
                     denom = s.identity.denominator
                     od = s.identity.other_details
-                    tgt_asym = _get_target_asym(s.target)
                     lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
                              template_segment_id=s.template._segment_id,
-                             target_asym_id=tgt_asym._id,
+                             target_asym_id=s.target.asym._id,
                              score_type=s.score.type,
                              score_type_other_details=s.score.other_details,
                              score_value=s.score.value,
@@ -443,14 +452,12 @@ class _AlignmentDumper(Dumper):
                 # todo: don't duplicate sequences
                 for s in a.pairs:
                     # 1=target, 2=template
-                    if hasattr(s.target, 'gapped_sequence'):
-                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
-                                 target_template_flag=1,
-                                 sequence=s.target.gapped_sequence)
-                    if hasattr(s.template, 'gapped_sequence'):
-                        lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
-                                 target_template_flag=2,
-                                 sequence=s.template.gapped_sequence)
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=1,
+                             sequence=s.target.gapped_sequence)
+                    lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
+                             target_template_flag=2,
+                             sequence=s.template.gapped_sequence)
 
 
 class _ProtocolDumper(Dumper):
@@ -501,6 +508,52 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                              data_id=model._data_id,
                              model_type=model.model_type,
                              model_type_other_details=model.other_details)
+
+
+class _AssociatedDumper(Dumper):
+    def finalize(self, system):
+        file_id = itertools.count(1)
+        in_archive_file_id = itertools.count(1)
+        for repo in system.repositories:
+            for f in repo.files:
+                f._id = next(file_id)
+                if hasattr(f, 'files'):
+                    for af in f.files:
+                        if hasattr(af, 'files'):
+                            raise ValueError(
+                                "An archive cannot contain another archive")
+                        af._id = next(in_archive_file_id)
+
+    def dump(self, system, writer):
+        self.dump_files(system, writer)
+        self.dump_archive_files(system, writer)
+
+    def dump_files(self, system, writer):
+        with writer.loop(
+                "_ma_entry_associated_files",
+                ["id", "entry_id", "file_url", "file_type", "file_format",
+                 "file_content", "details"]) as lp:
+            for repo in system.repositories:
+                for f in repo.files:
+                    lp.write(id=f._id, entry_id=system.id,
+                             file_url=repo.get_url(f), file_type=f.file_type,
+                             file_format=f.file_format,
+                             file_content=f.file_content, details=f.details)
+
+    def dump_archive_files(self, system, writer):
+        with writer.loop(
+                "_ma_associated_archive_file_details",
+                ["id", "archive_file_id", "file_path", "file_format",
+                 "file_content", "description"]) as lp:
+            for repo in system.repositories:
+                for f in repo.files:
+                    if not hasattr(f, 'files'):
+                        continue
+                    for af in f.files:
+                        lp.write(id=af._id, archive_file_id=f._id,
+                                 file_path=af.path, file_format=af.file_format,
+                                 file_content=af.file_content,
+                                 description=af.details)
 
 
 class _QAMetricDumper(Dumper):
@@ -589,6 +642,70 @@ class _QAMetricDumper(Dumper):
                              metric_id=m._id, metric_value=m.value)
 
 
+class _CopyWriter(object):
+    """Context manager to write loop or category to two mmCIF/BinaryCIF
+       files"""
+    def __init__(self, w1, w2):
+        self.w1, self.w2 = w1, w2
+
+    def write(self, *args, **keys):
+        self.w1.write(*args, **keys)
+        self.w2.write(*args, **keys)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # This may not correctly handle exceptions raised within the loop
+        self.w1.__exit__(exc_type, exc_value, traceback)
+        self.w2.__exit__(exc_type, exc_value, traceback)
+
+
+class _SystemWriter(object):
+    """Utility class which normally just passes through to the default
+       ``base_writer``, but outputs selected categories to associated files."""
+    def __init__(self, base_writer, category_map, copy_category_map):
+        self._base_writer = base_writer
+        self.category_map = category_map
+        self.copy_category_map = copy_category_map
+
+    def category(self, category):
+        w = self.copy_category_map.get(category)
+        if w:
+            return _CopyWriter(w.category(category),
+                               self._base_writer.category(category))
+        else:
+            w = self.category_map.get(category, self._base_writer)
+            return w.category(category)
+
+    def loop(self, category, keys):
+        w = self.copy_category_map.get(category)
+        if w:
+            return _CopyWriter(w.loop(category, keys),
+                               self._base_writer.loop(category, keys))
+        else:
+            w = self.category_map.get(category, self._base_writer)
+            return w.loop(category, keys)
+
+    def end_block(self):
+        # Close all file handles of associated files
+        for w in self.category_map.values():
+            if not hasattr(w, 'fh'):
+                continue
+            w.fh.close()
+            del w.fh
+
+    # Just pass through to base writer object
+    def flush(self):
+        return self._base_writer.flush()
+
+    def start_block(self, name):
+        return self._base_writer.start_block(name)
+
+    def write_comment(self, comment):
+        return self._base_writer.write_comment(comment)
+
+
 class ModelCIFVariant(Variant):
     """Used to select typical PDBx/ModelCIF file output.
        See :func:`write` and :class:`ihm.dumper.Variant`."""
@@ -602,15 +719,47 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
         ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,
-        ihm.dumper._EntityPolyDumper, ihm.dumper._EntityNonPolyDumper,
+        ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper, _DataGroupDumper, _TargetEntityDumper, _AssemblyDumper,
         _TemplateTransformDumper, _AlignmentDumper,
-        _ProtocolDumper, _ModelDumper, _QAMetricDumper]
+        _ProtocolDumper, _ModelDumper, _AssociatedDumper, _QAMetricDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
+
+    def get_system_writer(self, system, writer_class, writer):
+        # Get a Writer-like object which outputs selected categories to
+        # associated files (the rest use the default writer)
+        category_map = {}
+        copy_category_map = {}
+        for r in system.repositories:
+            for f in r.files:
+                if (not hasattr(f, 'categories')
+                        or (not f.categories and not f.copy_categories)):
+                    continue
+                # Always output associated file in mmCIF, not BinaryCIF
+                w = ihm.format.CifWriter(open(f.path, 'w'))
+                # Write header information to the associated file
+                dumpers = (ihm.dumper._EntryDumper(), _EntryLinkDumper())
+                # We are passing the File object to the dumpers here where
+                # they expect a System object, but the interfaces are similar
+                # enough, so we don't need a facade object.
+                for d in dumpers:
+                    d.finalize(f)
+                for d in dumpers:
+                    d.dump(f, w)
+                for c in f.categories:
+                    # Allow for categories with or without leading underscore
+                    category_map['_' + c.lstrip('_').lower()] = w
+                for c in f.copy_categories:
+                    copy_category_map['_' + c.lstrip('_').lower()] = w
+        if category_map or copy_category_map:
+            return _SystemWriter(writer, category_map, copy_category_map)
+        else:
+            # If no categories, we can just use the base writer
+            return writer
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],

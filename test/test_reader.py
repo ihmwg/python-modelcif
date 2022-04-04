@@ -223,13 +223,43 @@ _ma_template_details.template_auth_asym_id
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
-        # An 'alignment' should have been created for the implied
-        # template - target_asym_id correspondence
-        a, = s.alignments
-        p, = a.pairs
-        self.assertEqual(p.template._id, '1')
-        self.assertIs(p.template, t)
-        self.assertEqual(p.target._id, 'A')
+        self.assertEqual(len(s.alignments), 0)
+
+    def test_template_details_handler_nonpoly(self):
+        """Test _TemplateDetailsHandler with nonpolymeric template"""
+        cif = """
+loop_
+_pdbx_entity_nonpoly.entity_id
+_pdbx_entity_nonpoly.name
+_pdbx_entity_nonpoly.comp_id
+_pdbx_entity_nonpoly.ma_model_mode
+3 Heme HEM explicit
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' non-polymer 1 2 A B 3 4 Z
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        t, = s.templates
+        self.assertEqual(t.entity._id, '3')
+        self.assertEqual(t.model_num, 4)
+        self.assertEqual(t.asym_id, 'B')
+        self.assertEqual(t.strand_id, 'Z')
+        self.assertEqual(len(s.alignments), 0)
+        a, = s.asym_units
+        self.assertIsInstance(a, modelcif.NonPolymerFromTemplate)
+        self.assertIs(a.template, t)
+        self.assertTrue(a.explicit)
 
     def test_template_ref_db_handler(self):
         """Test _TemplateRefDBHandler"""
@@ -773,6 +803,53 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertEqual(p.target.asym._id, 'A')
         self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
         self.assertEqual(p.target.seq_id_range, (1, 8))
+
+    def test_associated_files(self):
+        """Test _AssociatedHandler and _AssociatedArchiveHandler"""
+        cif = """
+loop_
+_ma_entry_associated_files.id
+_ma_entry_associated_files.entry_id
+_ma_entry_associated_files.file_url
+_ma_entry_associated_files.file_type
+_ma_entry_associated_files.file_format
+_ma_entry_associated_files.file_content
+_ma_entry_associated_files.details
+1 model https://example.com/foo.txt file other other 'test file'
+2 model https://example.com/t.zip archive zip 'archive with multiple files' .
+3 model baz.txt file other other 'test file3'
+#
+#
+loop_
+_ma_associated_archive_file_details.id
+_ma_associated_archive_file_details.archive_file_id
+_ma_associated_archive_file_details.file_path
+_ma_associated_archive_file_details.file_format
+_ma_associated_archive_file_details.file_content
+_ma_associated_archive_file_details.description
+1 2 bar.txt other other 'test file2'
+2 99 99.txt other other 'test file99'
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        r1, r2 = s.repositories
+        self.assertEqual(r1.url_root, 'https://example.com')
+        f1, zf = r1.files
+        self.assertIsInstance(f1, modelcif.associated.File)
+        self.assertEqual(f1.path, 'foo.txt')
+        self.assertEqual(f1.details, 'test file')
+
+        self.assertIsInstance(zf, modelcif.associated.ZipFile)
+        self.assertEqual(zf.path, 't.zip')
+        self.assertIsNone(zf.details)
+
+        f2, = zf.files
+        self.assertEqual(f2.path, 'bar.txt')
+        self.assertEqual(f2.details, 'test file2')
+
+        self.assertIsNone(r2.url_root)
+        f3, = r2.files
+        self.assertEqual(f3.path, 'baz.txt')
+        self.assertEqual(f3.details, 'test file3')
 
 
 if __name__ == '__main__':

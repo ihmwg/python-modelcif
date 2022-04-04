@@ -28,6 +28,9 @@ The :mod:`modelcif` Python module
 .. autoclass:: AsymUnit
    :members:
 
+.. autoclass:: NonPolymerFromTemplate
+   :members:
+
 .. autoclass:: Residue
    :members:
 

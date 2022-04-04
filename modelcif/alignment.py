@@ -1,9 +1,5 @@
-"""Classes to handle correspondence between template structure(s)
-   and target sequence(s). These may include complete sequence alignments
-   indicating which residues in the target are aligned with which
-   template residues, or simply map a given target onto a given
-   template without a sequence alignment (as is typical for a nonpolymeric
-   chain, such as a ligand).
+"""Classes to handle alignments between template structure(s)
+   and target sequence(s).
 
    To create an alignment, first declare a class for the given kind of
    alignment by deriving from subclasses of :class:`AlignmentMode`
@@ -64,20 +60,16 @@ class AlignedPositionsIdentity(Identity):
 
 
 class Pair(object):
-    """A single pairwise correspondence between a single target and
-       template chain. See :class:`AlignmentMode`. An alignment consists
-       of one or more of these pairs.
+    """A single pairwise alignment between a single target and template chain.
+       See :class:`AlignmentMode`. An alignment consists of one or more of
+       these pairs.
 
        :param template: The template segment that is aligned, i.e. the
               seq_id range for the template and the sequence (including gaps)
-              of one-letter codes, as a :class:`modelcif.TemplateSegment`
-              object. If the template is non-polymeric, then a seq_id range
-              makes no sense; a plain :class:`modelcif.Template` can be
-              passed instead in this case.
+              of one-letter codes.
        :type template: :class:`modelcif.TemplateSegment`
-             or :class:`modelcif.Template`
        :param target: The target segment that is aligned.
-       :type target: :class:`ihm.AsymUnitSegment` or :class:`ihm.AsymUnit`
+       :type target: :class:`ihm.AsymUnitSegment`
        :param identity: The sequence identity between target and template.
        :type identity: :class:`Identity`
        :param score: A measure of the quality of the alignment.

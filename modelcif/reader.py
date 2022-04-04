@@ -6,11 +6,13 @@ import modelcif.protocol
 import modelcif.qa_metric
 import modelcif.alignment
 import modelcif.reference
+import modelcif.associated
 import ihm
 import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
+import posixpath
 import operator
 import inspect
 import collections
@@ -94,6 +96,8 @@ class _SystemReader(object):
         self.protocols = IDMapper(self.system.protocols,
                                   modelcif.protocol.Protocol)
 
+        self.assoc_by_id = {}
+
         self.qa_by_id = {}
 
         self.software_parameters = collections.defaultdict(list)
@@ -108,6 +112,9 @@ class _SystemReader(object):
         # Correspondence between target and template chains
         self.target_asym_for_template = {}
 
+        # Mapping from Entity to bool ma_model_mode flag
+        self.ma_model_mode_map = {}
+
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
         for e in self.system.entities:
@@ -120,6 +127,16 @@ class _DatabaseHandler(Handler):
     def __call__(self, database_code, database_id):
         self.system.database = modelcif.Database(
             id=database_id, code=database_code)
+
+
+class _EntityNonPolyHandler(Handler):
+    category = '_pdbx_entity_nonpoly'
+    _mmmap = {'explicit': True, 'implicit': False}
+
+    def __call__(self, entity_id, comp_id, ma_model_mode):
+        s = self.sysr.entities.get_by_id(entity_id)
+        s.sequence = (self.sysr.chem_comps.get_by_id(comp_id),)
+        self.sysr.ma_model_mode_map[s] = self._mmmap.get(ma_model_mode.lower())
 
 
 class _SoftwareGroupHandler(Handler):
@@ -355,11 +372,9 @@ class _AlignmentInfoHandler(Handler):
         self.sysr.system.alignments.append(alignment)
 
     def finalize(self):
-        seen_pairs = set()
         for aln in self.sysr.system.alignments:
             for pair in self.sysr.alignment_pairs[aln._id]:
                 k = (pair.template._id, pair.target.asym._id)
-                seen_pairs.add(k)
                 pair.target.seq_id_range = \
                     self.sysr.target_template_poly_mapping.get(k)
                 aln.pairs.append(pair)
@@ -369,23 +384,15 @@ class _AlignmentInfoHandler(Handler):
                     aln.pairs[0].template.gapped_sequence = sequence
                 else:  # target
                     aln.pairs[0].target.gapped_sequence = sequence
-        # Handle templates without explicit sequence alignments
-        for tmpl_target in self.sysr.target_asym_for_template.items():
-            if tmpl_target in seen_pairs:
-                continue
-            template_id, target_asym_id = tmpl_target
-            template = self.sysr.templates.get_by_id(template_id)
-            asym = self.sysr.asym_units.get_by_id(target_asym_id)
-            p = modelcif.alignment.Pair(template=template, target=asym,
-                                        identity=None, score=None)
-
-            class Alignment(modelcif.alignment.Global,
-                            modelcif.alignment.Pairwise):
-                pass
-
-            # We have to make a new Alignment since there is no alignment_id
-            aln = Alignment(name="Modeling alignment", pairs=[p])
-            self.sysr.system.alignments.append(aln)
+        # Handle nonpolymer templates
+        for tmpl_id, tgt_asym_id in self.sysr.target_asym_for_template.items():
+            template = self.sysr.templates.get_by_id(tmpl_id)
+            if not template.entity.is_polymeric():
+                asym = self.sysr.asym_units.get_by_id(tgt_asym_id)
+                asym.__class__ = modelcif.NonPolymerFromTemplate
+                asym.template = template
+                asym.explicit = self.sysr.ma_model_mode_map.get(
+                    template.entity)
 
 
 class _AlignmentHandler(Handler):
@@ -452,7 +459,10 @@ class _AssemblyHandler(Handler):
     def __call__(self, assembly_id, asym_id, seq_id_begin, seq_id_end):
         a = self.sysr.assemblies.get_by_id(assembly_id)
         asym = self.sysr.asym_units.get_by_id(asym_id)
-        a.append(asym(int(seq_id_begin), int(seq_id_end)))
+        if seq_id_begin is None and seq_id_end is None:
+            a.append(asym)
+        else:
+            a.append(asym(int(seq_id_begin), int(seq_id_end)))
 
     def finalize(self):
         # Any AsymUnitRange which covers an entire asym,
@@ -540,6 +550,69 @@ class _ProtocolHandler(Handler):
         step = stepcls(input_data=indata, output_data=outdata, name=step_name,
                        details=details, software=software)
         p.steps.append(step)
+
+
+class _AssociatedHandler(Handler):
+    category = '_ma_entry_associated_files'
+
+    def __init__(self, *args):
+        super(_AssociatedHandler, self).__init__(*args)
+        self._repos_by_root = {}
+        # Map (file_content,file_format) to subclass of
+        # modelcif.associated.File
+        self._type_map = dict(
+            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
+            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
+            if issubclass(x[1], modelcif.associated.File)
+            and x[1] is not modelcif.associated.File)
+
+    def __call__(self, id, file_url, file_type, file_format, file_content,
+                 details):
+        filecls = self._type_map.get(
+            (file_content.upper(), file_format.upper()),
+            modelcif.associated.File)
+        # Assume everything before last slash (if any) is URL root
+        url_root, path = posixpath.split(file_url)
+        url_root = url_root or None
+        r = self._repos_by_root.get(url_root)
+        if not r:
+            r = modelcif.associated.Repository(url_root=url_root, files=[])
+            self._repos_by_root[url_root] = r
+            self.system.repositories.append(r)
+        c = filecls(path=path, details=details)
+        r.files.append(c)
+        self.sysr.assoc_by_id[id] = c
+
+
+class _AssociatedArchiveHandler(Handler):
+    category = '_ma_associated_archive_file_details'
+
+    def __init__(self, *args):
+        super(_AssociatedArchiveHandler, self).__init__(*args)
+        # Map (file_content,file_format) to subclass of
+        # modelcif.associated.File
+        self._type_map = dict(
+            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
+            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
+            if issubclass(x[1], modelcif.associated.File)
+            and x[1] is not modelcif.associated.File)
+        self._archive_files = collections.defaultdict(list)
+
+    def __call__(self, id, archive_file_id, file_path, file_format,
+                 file_content, description):
+        filecls = self._type_map.get(
+            (file_content.upper(), file_format.upper()),
+            modelcif.associated.File)
+        c = filecls(path=file_path, details=description)
+        # Top-level archive file might not exist yet
+        self._archive_files[archive_file_id].append(c)
+
+    def finalize(self):
+        # Put files in archives
+        for archive_file_id, files in self._archive_files.items():
+            archive = self.sysr.assoc_by_id.get(archive_file_id)
+            if archive:
+                archive.files = files
 
 
 def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
@@ -631,7 +704,7 @@ class ModelCIFVariant(Variant):
         ihm.reader._ChemCompHandler, ihm.reader._EntityHandler,
         ihm.reader._EntitySrcNatHandler, ihm.reader._EntitySrcGenHandler,
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
-        ihm.reader._EntityPolySeqHandler, ihm.reader._EntityNonPolyHandler,
+        ihm.reader._EntityPolySeqHandler, _EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _DatabaseHandler, _SoftwareParameterHandler,
         _DataHandler, _DataGroupHandler, _TargetEntityHandler,
@@ -640,7 +713,8 @@ class ModelCIFVariant(Variant):
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
-        _ModelListHandler, _ProtocolHandler, _QAMetricHandler,
+        _ModelListHandler, _ProtocolHandler,
+        _AssociatedHandler, _AssociatedArchiveHandler, _QAMetricHandler,
         _QAMetricGlobalHandler, _QAMetricLocalHandler,
         _QAMetricPairwiseHandler]
 
@@ -664,6 +738,10 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
        in the file will be returned as that type, regardless of their type
        stated in the mmCIF file (e.g. homology model, ab initio model).
        (However, the ``model_type`` attribute will be set appropriately.)
+
+       If the input file references any associated files, they will be
+       listed in :attr:`modelcif.System.repositories`. The files will not be
+       downloaded or read in, however.
 
       :return: A list of :class:`modelcif.System` objects.
     """

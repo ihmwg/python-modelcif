@@ -14,6 +14,7 @@ import modelcif.protocol
 import modelcif.model
 import modelcif.reference
 import modelcif.alignment
+import modelcif.associated
 import ihm.format
 import ihm.dumper
 
@@ -590,234 +591,8 @@ _ma_alignment.sequence
 #
 """)
 
-    def test_alignment_no_segment(self):
-        """Test AlignmentDumper with no poly segments specified"""
-
-        class Alignment(modelcif.alignment.Global,
-                        modelcif.alignment.Pairwise):
-            pass
-
-        system = modelcif.System()
-        tmp_e = modelcif.Entity('ACG')
-        tmp_e._id = 1
-        tgt_e = modelcif.Entity('ACE')
-        tgt_e._id = 2
-        system.entities.extend((tmp_e, tgt_e))
-        asym = modelcif.AsymUnit(tgt_e, id='A')
-        asym._id = 'A'
-        system.asym_units.append(asym)
-        tr = modelcif.Transformation.identity()
-        tr._id = 42
-        t = modelcif.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
-                              transformation=tr, references=[])
-        t._data_id = 99
-        t._segment_id = 8
-        system.templates.append(t)
-        p = modelcif.alignment.Pair(
-            template=t, target=asym,
-            score=modelcif.alignment.BLASTEValue("1e-15"),
-            identity=modelcif.alignment.ShorterSequenceIdentity(42.))
-        aln = Alignment(name='testaln', pairs=[p])
-        aln._data_id = 100
-        system.alignments.append(aln)
-        dumper = modelcif.dumper._AlignmentDumper()
-        dumper.finalize(system)
-        out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, """#
-loop_
-_ma_template_details.ordinal_id
-_ma_template_details.template_id
-_ma_template_details.template_origin
-_ma_template_details.template_entity_type
-_ma_template_details.template_trans_matrix_id
-_ma_template_details.template_data_id
-_ma_template_details.target_asym_id
-_ma_template_details.template_label_asym_id
-_ma_template_details.template_label_entity_id
-_ma_template_details.template_model_num
-_ma_template_details.template_auth_asym_id
-1 1 customized polymer 42 99 A H 1 1 H
-#
-#
-loop_
-_ma_template_poly.template_id
-_ma_template_poly.seq_one_letter_code
-_ma_template_poly.seq_one_letter_code_can
-1 ACG ACG
-#
-#
-loop_
-_ma_target_template_poly_mapping.id
-_ma_target_template_poly_mapping.template_segment_id
-_ma_target_template_poly_mapping.target_asym_id
-_ma_target_template_poly_mapping.target_seq_id_begin
-_ma_target_template_poly_mapping.target_seq_id_end
-1 8 A . .
-#
-#
-loop_
-_ma_alignment_info.alignment_id
-_ma_alignment_info.data_id
-_ma_alignment_info.software_group_id
-_ma_alignment_info.alignment_length
-_ma_alignment_info.alignment_type
-_ma_alignment_info.alignment_mode
-1 100 . 3 'target-template pairwise alignment' global
-#
-#
-loop_
-_ma_alignment_details.ordinal_id
-_ma_alignment_details.alignment_id
-_ma_alignment_details.template_segment_id
-_ma_alignment_details.target_asym_id
-_ma_alignment_details.score_type
-_ma_alignment_details.score_type_other_details
-_ma_alignment_details.score_value
-_ma_alignment_details.percent_sequence_identity
-_ma_alignment_details.sequence_identity_denominator
-_ma_alignment_details.sequence_identity_denominator_other_details
-1 1 8 A 'BLAST e-value' . 1e-15 42.000 'Length of the shorter sequence' .
-#
-""")
-
-    def test_alignment_non_poly_with_alignment(self):
-        """Test AlignmentDumper with nonpolymeric template, with alignment"""
-
-        class Alignment(modelcif.alignment.Global,
-                        modelcif.alignment.Pairwise):
-            pass
-
-        system = modelcif.System()
-        e1 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
-        e1._id = 1
-        system.entities.append(e1)
-        asym = modelcif.AsymUnit(e1)
-        asym._id = 'A'
-        system.asym_units.append(asym)
-        tr = modelcif.Transformation.identity()
-        tr._id = 42
-        t = modelcif.Template(e1, asym_id='H', model_num=1, name='testtmp',
-                              transformation=tr, references=[])
-        t._data_id = 99
-        system.templates.append(t)
-        p = modelcif.alignment.Pair(
-            template=t, target=asym, score=None, identity=None)
-        aln = Alignment(name='testaln', pairs=[p])
-        aln._data_id = 100
-        system.alignments.append(aln)
-        dumper = modelcif.dumper._AlignmentDumper()
-        dumper.finalize(system)
-        out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, """#
-loop_
-_ma_template_details.ordinal_id
-_ma_template_details.template_id
-_ma_template_details.template_origin
-_ma_template_details.template_entity_type
-_ma_template_details.template_trans_matrix_id
-_ma_template_details.template_data_id
-_ma_template_details.target_asym_id
-_ma_template_details.template_label_asym_id
-_ma_template_details.template_label_entity_id
-_ma_template_details.template_model_num
-_ma_template_details.template_auth_asym_id
-1 1 customized non-polymer 42 99 A H 1 1 H
-#
-#
-loop_
-_ma_template_non_poly.template_id
-_ma_template_non_poly.comp_id
-_ma_template_non_poly.details
-1 HEM heme
-#
-#
-loop_
-_ma_alignment_info.alignment_id
-_ma_alignment_info.data_id
-_ma_alignment_info.software_group_id
-_ma_alignment_info.alignment_length
-_ma_alignment_info.alignment_type
-_ma_alignment_info.alignment_mode
-1 100 . 1 'target-template pairwise alignment' global
-#
-""")
-
-    def test_alignment_non_poly_with_poly_alignment(self):
-        """Test AlignmentDumper with nonpolymeric template, poly alignment"""
-
-        class Alignment(modelcif.alignment.Global,
-                        modelcif.alignment.Pairwise):
-            pass
-
-        system = modelcif.System()
-        e1 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
-        e1._id = 1
-        system.entities.append(e1)
-        asym = modelcif.AsymUnit(e1)
-        asym._id = 'A'
-        system.asym_units.append(asym)
-        tr = modelcif.Transformation.identity()
-        tr._id = 42
-        t = modelcif.Template(e1, asym_id='H', model_num=1, name='testtmp',
-                              transformation=tr, references=[])
-        t._data_id = 99
-        system.templates.append(t)
-        # A TemplateSegment doesn't make a lot of sense for a nonpoly template,
-        # but allow it; just don't write out ma_template_poly_segment for it
-        p = modelcif.alignment.Pair(
-            template=t.segment('X', 1, 1), target=asym,
-            score=None, identity=None)
-        aln = Alignment(name='testaln', pairs=[p])
-        aln._data_id = 100
-        system.alignments.append(aln)
-        dumper = modelcif.dumper._AlignmentDumper()
-        system._before_write()  # populate system.template_segments
-        dumper.finalize(system)
-        out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, """#
-loop_
-_ma_template_details.ordinal_id
-_ma_template_details.template_id
-_ma_template_details.template_origin
-_ma_template_details.template_entity_type
-_ma_template_details.template_trans_matrix_id
-_ma_template_details.template_data_id
-_ma_template_details.target_asym_id
-_ma_template_details.template_label_asym_id
-_ma_template_details.template_label_entity_id
-_ma_template_details.template_model_num
-_ma_template_details.template_auth_asym_id
-1 1 customized non-polymer 42 99 A H 1 1 H
-#
-#
-loop_
-_ma_template_non_poly.template_id
-_ma_template_non_poly.comp_id
-_ma_template_non_poly.details
-1 HEM heme
-#
-#
-loop_
-_ma_alignment_info.alignment_id
-_ma_alignment_info.data_id
-_ma_alignment_info.software_group_id
-_ma_alignment_info.alignment_length
-_ma_alignment_info.alignment_type
-_ma_alignment_info.alignment_mode
-1 100 . 1 'target-template pairwise alignment' global
-#
-#
-loop_
-_ma_alignment.ordinal_id
-_ma_alignment.alignment_id
-_ma_alignment.target_template_flag
-_ma_alignment.sequence
-1 1 2 X
-#
-""")
-
-    def test_non_poly_template_no_aln(self):
-        """Test AlignmentDumper with nonpolymeric template, no alignments"""
+    def test_non_poly_template_unused(self):
+        """Test AlignmentDumper with unused nonpolymeric template"""
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
@@ -835,6 +610,62 @@ _ma_alignment.sequence
         dumper = modelcif.dumper._AlignmentDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
+loop_
+_ma_template_poly.template_id
+_ma_template_poly.seq_one_letter_code
+_ma_template_poly.seq_one_letter_code_can
+1 ACGT ACGT
+#
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+2 HEM heme
+#
+""")
+
+    def test_non_poly_template_used(self):
+        """Test AlignmentDumper with used nonpolymeric template"""
+        system = modelcif.System()
+        # Polymeric entity
+        e1 = ihm.Entity('ACGT')
+        t1 = modelcif.Template(
+            e1, asym_id="A", model_num=1, name="test template",
+            transformation=modelcif.Transformation.identity())
+        t1._id = 1
+        # Non-polymeric entity
+        e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
+        e2._id = 9
+        t2 = modelcif.Template(
+            e2, asym_id="B", model_num=1, name="test template",
+            transformation=modelcif.Transformation.identity())
+        t2._id = 2
+        t2._data_id = 99
+        system.templates.extend((t1, t2))
+
+        a2 = modelcif.NonPolymerFromTemplate(template=t2, explicit=True)
+        a2._id = 'X'
+        system.asym_units.append(a2)
+
+        dumper = modelcif.dumper._AlignmentDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 2 customized non-polymer 42 99 X B 9 1 B
+#
+#
 loop_
 _ma_template_poly.template_id
 _ma_template_poly.seq_one_letter_code
@@ -945,6 +776,173 @@ _ma_struct_assembly_details.assembly_id
 _ma_struct_assembly_details.assembly_name
 _ma_struct_assembly_details.assembly_description
 1 foo bar
+#
+""")
+
+    def test_associated_dumper(self):
+        """Test AssociatedDumper"""
+        system = modelcif.System()
+        # File in a repository
+        f1 = modelcif.associated.File(path='foo.txt', details='test file')
+        # File in an archive
+        f2 = modelcif.associated.File(path='bar.txt', details='test file2')
+        zf = modelcif.associated.ZipFile(path='t.zip', files=[f2])
+        # Local file
+        f3 = modelcif.associated.File(path='baz.txt', details='test file3')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f1, zf])
+        r2 = modelcif.associated.Repository(url_root=None, files=[f3])
+        system.repositories.extend((r, r2))
+
+        dumper = modelcif.dumper._AssociatedDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_entry_associated_files.id
+_ma_entry_associated_files.entry_id
+_ma_entry_associated_files.file_url
+_ma_entry_associated_files.file_type
+_ma_entry_associated_files.file_format
+_ma_entry_associated_files.file_content
+_ma_entry_associated_files.details
+1 model https://example.com/foo.txt file other other 'test file'
+2 model https://example.com/t.zip archive zip 'archive with multiple files' .
+3 model baz.txt file other other 'test file3'
+#
+#
+loop_
+_ma_associated_archive_file_details.id
+_ma_associated_archive_file_details.archive_file_id
+_ma_associated_archive_file_details.file_path
+_ma_associated_archive_file_details.file_format
+_ma_associated_archive_file_details.file_content
+_ma_associated_archive_file_details.description
+1 2 bar.txt other other 'test file2'
+#
+""")
+
+        # Should be an error to put a zip file inside another zip
+        zf2 = modelcif.associated.ZipFile(path='test2.zip', files=[])
+        zf.files.append(zf2)
+        self.assertRaises(ValueError, dumper.finalize, system)
+
+    def test_write_associated(self):
+        """Test write() function with associated files"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated.cif',
+            categories=['exptl', '_AUDIT_CONFORM'],
+            entry_details='test details', entry_id='testcif')
+        f2 = modelcif.associated.File(path='foo.txt', details='test file')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f, f2])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        main_file = fh.getvalue()
+        with open('test_write_associated.cif') as fh:
+            assoc_file = fh.read()
+        os.unlink('test_write_associated.cif')
+        # exptl and audit_conform categories should be in associated file,
+        # not the main file
+        self.assertIn('_exptl.entry_id', assoc_file)
+        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform.dict_name', assoc_file)
+        self.assertNotIn('_audit_conform.dict_name', main_file)
+
+    def test_write_associated_copy(self):
+        """Test write() function with associated files, copy_categories"""
+        s = modelcif.System(id='system1')
+
+        e1 = modelcif.Entity('ACGT')
+        e1._id = 42
+        s.entities.append(e1)
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated_copy.cif',
+            categories=['exptl'], copy_categories=['entity', 'audit_conform'],
+            entry_details='test details', entry_id='testcif')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        main_file = fh.getvalue()
+        with open('test_write_associated_copy.cif') as fh:
+            assoc_file = fh.read()
+        os.unlink('test_write_associated_copy.cif')
+        # exptl category should be in associated file, not the main file
+        self.assertIn('_exptl.entry_id', assoc_file)
+        self.assertNotIn('_exptl.entry_id', main_file)
+        # entity and audit conform categories should be in *both* files
+        self.assertIn('_entity.type', assoc_file)
+        self.assertIn('_entity.type', main_file)
+        self.assertIn('_audit_conform.dict_name', assoc_file)
+        self.assertIn('_audit_conform.dict_name', main_file)
+
+    def test_write_associated_none(self):
+        """Test write() function with associated files, no categories"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated_none.cif')
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        main_file = fh.getvalue()
+        self.assertIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform.dict_name', main_file)
+
+    def test_system_writer(self):
+        """Test _SystemWriter utility class"""
+        class BaseWriter(object):
+            def flush(self):
+                return 'flush called'
+
+            def write_comment(self, comment):
+                return 'write comment ' + comment
+
+        s = modelcif.dumper._SystemWriter(BaseWriter(), {}, {})
+        # These methods are not usually called in ordinary operation, but
+        # we should provide them for Writer compatibility
+        self.assertEqual(s.flush(), 'flush called')
+        self.assertEqual(s.write_comment('foo'), 'write comment foo')
+
+    def test_entity_non_poly_dumper(self):
+        """Test EntityNonPolyDumper"""
+        system = modelcif.System()
+        # Polymeric entity (ignored)
+        e1 = modelcif.Entity('ACGT')
+        e1._id = 1
+        e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
+        e2._id = 2
+        e3 = ihm.Entity([ihm.NonPolymerChemComp('ZN')], description='zinc')
+        e3._id = 3
+        system.entities.extend((e1, e2, e3))
+
+        t2 = modelcif.Template(e2, 'A', model_num=1, transformation=None)
+        a1 = modelcif.AsymUnit(e1, 'foo')
+        a2 = modelcif.NonPolymerFromTemplate(template=t2, explicit=True)
+        system.asym_units.extend((a1, a2))
+
+        dumper = modelcif.dumper._EntityNonPolyDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_pdbx_entity_nonpoly.entity_id
+_pdbx_entity_nonpoly.name
+_pdbx_entity_nonpoly.comp_id
+_pdbx_entity_nonpoly.ma_model_mode
+2 heme HEM explicit
+3 zinc ZN .
 #
 """)
 
