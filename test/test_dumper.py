@@ -40,7 +40,7 @@ class Tests(unittest.TestCase):
             self.assertEqual(lines[9:11],
                              ["data_system23", "_entry.id 'system 2+3'"])
         else:
-            self.assertEqual(lines[10:12],
+            self.assertEqual(lines[11:13],
                              ["data_system23", "_entry.id 'system 2+3'"])
 
     def test_audit_conform_dumper(self):

@@ -15,6 +15,8 @@ class System(object):
        :param database: If this system is part of an official database
               (e.g. SwissModel, ModBase), details of the database identifiers.
        :type database: :class:`Database`
+       :param str model_details: Detailed description of the system, like an
+                                 abstract.
 
        The system contains a number of simple flat lists of various objects,
        for example :attr:`alignments`. After constructing objects they should
@@ -33,9 +35,11 @@ class System(object):
 
     structure_determination_methodology = "computational"
 
-    def __init__(self, title=None, id='model', database=None):
+    def __init__(self, title=None, id='model', database=None,
+                 model_details=None):
         self.id, self.title = id, title
         self.database = database
+        self.model_details = model_details
 
         #: List of plain text comments. These will be added to the top of
         #: the mmCIF file.
