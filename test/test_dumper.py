@@ -1,3 +1,4 @@
+from datetime import date
 import utils
 import os
 import unittest
@@ -434,7 +435,8 @@ C
         ref1 = modelcif.reference.UniProt(
             code='testcode', accession='testacc', align_begin=4, align_end=8,
             isoform='testiso', ncbi_taxonomy_id='1234',
-            organism_scientific='testorg')
+            organism_scientific='testorg',
+            sequence_version_date=date(1979, 11, 22))
         ref2 = modelcif.reference.UniProt(code='c2', accession='a2')
         ref3 = CustomRef(code='c3', accession='a3', isoform=ihm.unknown)
 
@@ -457,9 +459,10 @@ _ma_target_ref_db_details.seq_db_align_begin
 _ma_target_ref_db_details.seq_db_align_end
 _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
-1 UNP . testcode testacc testiso 4 8 1234 testorg
-1 UNP . c2 a2 . 1 4 . .
-1 Other 'my custom ref' c3 a3 ? 1 4 . .
+_ma_target_ref_db_details.seq_db_sequence_version_date
+1 UNP . testcode testacc testiso 4 8 1234 testorg 1979-11-22
+1 UNP . c2 a2 . 1 4 . . .
+1 Other 'my custom ref' c3 a3 ? 1 4 . . .
 #
 """)
 
