@@ -273,7 +273,8 @@ class _TargetRefDBHandler(Handler):
                   align_end=self.get_int(seq_db_align_end),
                   isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
                   organism_scientific=organism_scientific,
-                  sequence_version_date=self.get_date(seq_db_sequence_version_date))
+                  sequence_version_date=self.get_date(
+                      seq_db_sequence_version_date))
         e.references.append(ref)
 
 
