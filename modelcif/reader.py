@@ -12,6 +12,7 @@ import ihm.source
 import ihm.reader
 from ihm.reader import Variant, Handler, IDMapper, _ChemCompIDMapper
 from ihm.reader import OldFileError, _make_new_entity
+from datetime import date
 import posixpath
 import operator
 import inspect
@@ -253,16 +254,27 @@ class _TargetRefDBHandler(Handler):
         self.type_map = _EnumerationMapper(modelcif.reference,
                                            modelcif.reference.TargetReference)
 
+    def get_date(self, iso_date_str):
+        """Get a datetime.date obj for a string in isoformat."""
+        if iso_date_str is None:
+            return None
+        return date(int(iso_date_str[0:4]),
+                    int(iso_date_str[5:7]),
+                    int(iso_date_str[8:10]))
+
     def __call__(self, target_entity_id, db_name, db_name_other_details,
                  db_code, db_accession, seq_db_isoform, seq_db_align_begin,
-                 seq_db_align_end, ncbi_taxonomy_id, organism_scientific):
+                 seq_db_align_end, ncbi_taxonomy_id, organism_scientific,
+                 seq_db_sequence_version_date):
         e = self.sysr.entities.get_by_id(target_entity_id)
         typ = self.type_map.get(db_name, db_name_other_details)
         ref = typ(code=db_code, accession=db_accession,
                   align_begin=self.get_int(seq_db_align_begin),
                   align_end=self.get_int(seq_db_align_end),
                   isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
-                  organism_scientific=organism_scientific)
+                  organism_scientific=organism_scientific,
+                  sequence_version_date=self.get_date(
+                      seq_db_sequence_version_date))
         e.references.append(ref)
 
 

@@ -1,5 +1,6 @@
 """Utility classes to dump out information in mmCIF or BinaryCIF format"""
 
+from datetime import date
 import itertools
 import operator
 import ihm.dumper
@@ -52,7 +53,8 @@ class _TargetRefDBDumper(Dumper):
                 ["target_entity_id", "db_name", "db_name_other_details",
                  "db_code", "db_accession", "seq_db_isoform",
                  "seq_db_align_begin", "seq_db_align_end",
-                 "ncbi_taxonomy_id", "organism_scientific"]) as lp:
+                 "ncbi_taxonomy_id", "organism_scientific",
+                 "seq_db_sequence_version_date"]) as lp:
             for e in entities:
                 for r in e.references:
                     db_begin = (e.seq_id_range[0] if r.align_begin is None
@@ -66,7 +68,10 @@ class _TargetRefDBDumper(Dumper):
                              seq_db_align_begin=db_begin,
                              seq_db_align_end=db_end,
                              ncbi_taxonomy_id=r.ncbi_taxonomy_id,
-                             organism_scientific=r.organism_scientific)
+                             organism_scientific=r.organism_scientific,
+                             seq_db_sequence_version_date=date.isoformat(
+                                 r.sequence_version_date)
+                             if r.sequence_version_date else None)
 
 
 class _EntityNonPolyDumper(Dumper):
