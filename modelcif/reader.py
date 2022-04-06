@@ -265,7 +265,7 @@ class _TargetRefDBHandler(Handler):
     def __call__(self, target_entity_id, db_name, db_name_other_details,
                  db_code, db_accession, seq_db_isoform, seq_db_align_begin,
                  seq_db_align_end, ncbi_taxonomy_id, organism_scientific,
-                 seq_db_sequence_version_date):
+                 seq_db_sequence_version_date, seq_db_sequence_checksum):
         e = self.sysr.entities.get_by_id(target_entity_id)
         typ = self.type_map.get(db_name, db_name_other_details)
         ref = typ(code=db_code, accession=db_accession,
@@ -274,7 +274,8 @@ class _TargetRefDBHandler(Handler):
                   isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
                   organism_scientific=organism_scientific,
                   sequence_version_date=self.get_date(
-                      seq_db_sequence_version_date))
+                      seq_db_sequence_version_date),
+                  sequence_crc64=seq_db_sequence_checksum)
         e.references.append(ref)
 
 

@@ -154,10 +154,12 @@ _ma_target_ref_db_details.seq_db_align_end
 _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
 _ma_target_ref_db_details.seq_db_sequence_version_date
-1 UNP . MED1_YEAST Q12321 test_iso 1 10 test_tax test_org 1979-11-22
-1 Other foo . . ? 1 10 . . .
-1 other bar . . ? 1 10 . . .
-1 MIS baz . . ? 1 10 . . .
+_ma_target_ref_db_details.seq_db_sequence_checksum
+1 UNP . MED1_YEAST Q12321 test_iso 1 10 test_tax test_org 1996-11-01
+637FEA3E78D915BC
+1 Other foo . . ? 1 10 . . . .
+1 other bar . . ? 1 10 . . . .
+1 MIS baz . . ? 1 10 . . . .
 """
         s, = modelcif.reader.read(StringIO(cif))
         e, = s.entities
@@ -170,7 +172,7 @@ _ma_target_ref_db_details.seq_db_sequence_version_date
         self.assertEqual(r1.align_end, 10)
         self.assertEqual(r1.ncbi_taxonomy_id, 'test_tax')
         self.assertEqual(r1.organism_scientific, 'test_org')
-        self.assertEqual(r1.sequence_version_date, date(1979, 11, 22))
+        self.assertEqual(r1.sequence_version_date, date(1996, 11, 1))
         self.assertEqual(r2.name, 'Other')
         self.assertEqual(r2.other_details, 'foo')
         self.assertEqual(r3.name, 'Other')
