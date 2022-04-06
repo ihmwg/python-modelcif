@@ -26,19 +26,23 @@ class TargetReference(object):
                                      modification from the DT line of an entry.
        :type sequence_version_date: :class:`datetime.date` or
                                     :class:`datetime.datetime`
+       :param str sequence_crc64: The CRC64 sum of the original database
+                                  sequence.
     """
 
     name = 'Other'
 
     def __init__(self, code, accession, align_begin=None, align_end=None,
                  isoform=None, ncbi_taxonomy_id=None,
-                 organism_scientific=None, sequence_version_date=None):
+                 organism_scientific=None, sequence_version_date=None,
+                 sequence_crc64=None):
         self.code, self.accession = code, accession
         self.align_begin, self.align_end = align_begin, align_end
         self.isoform = isoform
         self.ncbi_taxonomy_id = ncbi_taxonomy_id
         self.organism_scientific = organism_scientific
         self.sequence_version_date = sequence_version_date
+        self.sequence_crc64 = sequence_crc64
 
     def _get_other_details(self):
         if (type(self) is not TargetReference
