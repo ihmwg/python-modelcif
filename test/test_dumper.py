@@ -890,7 +890,8 @@ _ma_associated_archive_file_details.description
         s.entities.append(e1)
 
         f = modelcif.associated.CIFFile(
-            path='test_write_associated_copy.cif',
+            path='/not/exist/foo.cif',
+            local_path='test_write_associated_copy.cif',
             categories=['exptl'], copy_categories=['entity', 'audit_conform'],
             entry_details='test details', entry_id='testcif')
         r = modelcif.associated.Repository(url_root='https://example.com',

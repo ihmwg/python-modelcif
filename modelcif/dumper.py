@@ -754,7 +754,7 @@ class ModelCIFVariant(Variant):
                         or (not f.categories and not f.copy_categories)):
                     continue
                 # Always output associated file in mmCIF, not BinaryCIF
-                w = ihm.format.CifWriter(open(f.path, 'w'))
+                w = ihm.format.CifWriter(open(f.local_path, 'w'))
                 # Write header information to the associated file
                 dumpers = (ihm.dumper._EntryDumper(), _EntryLinkDumper())
                 # We are passing the File object to the dumpers here where

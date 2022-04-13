@@ -45,26 +45,34 @@ class File(object):
 class CIFFile(File):
     """An associated file in CIF format. See :class:`File` for more details.
 
+       :param str path: File name that will be used to construct URLs in the
+              main mmCIF file (see :class:`Repository` or :class:`ZipFile`).
+       :param str details: Any additional information about the file.
        :param list categories: If given, any mmCIF category names in this list
-              are written out to ``path`` by :func:`modelcif.dumper.write`
-              instead of to the primary file handle.
+              are written out to ``local_path`` by
+              :func:`modelcif.dumper.write` instead of to the primary file
+              handle.
        :param list copy_categories: If given, any mmCIF category names in this
-              list are written out to both ``path`` by
+              list are written out to both ``local_path`` by
               :func:`modelcif.dumper.write` and the primary file handle.
        :param str entry_id: Unique identifier for the associated file,
               if written (by specifying ``categories`` or ``copy_categories``).
        :param str entry_details: A comment to be added to the associated file,
               if written (by specifying ``categories`` or ``copy_categories``).
+       :param str local_path: File name that will be used for ``categories``
+              or ``copy_categories``. If not given, it defaults to the same
+              as ``path``.
     """
     file_format = 'cif'
 
     def __init__(self, path, details=None, categories=[], copy_categories=[],
-                 entry_id='model', entry_details=None):
+                 entry_id='model', entry_details=None, local_path=None):
         super(CIFFile, self).__init__(path, details)
         self.categories = categories
         self.copy_categories = copy_categories
         self.id = entry_id
         self.entry_details = entry_details
+        self.local_path = local_path or path
 
 
 class LocalPairwiseQAScoresFile(CIFFile):
