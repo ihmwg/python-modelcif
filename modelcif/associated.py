@@ -46,10 +46,10 @@ class CIFFile(File):
     """An associated file in CIF format. See :class:`File` for more details.
 
        :param list categories: If given, any mmCIF category names in this list
-              are written out to ``file`` by :func:`modelcif.dumper.write`
+              are written out to ``path`` by :func:`modelcif.dumper.write`
               instead of to the primary file handle.
        :param list copy_categories: If given, any mmCIF category names in this
-              list are written out to both ``file`` by
+              list are written out to both ``path`` by
               :func:`modelcif.dumper.write` and the primary file handle.
        :param str entry_id: Unique identifier for the associated file,
               if written (by specifying ``categories`` or ``copy_categories``).
