@@ -209,5 +209,7 @@ with open('output.cif', 'w') as fh:
 # Here we read in the file we just created:
 with open('output.cif') as fh:
     s, = modelcif.reader.read(fh)
+for t in s.templates:
+    print(t.name, "-".join(c.id for c in t.entity.sequence))
 for e in s.entities:
-    print(e.description, "".join(c.id for c in e.sequence))
+    print(e.description, "-".join(c.id for c in e.sequence))

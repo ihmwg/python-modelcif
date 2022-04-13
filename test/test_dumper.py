@@ -480,7 +480,6 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
 
         system = modelcif.System()
         tmp_e = modelcif.Entity('ACG')
-        tmp_e._id = 1
         tgt_e = modelcif.Entity('ACE')
         tgt_e._id = 1
         system.entities.extend((tmp_e, tgt_e))
@@ -525,7 +524,7 @@ _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
-1 1 'reference database' polymer 42 99 A H 1 1 Z
+1 1 'reference database' polymer 42 99 A H . 1 Z
 #
 #
 loop_
@@ -601,18 +600,18 @@ _ma_alignment.sequence
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
-        e1._id = 9
         t1 = modelcif.Template(
             e1, asym_id="A", model_num=1, name="test template",
-            transformation=modelcif.Transformation.identity())
+            transformation=modelcif.Transformation.identity(),
+            entity_id=9)
         t1._id = 1
         t1._data_id = 99
         # Non-polymeric entity
         e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
-        e2._id = 10
         t2 = modelcif.Template(
             e2, asym_id="B", model_num=1, name="test template",
-            transformation=modelcif.Transformation.identity())
+            transformation=modelcif.Transformation.identity(),
+            entity_id=10)
         t2._id = 2
         t2._data_id = 100
         system.templates.extend((t1, t2))
@@ -655,7 +654,6 @@ _ma_template_non_poly.details
         system = modelcif.System()
         # Polymeric entity
         e1 = ihm.Entity('ACGT')
-        e1._id = 8
         t1 = modelcif.Template(
             e1, asym_id="A", model_num=1, name="test template",
             transformation=modelcif.Transformation.identity())
@@ -663,10 +661,12 @@ _ma_template_non_poly.details
         t1._data_id = 98
         # Non-polymeric entity
         e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')], description='heme')
-        e2._id = 9
+        # Template should use entity_id, not e2._id
+        e2._id = "THIS SHOULD BE IGNORED"
         t2 = modelcif.Template(
             e2, asym_id="B", model_num=1, name="test template",
-            transformation=modelcif.Transformation.identity())
+            transformation=modelcif.Transformation.identity(),
+            entity_id=9)
         t2._id = 2
         t2._data_id = 99
         system.templates.extend((t1, t2))
@@ -691,7 +691,7 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 2 customized non-polymer 42 99 X B 9 1 B
-2 1 customized polymer 42 98 . A 8 1 A
+2 1 customized polymer 42 98 . A . 1 A
 #
 #
 loop_
@@ -972,6 +972,33 @@ _pdbx_entity_nonpoly.comp_id
 _pdbx_entity_nonpoly.ma_model_mode
 2 heme HEM explicit
 3 zinc ZN .
+#
+""")
+
+    def test_chem_comp_dumper(self):
+        """Test ChemCompDumper"""
+        system = modelcif.System()
+        e1 = modelcif.Entity('AC')
+        system.entities.append(e1)
+
+        e2 = modelcif.Entity('GT')
+        t2 = modelcif.Template(e2, 'A', model_num=1, transformation=None)
+        system.templates.append(t2)
+
+        dumper = modelcif.dumper._ChemCompDumper()
+        out = _get_dumper_output(dumper, system)
+        # chem_comp should include both system.entities and system.templates
+        self.assertEqual(out, """#
+loop_
+_chem_comp.id
+_chem_comp.type
+_chem_comp.name
+_chem_comp.formula
+_chem_comp.formula_weight
+ALA 'L-peptide linking' ALANINE 'C3 H7 N O2' 89.094
+CYS 'L-peptide linking' CYSTEINE 'C3 H7 N O2 S' 121.154
+GLY 'peptide linking' GLYCINE 'C2 H5 N O2' 75.067
+THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120
 #
 """)
 

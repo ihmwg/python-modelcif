@@ -1,3 +1,12 @@
+HEAD
+====
+ - Sequence information for templates is now only written to template-specific
+   categories in the mmCIF/BinaryCIF, not to the entity, entity_poly etc.
+   tables, to properly comply with the ModelCIF dictionary.
+ - :class:`modelcif.Template` now takes a ``entity_id`` argument which can be
+   used to provide the entity ID (if known) of the template in its own mmCIF
+   file.
+
 0.3 - 2022-03-21
 ================
  - Add a package to conda-forge so the library can be installed using

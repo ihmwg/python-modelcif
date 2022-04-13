@@ -42,6 +42,27 @@ class _DatabaseDumper(Dumper):
                          database_code=system.database.code)
 
 
+class _ChemCompDumper(Dumper):
+    # Similar to ihm.dumper._ChemCompDumper, but we need to also include
+    # components referenced only by Templates, as their Entities are not
+    # included in system.entities by default
+
+    def _get_entities(self, system):
+        return itertools.chain(
+            system.entities, (t.entity for t in system.templates))
+
+    def dump(self, system, writer):
+        comps = frozenset(
+            comp for e in self._get_entities(system) for comp in e.sequence)
+
+        with writer.loop("_chem_comp", ["id", "type", "name",
+                                        "formula", "formula_weight"]) as lp:
+            for comp in sorted(comps, key=operator.attrgetter('id')):
+                lp.write(id=comp.id, type=comp.type, name=comp.name,
+                         formula=comp.formula,
+                         formula_weight=comp.formula_weight)
+
+
 class _TargetRefDBDumper(Dumper):
     def dump(self, system, writer):
         # Since target_entities is a *subset* of all entities, they may not
@@ -312,7 +333,7 @@ class _AlignmentDumper(Dumper):
                      template_data_id=tmpl._data_id,
                      target_asym_id=tgt_asym._id if tgt_asym else None,
                      template_label_asym_id=tmpl.asym_id,
-                     template_label_entity_id=tmpl.entity._id,
+                     template_label_entity_id=tmpl.entity_id,
                      template_model_num=tmpl.model_num,
                      template_auth_asym_id=tmpl.strand_id)
 
@@ -729,7 +750,7 @@ class ModelCIFVariant(Variant):
         _AuditConformDumper, _DatabaseDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
         ihm.dumper._AuditAuthorDumper,
-        ihm.dumper._GrantDumper, ihm.dumper._ChemCompDumper,
+        ihm.dumper._GrantDumper, _ChemCompDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
         ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,

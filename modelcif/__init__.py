@@ -196,10 +196,10 @@ class System(object):
             self.asym_units, _all_asym_in_assemblies())
 
     def _all_entities(self):
+        # Note that template entities are not included by default
         return itertools.chain(
             self.entities,
-            (asym.entity for asym in self.asym_units),
-            (template.entity for template in self.templates))
+            (asym.entity for asym in self.asym_units))
 
     def _all_model_groups(self, only_in_states=True):
         return self.model_groups
@@ -237,6 +237,10 @@ if sys.version_info[0] >= 3:
 This can be used both for template sequences (in which case the Entity is
 then used in a :class:`Template` object) or for target (model) sequences
 (where it is used in a :class:`AsymUnit` object).
+
+(Note that template sequence Entity objects are not written out to the
+entity, entity_poly etc. tables in the mmCIF/BinaryCIF file by default.
+Instead, sequence information is captured in template-specific categories.)
 
 :param sequence sequence: The primary sequence, as a sequence of
        :class:`ihm.ChemComp` objects, and/or codes looked up in `alphabet`.
@@ -421,11 +425,13 @@ class Template(modelcif.data.Data):
              objects
        :param str strand_id: PDB or "author-provided" strand/chain ID.
               If not specified, it will be the same as the regular asym_id.
+       :param str entity_id: If known, the ID of the entity for this template
+              in its own mmCIF file.
     """
     data_content_type = "template structure"
 
     def __init__(self, entity, asym_id, model_num, transformation,
-                 name=None, references=[], strand_id=None):
+                 name=None, references=[], strand_id=None, entity_id=None):
         super(Template, self).__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
@@ -433,6 +439,7 @@ class Template(modelcif.data.Data):
         self.references = []
         self.references.extend(references)
         self._strand_id = strand_id
+        self.entity_id = entity_id
 
     def segment(self, gapped_sequence, seq_id_begin, seq_id_end):
         """Get an object representing the alignment of part of this sequence.

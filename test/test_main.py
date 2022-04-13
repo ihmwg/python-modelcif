@@ -55,8 +55,8 @@ class Tests(unittest.TestCase):
         s.templates.append(t2)
 
         es = s._all_entities()
-        # List may contain duplicates
-        self.assertEqual(list(es), [e1, e1, e2])
+        # List may contain duplicates, but does not contain template entity e2
+        self.assertEqual(list(es), [e1, e1])
 
     def test_all_data_groups(self):
         """Test _all_data_groups() method"""

@@ -225,7 +225,7 @@ _ma_template_details.template_auth_asym_id
 """
         s, = modelcif.reader.read(StringIO(cif))
         t, t2 = s.templates
-        self.assertEqual(t.entity._id, '3')
+        self.assertEqual(t.entity_id, '3')
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
@@ -254,10 +254,16 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 1 'reference database' non-polymer 1 2 A B 3 4 Z
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+1 HEM Heme
 """
         s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
-        self.assertEqual(t.entity._id, '3')
+        self.assertEqual(t.entity_id, '3')
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
@@ -856,6 +862,97 @@ _ma_associated_archive_file_details.description
         f3, = r2.files
         self.assertEqual(f3.path, 'baz.txt')
         self.assertEqual(f3.details, 'test file3')
+
+    def test_template_poly_handler(self):
+        """Test _TemplatePolyHandler"""
+        cif = """
+loop_
+_chem_comp.id
+_chem_comp.type
+_chem_comp.name
+_chem_comp.formula
+MYTYPE 'D-PEPTIDE LINKING' 'MY CUSTOM COMPONENT' 'C6 H12'
+MYTYP2 'D-PEPTIDE LINKING' 'MY CUSTOM COMPONENT2' 'C6 H12'
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 1 1 A A . 1 A
+2 2 'reference database' polymer 1 1 A A . 1 A
+3 3 'reference database' polymer 1 1 A A . 1 A
+#
+loop_
+_ma_template_poly.template_id
+_ma_template_poly.seq_one_letter_code
+_ma_template_poly.seq_one_letter_code_can
+1 A(MYTYPE)V AVV
+2 A(MYTYP2)V .
+3 . .
+4 CCC CCC
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        # template_id=4 in template_poly should be ignored
+        t1, t2, t3 = s.templates
+        s1, s2, s3 = t1.entity.sequence
+        self.assertEqual(s1.id, 'ALA')
+        self.assertEqual(s1.code, 'A')
+        # Both one-letter and one-letter-canonical were provided
+        self.assertEqual(s2.id, 'MYTYPE')
+        self.assertEqual(s2.code, 'MYTYPE')
+        self.assertEqual(s2.code_canonical, 'V')
+
+        # Only one-letter was provided
+        s1, s2, s3 = t2.entity.sequence
+        self.assertEqual(s2.id, 'MYTYP2')
+        self.assertEqual(s2.code, 'MYTYP2')
+        self.assertIsNone(s2.code_canonical)
+
+        # No sequence provided
+        self.assertEqual(len(t3.entity.sequence), 0)
+
+    def test_template_non_poly_handler(self):
+        """Test _TemplateNonPolyHandler"""
+        cif = """
+loop_
+_chem_comp.id
+_chem_comp.type
+HEM non-polymer
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' polymer 1 1 A A . 1 A
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+1 HEM Heme
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        t, = s.templates
+        s1, = t.entity.sequence
+        self.assertEqual(s1.id, 'HEM')
+        self.assertEqual(s1.type, 'non-polymer')
+        self.assertIsInstance(s1, ihm.NonPolymerChemComp)
 
 
 if __name__ == '__main__':

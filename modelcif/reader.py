@@ -140,6 +140,53 @@ class _EntityNonPolyHandler(Handler):
         self.sysr.ma_model_mode_map[s] = self._mmmap.get(ma_model_mode.lower())
 
 
+class _TemplatePolyHandler(Handler):
+    category = '_ma_template_poly'
+
+    def __init__(self, sysr):
+        super(_TemplatePolyHandler, self).__init__(sysr)
+        # Use python-ihm's _EntityPolyHandler to do most of the work here
+        self._eph = ihm.reader._EntityPolyHandler(sysr)
+
+    def __call__(self, template_id, seq_one_letter_code,
+                 seq_one_letter_code_can):
+        self._eph(entity_id=template_id, type=None,
+                  pdbx_seq_one_letter_code=seq_one_letter_code,
+                  pdbx_seq_one_letter_code_can=seq_one_letter_code_can)
+
+    def finalize(self):
+        # No type given in _ma_template_poly, so assume amino acid
+        alphabet = ihm.LPeptideAlphabet()
+
+        def _get_seq(codes, codes_can):
+            for i, code in enumerate(codes):
+                # Hopefully non-standard codes are listed in chem_comp table
+                if code in alphabet:
+                    yield alphabet[code]
+                else:
+                    comp = self.sysr.chem_comps.get_by_id(code)
+                    # chem_comp table doesn't define one-letter codes, so
+                    # fill them in here if we have them
+                    comp.code = code
+                    if i < len(codes_can):
+                        comp.code_canonical = codes_can[i]
+                    yield comp
+        for t in self.system.templates:
+            ei = self._eph._entity_info.get(t._id)
+            if ei:
+                t.entity = ihm.Entity(sequence=_get_seq(ei.one_letter,
+                                                        ei.one_letter_can))
+
+
+class _TemplateNonPolyHandler(Handler):
+    category = '_ma_template_non_poly'
+
+    def __call__(self, template_id, comp_id):
+        template = self.sysr.templates.get_by_id(template_id)
+        seq = (self.sysr.chem_comps.get_by_id(comp_id),)
+        template.entity = ihm.Entity(sequence=seq)
+
+
 class _SoftwareGroupHandler(Handler):
     category = '_ma_software_group'
 
@@ -300,8 +347,10 @@ class _TemplateDetailsHandler(Handler):
         template = self.sysr.templates.get_by_id(template_id)
         template.transformation = self.sysr.transformations.get_by_id(
             template_trans_matrix_id)
-        template.entity = self.sysr.entities.get_by_id(
-            template_label_entity_id)
+        # Add empty sequence (hopefully will fill in from _ma_template_poly
+        # or _ma_template_non_poly)
+        template.entity = ihm.Entity([])
+        template.entity_id = template_label_entity_id
         template.asym_id = template_label_asym_id
         template.model_num = self.get_int(template_model_num)
         template._strand_id = template_auth_asym_id
@@ -723,6 +772,7 @@ class ModelCIFVariant(Variant):
         _DataHandler, _DataGroupHandler, _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
+        _TemplatePolyHandler, _TemplateNonPolyHandler,
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
