@@ -11,6 +11,11 @@ HEAD
    CIF categories can automatically be written to these external files instead
    of the main file, in either mmCIF or BinaryCIF format (see
    :class:`modelcif.associated.CIFFile`).
+ - Non-polymer models can now be linked to their template using the
+   :class:`modelcif.NonPolymerFromTemplate` class.
+ - Add classes for the PLDDT, PTM, and IpTM quality metrics.
+ - :class:`modelcif.reference.TargetReference` now supports the version
+   and CRC64 checksum of the reference sequence.
 
 0.3 - 2022-03-21
 ================
