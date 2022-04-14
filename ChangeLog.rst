@@ -6,6 +6,11 @@ HEAD
  - :class:`modelcif.Template` now takes a ``entity_id`` argument which can be
    used to provide the entity ID (if known) of the template in its own mmCIF
    file.
+ - External files (e.g. alignments, or quality scores) can now be referenced
+   from the main file (using the :mod:`modelcif.associated` module). Selected
+   CIF categories can automatically be written to these external files instead
+   of the main file, in either mmCIF or BinaryCIF format (see
+   :class:`modelcif.associated.CIFFile`).
 
 0.3 - 2022-03-21
 ================

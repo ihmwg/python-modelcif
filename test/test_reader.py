@@ -830,6 +830,8 @@ _ma_entry_associated_files.details
 1 model https://example.com/foo.txt file other other 'test file'
 2 model https://example.com/t.zip archive zip 'archive with multiple files' .
 3 model baz.txt file other other 'test file3'
+4 model baz.cif file cif other 'test mmCIF'
+5 model baz.bcif file bcif other 'test BinaryCIF'
 #
 #
 loop_
@@ -841,6 +843,8 @@ _ma_associated_archive_file_details.file_content
 _ma_associated_archive_file_details.description
 1 2 bar.txt other other 'test file2'
 2 99 99.txt other other 'test file99'
+3 2 bar.cif cif other 'test mmCIF in zip'
+4 2 bar.bcif bcif 'local pairwise QA scores' 'test BinaryCIF in zip'
 """
         s, = modelcif.reader.read(StringIO(cif))
         r1, r2 = s.repositories
@@ -854,14 +858,23 @@ _ma_associated_archive_file_details.description
         self.assertEqual(zf.path, 't.zip')
         self.assertIsNone(zf.details)
 
-        f2, = zf.files
+        f2, f3, f4 = zf.files
         self.assertEqual(f2.path, 'bar.txt')
         self.assertEqual(f2.details, 'test file2')
+        self.assertIsInstance(f3, modelcif.associated.CIFFile)
+        self.assertFalse(f3.binary)
+        self.assertIsInstance(
+            f4, modelcif.associated.LocalPairwiseQAScoresFile)
+        self.assertTrue(f4.binary)
 
         self.assertIsNone(r2.url_root)
-        f3, = r2.files
+        f3, f4, f5 = r2.files
         self.assertEqual(f3.path, 'baz.txt')
         self.assertEqual(f3.details, 'test file3')
+        self.assertIsInstance(f4, modelcif.associated.CIFFile)
+        self.assertFalse(f4.binary)
+        self.assertIsInstance(f5, modelcif.associated.CIFFile)
+        self.assertTrue(f5.binary)
 
     def test_template_poly_handler(self):
         """Test _TemplatePolyHandler"""

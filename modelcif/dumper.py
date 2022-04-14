@@ -5,6 +5,8 @@ import itertools
 import operator
 import ihm.dumper
 import ihm
+import ihm.format
+import ihm.format_bcif
 from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
 import modelcif.qa_metric
 import modelcif.data
@@ -723,10 +725,11 @@ class _SystemWriter(object):
             return w.loop(category, keys)
 
     def end_block(self):
-        # Close all file handles of associated files
+        # Flush and close all file handles of associated files
         for w in self.category_map.values():
             if not hasattr(w, 'fh'):
                 continue
+            w.flush()
             w.fh.close()
             del w.fh
 
@@ -774,8 +777,11 @@ class ModelCIFVariant(Variant):
                 if (not hasattr(f, 'categories')
                         or (not f.categories and not f.copy_categories)):
                     continue
-                # Always output associated file in mmCIF, not BinaryCIF
-                w = ihm.format.CifWriter(open(f.local_path, 'w'))
+                if f.binary:
+                    w = ihm.format_bcif.BinaryCifWriter(
+                        open(f.local_path, 'wb'))
+                else:
+                    w = ihm.format.CifWriter(open(f.local_path, 'w'))
                 # Write header information to the associated file
                 dumpers = (ihm.dumper._EntryDumper(), _EntryLinkDumper())
                 # We are passing the File object to the dumpers here where

@@ -7,6 +7,12 @@ if sys.version_info[0] >= 3:
     from io import StringIO
 else:
     from io import BytesIO as StringIO
+msgpack = None
+if sys.version_info[0] >= 3:
+    try:
+        import msgpack
+    except ImportError:
+        pass
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
@@ -928,6 +934,33 @@ _ma_associated_archive_file_details.description
         main_file = fh.getvalue()
         self.assertIn('_exptl.entry_id', main_file)
         self.assertIn('_audit_conform.dict_name', main_file)
+
+    @unittest.skipIf(msgpack is None, "needs Python 3 and msgpack")
+    def test_write_associated_binary(self):
+        """Test write() function with associated binary files"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated_binary.bcif',
+            categories=['exptl', '_AUDIT_CONFORM'],
+            entry_details='test details', entry_id='testcif', binary=True)
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[f])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        main_file = fh.getvalue()
+        with open('test_write_associated_binary.bcif', 'rb') as fh:
+            assoc_file = msgpack.unpack(fh, raw=False)
+        os.unlink('test_write_associated_binary.bcif')
+        assoc_cats = frozenset(
+            x['name'] for x in assoc_file['dataBlocks'][0]['categories'])
+
+        self.assertIn('_exptl', assoc_cats)
+        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform', assoc_cats)
+        self.assertNotIn('_audit_conform.dict_name', main_file)
 
     def test_system_writer(self):
         """Test _SystemWriter utility class"""

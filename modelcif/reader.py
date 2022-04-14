@@ -17,6 +17,7 @@ import posixpath
 import operator
 import inspect
 import collections
+import functools
 
 
 class _AuditConformHandler(Handler):
@@ -614,25 +615,52 @@ class _ProtocolHandler(Handler):
         p.steps.append(step)
 
 
+def _get_assoc_type_maps():
+    # Get a mapping from (file_content,file_format) to a subclass of
+    # modelcif.associated.File
+    cs = [x[1] for x in inspect.getmembers(modelcif.associated,
+                                           inspect.isclass)
+          if issubclass(x[1], modelcif.associated.File)
+          and x[1] is not modelcif.associated.File]
+    _type_map = dict(
+        ((x.file_content.upper(), x.file_format.upper()), x)
+        for x in cs if not hasattr(x, '_binary_ff_map'))
+    # Do the same thing for classes that take a 'binary' argument
+    _bin_type_map = {}
+    for x in cs:
+        if not hasattr(x, '_binary_ff_map'):
+            continue
+        file_content = x.file_content.upper()
+        for binary, file_format in x._binary_ff_map.items():
+            _bin_type_map[(file_content, file_format.upper())] = (x, binary)
+    return _type_map, _bin_type_map
+
+
+def _get_assoc_class(file_content, file_format, type_map, binary_type_map):
+    # Use previous mapping to get a subclass of modelcif.associated.File
+    # from (file_content, file_format)
+    k = (file_content.upper(), file_format.upper())
+
+    filecls_bin = binary_type_map.get(k)
+    if filecls_bin:
+        filecls, binary = filecls_bin
+        return functools.partial(filecls, binary=binary)
+    else:
+        return type_map.get(k, modelcif.associated.File)
+
+
 class _AssociatedHandler(Handler):
     category = '_ma_entry_associated_files'
 
     def __init__(self, *args):
         super(_AssociatedHandler, self).__init__(*args)
         self._repos_by_root = {}
-        # Map (file_content,file_format) to subclass of
-        # modelcif.associated.File
-        self._type_map = dict(
-            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
-            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
-            if issubclass(x[1], modelcif.associated.File)
-            and x[1] is not modelcif.associated.File)
+        self._type_map, self._binary_type_map = _get_assoc_type_maps()
 
     def __call__(self, id, file_url, file_type, file_format, file_content,
                  details):
-        filecls = self._type_map.get(
-            (file_content.upper(), file_format.upper()),
-            modelcif.associated.File)
+        filecls = _get_assoc_class(
+            file_content, file_format, self._type_map, self._binary_type_map)
         # Assume everything before last slash (if any) is URL root
         url_root, path = posixpath.split(file_url)
         url_root = url_root or None
@@ -651,20 +679,13 @@ class _AssociatedArchiveHandler(Handler):
 
     def __init__(self, *args):
         super(_AssociatedArchiveHandler, self).__init__(*args)
-        # Map (file_content,file_format) to subclass of
-        # modelcif.associated.File
-        self._type_map = dict(
-            ((x[1].file_content.upper(), x[1].file_format.upper()), x[1])
-            for x in inspect.getmembers(modelcif.associated, inspect.isclass)
-            if issubclass(x[1], modelcif.associated.File)
-            and x[1] is not modelcif.associated.File)
+        self._type_map, self._binary_type_map = _get_assoc_type_maps()
         self._archive_files = collections.defaultdict(list)
 
     def __call__(self, id, archive_file_id, file_path, file_format,
                  file_content, description):
-        filecls = self._type_map.get(
-            (file_content.upper(), file_format.upper()),
-            modelcif.associated.File)
+        filecls = _get_assoc_class(
+            file_content, file_format, self._type_map, self._binary_type_map)
         c = filecls(path=file_path, details=description)
         # Top-level archive file might not exist yet
         self._archive_files[archive_file_id].append(c)

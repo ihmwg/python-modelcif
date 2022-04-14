@@ -43,7 +43,8 @@ class File(object):
 
 
 class CIFFile(File):
-    """An associated file in CIF format. See :class:`File` for more details.
+    """An associated file in mmCIF or BinaryCIF format.
+       See :class:`File` for more details.
 
        :param str path: File name that will be used to construct URLs in the
               main mmCIF file (see :class:`Repository` or :class:`ZipFile`).
@@ -62,17 +63,24 @@ class CIFFile(File):
        :param str local_path: File name that will be used for ``categories``
               or ``copy_categories``. If not given, it defaults to the same
               as ``path``.
+       :param bool binary: If False (the default), any output file is written
+              in mmCIF format; if True, the file is written in BinaryCIF.
     """
-    file_format = 'cif'
+
+    _binary_ff_map = {True: 'bcif', False: 'cif'}
+
+    file_format = property(lambda self: self._binary_ff_map[self.binary])
 
     def __init__(self, path, details=None, categories=[], copy_categories=[],
-                 entry_id='model', entry_details=None, local_path=None):
+                 entry_id='model', entry_details=None, local_path=None,
+                 binary=False):
         super(CIFFile, self).__init__(path, details)
         self.categories = categories
         self.copy_categories = copy_categories
         self.id = entry_id
         self.entry_details = entry_details
         self.local_path = local_path or path
+        self.binary = binary
 
 
 class LocalPairwiseQAScoresFile(CIFFile):
