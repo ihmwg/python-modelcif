@@ -1,5 +1,5 @@
-HEAD
-====
+0.4 - 2022-04-14
+================
  - Sequence information for templates is now only written to template-specific
    categories in the mmCIF/BinaryCIF, not to the entity, entity_poly etc.
    tables, to properly comply with the ModelCIF dictionary.
