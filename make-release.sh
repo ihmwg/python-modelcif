@@ -2,6 +2,7 @@
 
 # First, do
 # - Update AuditConformDumper to match latest MA dictionary if necessary
+# - Run util/validate-outputs.py to make sure all example outputs validate
 # - Update ChangeLog.rst with the release number
 # - Update release number in modelcif/__init__.py and setup.py
 # - Commit, tag, and push
