@@ -3,6 +3,8 @@
 # First, do
 # - Update AuditConformDumper to match latest MA dictionary if necessary
 # - Run util/validate-outputs.py to make sure all example outputs validate
+# - If we need a newer python-ihm, update the version requirement in
+#   requirements.txt, setup.py, and README.md.
 # - Update ChangeLog.rst with the release number
 # - Update release number in modelcif/__init__.py and setup.py
 # - Commit, tag, and push
