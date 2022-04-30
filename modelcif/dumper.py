@@ -180,6 +180,18 @@ class _SoftwareGroupDumper(Dumper):
                                  group_id=g._group_id, software_id=s._id,
                                  parameter_group_id=param)
 
+    def _handle_list(self, value):
+        list_type_map = {int: 'integer-csv', float: 'float-csv'}
+        types = frozenset(type(x) for x in value)
+        if types == frozenset((int,)):
+            data_type = list_type_map[int]
+        elif types == frozenset((float,)) or types == frozenset((int, float)):
+            # Treat mix of int and float as float
+            data_type = list_type_map[float]
+        else:
+            raise TypeError("Only lists of ints or floats are supported")
+        return data_type, ",".join(str(x) for x in value)
+
     def dump_parameters(self, system, writer):
         parameter_id = itertools.count(1)
         type_map = {int: "integer", float: "float", str: "string",
@@ -191,10 +203,14 @@ class _SoftwareGroupDumper(Dumper):
             for g in self._param_groups:
                 group_id = self._param_group_id[id(g)]
                 for p in g:
+                    if isinstance(p.value, (list, tuple)):
+                        data_type, value = self._handle_list(p.value)
+                    else:
+                        data_type = type_map.get(type(p.value), str)
+                        value = p.value
                     lp.write(parameter_id=next(parameter_id),
-                             group_id=group_id,
-                             data_type=type_map.get(type(p.value), str),
-                             name=p.name, value=p.value,
+                             group_id=group_id, data_type=data_type,
+                             name=p.name, value=value,
                              description=p.description)
 
 

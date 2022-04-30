@@ -342,7 +342,8 @@ class SoftwareParameter(object):
 
        :param str name: A short name for this parameter.
        :param value: Parameter value.
-       :type value: ``int``, ``float``, ``str``, or ``bool``
+       :type value: ``int``, ``float``, ``str``, ``bool``, list of ``int``,
+             or list of ``float``.
        :param str description: A longer description of the parameter.
     """
     def __init__(self, name, value, description=None):

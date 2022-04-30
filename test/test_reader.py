@@ -68,6 +68,8 @@ _ma_software_parameter.description
 1 1 integer foo 42 foodesc
 2 1 boolean bar YES .
 3 1 string baz ok .
+4 1 integer-csv intlist 1,2,3,4 .
+5 1 float-csv floatlist 1.5,3.8 .
 #
 loop_
 _ma_software_group.ordinal_id
@@ -87,7 +89,7 @@ _ma_software_group.parameter_group_id
         self.assertEqual(g1[0], s1)
         self.assertEqual(g1[1], s2)
         self.assertEqual(g2[0], s3)
-        p1, p2, p3 = g2.parameters
+        p1, p2, p3, intlist, floatlist = g2.parameters
         self.assertEqual(p1.name, 'foo')
         self.assertEqual(p1.value, 42)
         self.assertEqual(p1.description, 'foodesc')
@@ -97,6 +99,10 @@ _ma_software_group.parameter_group_id
         self.assertEqual(p3.name, 'baz')
         self.assertEqual(p3.value, 'ok')
         self.assertIsNone(p3.description)
+        self.assertEqual(intlist.value, [1, 2, 3, 4])
+        f1, f2 = floatlist.value
+        self.assertAlmostEqual(f1, 1.5, delta=1e-1)
+        self.assertAlmostEqual(f2, 3.8, delta=1e-1)
 
     def test_enumeration_mapper(self):
         """Test EnumerationMapper class"""

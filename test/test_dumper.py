@@ -89,6 +89,10 @@ class Tests(unittest.TestCase):
         p1 = modelcif.SoftwareParameter(name='foo', value=42)
         p2 = modelcif.SoftwareParameter(name='bar', value=True)
         p3 = modelcif.SoftwareParameter(name='baz', value='ok')
+        intlist = modelcif.SoftwareParameter(name='intlist', value=[1, 2, 3])
+        floatlist = modelcif.SoftwareParameter(
+            name='floatlist', value=(1., 2., 3.))
+        mixlist = modelcif.SoftwareParameter(name='mixlist', value=[1, 2., 3])
         s1 = modelcif.Software(
             name='s1', classification='test code',
             description='Some test program',
@@ -114,7 +118,7 @@ class Tests(unittest.TestCase):
         aln3 = MockObject()
         aln3.pairs = []
         aln3.software = modelcif.SoftwareGroup(
-            (s2, s3), parameters=[p1, p2, p3])
+            (s2, s3), parameters=[p1, p2, p3, intlist, floatlist, mixlist])
         system.alignments.extend((aln1, aln2, aln3))
         system._before_write()  # populate system.software_groups
         dumper = modelcif.dumper._SoftwareGroupDumper()
@@ -133,6 +137,9 @@ _ma_software_parameter.description
 1 1 integer foo 42 .
 2 1 boolean bar YES .
 3 1 string baz ok .
+4 1 integer-csv intlist 1,2,3 .
+5 1 float-csv floatlist 1.0,2.0,3.0 .
+6 1 float-csv mixlist 1,2.0,3 .
 #
 #
 loop_
@@ -147,6 +154,21 @@ _ma_software_group.parameter_group_id
 5 3 3 1
 #
 """)
+
+    def test_bad_software_parameter(self):
+        """Test invalid SoftwareParameter"""
+        p1 = modelcif.SoftwareParameter(name='foo', value=['string', 'list'])
+        s1 = modelcif.Software(
+            name='s1', classification='test code',
+            description='Some test program',
+            version=1, location='http://test.org')
+        system = modelcif.System()
+        system.software.append(s1)
+        sg1 = modelcif.SoftwareGroup([s1], parameters=[p1])
+        system.software_groups.append(sg1)
+        dumper = modelcif.dumper._SoftwareGroupDumper()
+        dumper.finalize(system)
+        self.assertRaises(TypeError, _get_dumper_output, dumper, system)
 
     def test_data_dumper(self):
         """Test DataDumper"""

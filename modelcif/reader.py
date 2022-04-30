@@ -203,9 +203,17 @@ class _SoftwareGroupHandler(Handler):
 class _SoftwareParameterHandler(Handler):
     category = '_ma_software_parameter'
 
+    def _get_int_list(self, value):
+        return [int(x) for x in value.split(',')]
+
+    def _get_float_list(self, value):
+        return [float(x) for x in value.split(',')]
+
     def __call__(self, group_id, data_type, name, value, description):
         type_map = {"integer": self.get_int, "float": self.get_float,
-                    "boolean": self.get_bool, "string": str}
+                    "boolean": self.get_bool, "string": str,
+                    "integer-csv": self._get_int_list,
+                    "float-csv": self._get_float_list}
         pg = self.sysr.software_parameters[group_id]
         converter = type_map.get(data_type, str)
         p = modelcif.SoftwareParameter(name=name, value=converter(value),
