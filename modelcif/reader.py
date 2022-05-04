@@ -122,6 +122,13 @@ class _SystemReader(object):
         for e in self.system.entities:
             e.sequence = tuple(e.sequence)
 
+        # Assume everything in every Model is atomic
+        for mg in self.system.model_groups:
+            for m in mg:
+                m.representation = ihm.representation.Representation(
+                    [ihm.representation.AtomicSegment(seg, rigid=False)
+                    for seg in m.assembly])
+
 
 class _DatabaseHandler(Handler):
     category = '_database_2'
