@@ -127,7 +127,7 @@ class _SystemReader(object):
         for mg in self.system.model_groups:
             for m in mg:
                 if not m.assembly:
-                    m.assembly = modelcif.Assembly(self.system.asym_units[:])
+                    m.assembly.extend(self.system.asym_units[:])
                 m.representation = ihm.representation.Representation(
                     [ihm.representation.AtomicSegment(seg, rigid=False)
                      for seg in m.assembly])
