@@ -130,7 +130,7 @@ class _SystemReader(object):
                     m.assembly = modelcif.Assembly(self.system.asym_units[:])
                 m.representation = ihm.representation.Representation(
                     [ihm.representation.AtomicSegment(seg, rigid=False)
-                    for seg in m.assembly])
+                     for seg in m.assembly])
 
 
 class _DatabaseHandler(Handler):
