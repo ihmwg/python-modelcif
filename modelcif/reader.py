@@ -122,9 +122,12 @@ class _SystemReader(object):
         for e in self.system.entities:
             e.sequence = tuple(e.sequence)
 
+        # If no Assembly is provided, assume each model consists of all Asyms
         # Assume everything in every Model is atomic
         for mg in self.system.model_groups:
             for m in mg:
+                if not m.assembly:
+                    m.assembly = modelcif.Assembly(self.system.asym_units[:])
                 m.representation = ihm.representation.Representation(
                     [ihm.representation.AtomicSegment(seg, rigid=False)
                     for seg in m.assembly])
