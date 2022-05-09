@@ -261,6 +261,21 @@ class _DataGroupDumper(Dumper):
                                  group_id=g._data_group_id, data_id=d._data_id)
 
 
+class _DataRefDBDumper(Dumper):
+    def dump(self, system, writer):
+        with writer.loop(
+                "_ma_data_ref_db",
+                ["data_id", "name", "location_url",
+                 "version", "release_date"]) as lp:
+            for d in system.data:
+                if not isinstance(d, modelcif.ReferenceDatabase):
+                    continue
+                lp.write(data_id=d._data_id, name=d.name, location_url=d.url,
+                         version=d.version,
+                         release_date=date.isoformat(d.release_date)
+                         if d.release_date else None)
+
+
 class _AssemblyDumper(Dumper):
     def finalize(self, system):
         for n, asmb in enumerate(system.assemblies):
@@ -776,7 +791,8 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
-        _DataDumper, _DataGroupDumper, _TargetEntityDumper, _AssemblyDumper,
+        _DataDumper, _DataGroupDumper, _DataRefDBDumper,
+        _TargetEntityDumper, _AssemblyDumper,
         _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _AssociatedDumper, _QAMetricDumper]
 

@@ -10,6 +10,10 @@ class TargetReference(object):
            class CustomRef(TargetReference):
                "my custom database"
 
+       Compare with :class:`modelcif.ReferenceDatabase`, which describes
+       multiple sequences used in template searches or alignment
+       construction; this class relates to just the modeled sequence itself.
+
        :param str code: The name of the sequence in the database.
        :param str accession: The database accession.
        :param int align_begin: Beginning index of the sequence in the database.

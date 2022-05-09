@@ -11,6 +11,8 @@ class Data(object):
        Usually a subclass is passed to :class:`modelcif.protocol.Step`
        to describe the input or output:
 
+        - A database of possible template sequences/structures to construct
+          or search (:class:`modelcif.ReferenceDatabase`)
         - A template structure (:class:`modelcif.Template`)
         - The sequence of the target (:class:`modelcif.Entity`)
         - A target-template alignment (:mod:`modelcif.alignment`)

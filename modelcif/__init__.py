@@ -494,3 +494,27 @@ class NonPolymerFromTemplate(AsymUnit):
             template.entity, details=details, auth_seq_id_map=auth_seq_id_map,
             id=id, strand_id=strand_id)
         self.template, self.explicit = template, explicit
+
+
+class ReferenceDatabase(modelcif.data.Data):
+    """A reference database used in the modeling. This is typically a
+       sequence database used for template search, alignments, etc.
+       These objects are passed as input or output to
+       :class:`modelcif.protocol.Step`. See also :class:`modelcif.data.Data`
+       for more details.
+
+       Compare with :class:`modelcif.reference.TargetReference`, which pertains
+       to just the modeled sequence itself; this class describes *multiple*
+       sequences.
+
+       :param str name: Name of the database.
+       :param str url: Location of the database.
+       :param str version: Version of the database.
+       :param release_date: Release date of the specified version.
+       :type release_date: :class:`datetime.date`
+    """
+    data_content_type = "reference database"
+
+    def __init__(self, name, url, version=None, release_date=None):
+        super(ReferenceDatabase, self).__init__(name)
+        self.url, self.version, self.release_date = url, version, release_date

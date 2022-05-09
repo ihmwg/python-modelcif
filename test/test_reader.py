@@ -546,6 +546,41 @@ _ma_data_group.data_id
         self.assertEqual(len(g2), 1)
         self.assertIsNone(g2[0])
 
+    def test_data_ref_db_handler(self):
+        """Test _DataRefDBHandler"""
+        cif = """
+loop_
+_ma_data.id
+_ma_data.name
+_ma_data.content_type
+_ma_data.content_type_other_details
+1 defaultname1 'reference database' .
+2 defaultname2 'reference database' .
+#
+loop_
+_ma_data_ref_db.data_id
+_ma_data_ref_db.name
+_ma_data_ref_db.location_url
+_ma_data_ref_db.version
+_ma_data_ref_db.release_date
+1 name1 url1 1.0 1979-11-22
+2 . url2 . .
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        d1, d2 = s.data
+        self.assertIsInstance(d1, modelcif.ReferenceDatabase)
+        self.assertIsInstance(d2, modelcif.ReferenceDatabase)
+        # Name in ma_data_ref_db used rather than that from ma_data
+        self.assertEqual(d1.name, 'name1')
+        self.assertEqual(d1.url, 'url1')
+        self.assertEqual(d1.version, '1.0')
+        self.assertIsInstance(d1.release_date, date)
+        self.assertEqual(d1.release_date, date(1979, 11, 22))
+        # Name not given in ma_data_ref_db so taken from ma_data
+        self.assertEqual(d2.name, 'defaultname2')
+        self.assertIsNone(d2.version)
+        self.assertIsNone(d2.release_date)
+
     def test_protocol_handler(self):
         """Test _ProtocolHandler"""
         cif = """

@@ -229,6 +229,29 @@ _ma_data_group.data_id
 #
 """)
 
+    def test_data_ref_db_dumper(self):
+        """Test DataRefDBDumper"""
+        system = modelcif.System()
+        system.data.append(modelcif.ReferenceDatabase(
+            name='testdb', url='testurl', version='1.0',
+            release_date=date(1979, 11, 22)))
+        system.data.append(modelcif.data.Data(name="test other",
+                                              details="test details"))
+        dumper = modelcif.dumper._DataDumper()
+        dumper.finalize(system)  # Assign Data IDs
+        dumper = modelcif.dumper._DataRefDBDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_data_ref_db.data_id
+_ma_data_ref_db.name
+_ma_data_ref_db.location_url
+_ma_data_ref_db.version
+_ma_data_ref_db.release_date
+1 testdb testurl 1.0 1979-11-22
+#
+""")
+
     def test_qa_metric_dumper(self):
         """Test QAMetricDumper"""
         system = modelcif.System()

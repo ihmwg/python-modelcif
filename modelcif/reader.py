@@ -20,6 +20,15 @@ import collections
 import functools
 
 
+def _get_date(iso_date_str):
+    """Get a datetime.date obj for a string in isoformat."""
+    if iso_date_str is None:
+        return None
+    return date(int(iso_date_str[0:4]),
+                int(iso_date_str[5:7]),
+                int(iso_date_str[8:10]))
+
+
 class _AuditConformHandler(Handler):
     category = '_audit_conform'
 
@@ -265,6 +274,17 @@ class _DataGroupHandler(Handler):
         g.append(data_id)
 
 
+class _DataRefDBHandler(Handler):
+    category = '_ma_data_ref_db'
+
+    def __call__(self, data_id, name, location_url, version, release_date):
+        d = modelcif.ReferenceDatabase(
+            name=name, url=location_url, version=version,
+            release_date=_get_date(release_date))
+        self.sysr.data_by_id[data_id] = d
+        d._data_id = data_id
+
+
 class _EnumerationMapper(object):
     """Map an mmCIF enumerated value to the corresponding Python class"""
     def __init__(self, module, base_class, attr="name"):
@@ -320,14 +340,6 @@ class _TargetRefDBHandler(Handler):
         self.type_map = _EnumerationMapper(modelcif.reference,
                                            modelcif.reference.TargetReference)
 
-    def get_date(self, iso_date_str):
-        """Get a datetime.date obj for a string in isoformat."""
-        if iso_date_str is None:
-            return None
-        return date(int(iso_date_str[0:4]),
-                    int(iso_date_str[5:7]),
-                    int(iso_date_str[8:10]))
-
     def __call__(self, target_entity_id, db_name, db_name_other_details,
                  db_code, db_accession, seq_db_isoform, seq_db_align_begin,
                  seq_db_align_end, ncbi_taxonomy_id, organism_scientific,
@@ -339,7 +351,7 @@ class _TargetRefDBHandler(Handler):
                   align_end=self.get_int(seq_db_align_end),
                   isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
                   organism_scientific=organism_scientific,
-                  sequence_version_date=self.get_date(
+                  sequence_version_date=_get_date(
                       seq_db_sequence_version_date),
                   sequence_crc64=seq_db_sequence_checksum)
         e.references.append(ref)
@@ -808,7 +820,8 @@ class ModelCIFVariant(Variant):
         ihm.reader._EntityPolySeqHandler, _EntityNonPolyHandler,
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _DatabaseHandler, _SoftwareParameterHandler,
-        _DataHandler, _DataGroupHandler, _TargetEntityHandler,
+        _DataHandler, _DataGroupHandler, _DataRefDBHandler,
+        _TargetEntityHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _TemplatePolyHandler, _TemplateNonPolyHandler,

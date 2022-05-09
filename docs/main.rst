@@ -48,3 +48,6 @@ The :mod:`modelcif` Python module
 
 .. autoclass:: Template
    :members:
+
+.. autoclass:: ReferenceDatabase
+   :members:
