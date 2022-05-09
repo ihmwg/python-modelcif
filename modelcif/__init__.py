@@ -110,10 +110,10 @@ class System(object):
             self._all_template_transformations()))
         self.target_entities = list(_remove_identical(
             self._all_target_entities()))
-        self.data = list(_remove_identical(
-            self._all_data()))
         self.data_groups = list(_remove_identical(
             self._all_data_groups()))
+        self.data = list(_remove_identical(
+            self._all_data()))
         self.model_groups = list(_remove_identical(self.model_groups))
         self.software_groups = list(_remove_identical(
             self._all_software_groups()))
@@ -205,12 +205,18 @@ class System(object):
         return self.model_groups
 
     def _all_data(self):
+        def _all_data_in_groups():
+            for dg in self.data_groups:
+                if isinstance(dg, list):
+                    for data in dg:
+                        yield data
         return itertools.chain(
             self.data,
             self.templates,
             self.target_entities,
             self.alignments,
-            (model for group, model in self._all_models()))
+            (model for group, model in self._all_models()),
+            _all_data_in_groups())
 
     def _all_data_groups(self):
         """Return all DataGroup (or singleton Data) objects"""

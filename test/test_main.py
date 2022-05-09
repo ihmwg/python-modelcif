@@ -19,9 +19,13 @@ class Tests(unittest.TestCase):
         e3 = modelcif.Entity("A")
         s.data.extend((e1, e3))
 
+        s.data_groups.append('something not a group')
+        e4 = modelcif.Entity("M")
+        s.data_groups.append(modelcif.data.DataGroup([e1, e4]))
+
         d = s._all_data()
         # List may contain duplicates
-        self.assertEqual(list(d), [e1, e3, e1, e2])
+        self.assertEqual(list(d), [e1, e3, e1, e2, e1, e4])
 
     def test_all_asym_units(self):
         """Test _all_asym_units() method"""
