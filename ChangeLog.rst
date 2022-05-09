@@ -2,6 +2,8 @@ HEAD
 ====
  - A new class :class:`modelcif.ReferenceDatabase` allows describing
    collections of sequences that were used as part of the modeling protocol.
+ - Lists of ints or floats can now be given as software parameters to the
+   :class:`modelcif.SoftwareParameter` class.
 
 0.4 - 2022-04-14
 ================
