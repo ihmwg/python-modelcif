@@ -1,5 +1,5 @@
-HEAD
-====
+0.5 - 2022-05-10
+================
  - A new class :class:`modelcif.ReferenceDatabase` allows describing
    collections of sequences that were used as part of the modeling protocol.
  - Lists of ints or floats can now be given as software parameters to the
