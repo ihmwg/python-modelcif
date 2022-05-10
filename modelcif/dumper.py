@@ -13,15 +13,15 @@ import modelcif.data
 
 
 class _AuditConformDumper(Dumper):
-    URL = ("https://raw.githubusercontent.com/" +
-           "ihmwg/ModelCIF/%s/mmcif_ma.dic")
+    URL = ("https://raw.githubusercontent.com/ihmwg/ModelCIF/%s/base/" +
+           "mmcif_ma-core.dic")
 
     def dump(self, system, writer):
         with writer.category("_audit_conform") as lp:
             # Update to match the version of the ModelCIF dictionary
             # we support:
-            lp.write(dict_name="mmcif_ma.dic", dict_version="1.3.8",
-                     dict_location=self.URL % "0975b79")
+            lp.write(dict_name="mmcif_ma.dic", dict_version="1.4.0",
+                     dict_location=self.URL % "a24fcfa")
 
 
 class _EntryLinkDumper(Dumper):
