@@ -115,3 +115,28 @@ class PDB(TemplateReference):
     """
     name = 'PDB'
     other_details = None
+
+
+class AlphaFoldDB(TemplateReference):
+    """Point to the structure of a :class:`modelcif.Template` in AlphaFold DB.
+
+       These objects are typically passed to the :class:`modelcif.Template`
+       constructor.
+
+       See :class:`TemplateReference` for a description of the parameters.
+    """
+    name = 'AlphaFoldDB'
+    other_details = None
+
+
+class PubChem(TemplateReference):
+    """Point to the structure of a :class:`modelcif.Template` in PubChem.
+
+       These objects are typically passed to the :class:`modelcif.Template`
+       constructor.
+
+       See :class:`TemplateReference` for a description of the parameters. Use
+       the PubChem CID ass accession code.
+    """
+    name = 'PubChem'
+    other_details = None
