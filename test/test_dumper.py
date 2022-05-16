@@ -539,10 +539,13 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         system.asym_units.append(asym)
         ref1 = modelcif.reference.PDB('1abc')
         ref2 = CustomRef('2xyz')
+        ref3 = modelcif.reference.PubChem("1234")
+        ref4 = modelcif.reference.AlphaFoldDB("P12345")
         tr = modelcif.Transformation.identity()
         tr._id = 42
         t = modelcif.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
-                              transformation=tr, references=[ref1, ref2],
+                              transformation=tr,
+                              references=[ref1, ref2, ref3, ref4],
                               strand_id='Z')
         t._data_id = 99
         p = modelcif.alignment.Pair(
@@ -600,6 +603,8 @@ _ma_template_ref_db_details.db_name_other_details
 _ma_template_ref_db_details.db_accession_code
 1 PDB . 1abc
 1 Other 'my custom ref' 2xyz
+1 PubChem . 1234
+1 AlphaFoldDB . P12345
 #
 #
 loop_
