@@ -16,3 +16,7 @@ The :mod:`modelcif.reference` Python module
    :members:
 
 .. autoclass:: PDB
+
+.. autoclass:: AlphaFoldDB
+
+.. autoclass:: PubChem
