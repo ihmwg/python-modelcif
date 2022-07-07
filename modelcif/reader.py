@@ -7,6 +7,7 @@ import modelcif.qa_metric
 import modelcif.alignment
 import modelcif.reference
 import modelcif.associated
+import modelcif.descriptor
 import ihm
 import ihm.source
 import ihm.reader
@@ -148,6 +149,53 @@ class _DatabaseHandler(Handler):
     def __call__(self, database_code, database_id):
         self.system.database = modelcif.Database(
             id=database_id, code=database_code)
+
+
+class _ChemCompHandler(Handler):
+    """Similar to ihm.reader._ChemCompHandler but also handles
+       the ma_provenance data item"""
+    category = '_chem_comp'
+
+    _prov_map = {'ccd core': 'core', 'ccd ma': 'ma', 'ccd local': 'local'}
+
+    def __init__(self, *args):
+        super(_ChemCompHandler, self).__init__(*args)
+        # Map _chem_comp.type to corresponding subclass of ihm.ChemComp
+        self.type_map = dict((x[1].type.lower(), x[1])
+                             for x in inspect.getmembers(ihm, inspect.isclass)
+                             if issubclass(x[1], ihm.ChemComp))
+
+    def __call__(self, type, id, name, formula, ma_provenance):
+        typ = 'other' if type is None else type.lower()
+        s = self.sysr.chem_comps.get_by_id(
+            id, self.type_map.get(typ, ihm.ChemComp))
+        self.copy_if_present(s, locals(), keys=('name', 'formula'))
+        if ma_provenance:
+            s.ccd = self._prov_map.get(ma_provenance.lower())
+
+
+class _ChemCompDescriptorHandler(Handler):
+    category = '_ma_chem_comp_descriptor'
+
+    def __init__(self, *args):
+        super(_ChemCompDescriptorHandler, self).__init__(*args)
+        # Map _chem_comp_descriptor.type to corresponding subclass of
+        # modelcif.descriptor.Descriptor
+        self._type_map = dict(
+            (x[1].type.lower(), x[1])
+            for x in inspect.getmembers(modelcif.descriptor, inspect.isclass)
+            if issubclass(x[1], modelcif.descriptor.Descriptor)
+            and x[1] is not modelcif.descriptor.Descriptor)
+
+    def __call__(self, chem_comp_id, type, value, details, software_id):
+        s = self.sysr.chem_comps.get_by_id(chem_comp_id)
+        type_class = self._type_map.get(
+            type.lower(), modelcif.descriptor.Descriptor)
+        software = self.sysr.software.get_by_id_or_none(software_id)
+        desc = type_class(value=value, details=details, software=software)
+        if not hasattr(s, 'descriptors') or not s.descriptors:
+            s.descriptors = []
+        s.descriptors.append(desc)
 
 
 class _EntityNonPolyHandler(Handler):
@@ -814,7 +862,8 @@ class ModelCIFVariant(Variant):
         ihm.reader._StructHandler, ihm.reader._SoftwareHandler,
         ihm.reader._CitationHandler, ihm.reader._AuditAuthorHandler,
         ihm.reader._GrantHandler, ihm.reader._CitationAuthorHandler,
-        ihm.reader._ChemCompHandler, ihm.reader._EntityHandler,
+        _ChemCompHandler, _ChemCompDescriptorHandler,
+        ihm.reader._EntityHandler,
         ihm.reader._EntitySrcNatHandler, ihm.reader._EntitySrcGenHandler,
         ihm.reader._EntitySrcSynHandler, ihm.reader._EntityPolyHandler,
         ihm.reader._EntityPolySeqHandler, _EntityNonPolyHandler,

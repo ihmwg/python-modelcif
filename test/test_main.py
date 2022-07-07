@@ -6,6 +6,8 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 import modelcif
 import modelcif.protocol
+import modelcif.descriptor
+import ihm
 
 
 class Tests(unittest.TestCase):
@@ -157,9 +159,33 @@ class Tests(unittest.TestCase):
         s.software_groups.append(modelcif.SoftwareGroup((s1, s2)))
         s.software_groups.append(s1)
 
+        e1 = modelcif.Entity("DDDD")
+        t1 = modelcif.Template(e1, asym_id='A', model_num=1,
+                               transformation=None)
+        s.templates.append(t1)
+
+        # Old-style ChemComp without descriptors
+        c1 = ihm.NonPolymerChemComp('C1', name='C1')
+        if hasattr(c1, 'descriptors'):
+            del c1.descriptors
+
+        # ChemComp with descriptor without software
+        c2 = ihm.NonPolymerChemComp('C2', name='C2')
+        c2.descriptors = [modelcif.descriptor.IUPACName('foo')]
+
+        # ChemComp with descriptor with software
+        c3 = ihm.NonPolymerChemComp('C3', name='C3')
+        s3 = modelcif.Software(
+            name='foo', version='2.0',
+            classification='4', description='5', location='6')
+        c3.descriptors = [modelcif.descriptor.IUPACName('foo', software=s3)]
+
+        e2 = modelcif.Entity([c1, c2, c3])
+        s.entities.append(e2)
+
         alls = s._all_ref_software()
         # List may contain duplicates
-        self.assertEqual(list(alls), [s1, s2, s1])
+        self.assertEqual(list(alls), [s1, s2, s1, s3])
 
     def test_software_parameter(self):
         """Test SoftwareParameter class"""

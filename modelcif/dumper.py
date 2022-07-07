@@ -49,20 +49,62 @@ class _ChemCompDumper(Dumper):
     # components referenced only by Templates, as their Entities are not
     # included in system.entities by default
 
+    _prov_map = {'core': 'CCD Core', 'ma': 'CCD MA', 'local': 'CCD local'}
+
     def _get_entities(self, system):
         return itertools.chain(
             system.entities, (t.entity for t in system.templates))
+
+    def _get_provenance(self, comp):
+        # Older python-ihm does not provide ChemComp.ccd
+        ccd = comp.ccd if hasattr(comp, 'ccd') else None
+        if ccd is None:
+            ccd = 'core'
+            if hasattr(comp, 'descriptors') and comp.descriptors:
+                ccd = 'local'
+        val = self._prov_map.get(ccd)
+        if not val:
+            raise KeyError("Invalid ccd value %s for %s; can be %s, or None"
+                           % (repr(comp.ccd), comp,
+                              ", ".join(sorted(self._prov_map.keys()))))
+        return val
 
     def dump(self, system, writer):
         comps = frozenset(
             comp for e in self._get_entities(system) for comp in e.sequence)
 
         with writer.loop("_chem_comp", ["id", "type", "name",
-                                        "formula", "formula_weight"]) as lp:
+                                        "formula", "formula_weight",
+                                        "ma_provenance"]) as lp:
             for comp in sorted(comps, key=operator.attrgetter('id')):
                 lp.write(id=comp.id, type=comp.type, name=comp.name,
                          formula=comp.formula,
-                         formula_weight=comp.formula_weight)
+                         formula_weight=comp.formula_weight,
+                         ma_provenance=self._get_provenance(comp))
+
+
+class _ChemCompDescriptorDumper(Dumper):
+    def _get_entities(self, system):
+        return itertools.chain(
+            system.entities, (t.entity for t in system.templates))
+
+    def dump(self, system, writer):
+        ordinal = itertools.count(1)
+        comps = frozenset(
+            comp for e in self._get_entities(system) for comp in e.sequence)
+
+        with writer.loop("_ma_chem_comp_descriptor",
+                         ["ordinal_id", "chem_comp_id", "chem_comp_name",
+                          "type", "value", "details", "software_id"]) as lp:
+            for comp in sorted(comps, key=operator.attrgetter('id')):
+                if not hasattr(comp, 'descriptors') or not comp.descriptors:
+                    continue
+                for desc in comp.descriptors:
+                    lp.write(ordinal_id=next(ordinal), chem_comp_id=comp.id,
+                             chem_comp_name=comp.name, type=desc.type,
+                             value=desc.value, details=desc.details,
+                             software_id=desc.software._id
+                             if desc.software else None)
 
 
 class _TargetRefDBDumper(Dumper):
@@ -784,7 +826,7 @@ class ModelCIFVariant(Variant):
         _AuditConformDumper, _DatabaseDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
         ihm.dumper._AuditAuthorDumper,
-        ihm.dumper._GrantDumper, _ChemCompDumper,
+        ihm.dumper._GrantDumper, _ChemCompDumper, _ChemCompDescriptorDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
         ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,

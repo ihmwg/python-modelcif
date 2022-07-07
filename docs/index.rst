@@ -31,6 +31,7 @@ API Reference:
    model
    qa_metric
    associated
+   descriptor
    dumper
    reader
    

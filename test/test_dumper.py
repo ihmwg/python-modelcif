@@ -22,6 +22,7 @@ import modelcif.model
 import modelcif.reference
 import modelcif.alignment
 import modelcif.associated
+import modelcif.descriptor
 import ihm.format
 import ihm.dumper
 
@@ -1061,7 +1062,26 @@ _pdbx_entity_nonpoly.ma_model_mode
     def test_chem_comp_dumper(self):
         """Test ChemCompDumper"""
         system = modelcif.System()
-        e1 = modelcif.Entity('AC')
+
+        # Old-style ChemComp without ccd
+        c1 = ihm.NonPolymerChemComp('C1', name='C1')
+        if hasattr(c1, 'ccd'):
+            del c1.ccd
+
+        # ChemComp using core CCD
+        c2 = ihm.NonPolymerChemComp('C2', name='C2')
+        c2.ccd = 'core'
+
+        # ChemComp using MA CCD
+        c3 = ihm.NonPolymerChemComp('C3', name='C3')
+        c3.ccd = 'ma'
+
+        # ChemComp with descriptors (local)
+        c4 = ihm.NonPolymerChemComp('C4', name='C4')
+        c4.ccd = None
+        c4.descriptors = [modelcif.descriptor.IUPACName("foo")]
+
+        e1 = modelcif.Entity(['A', 'C', c1, c2, c3, c4])
         system.entities.append(e1)
 
         e2 = modelcif.Entity('GT')
@@ -1078,10 +1098,67 @@ _chem_comp.type
 _chem_comp.name
 _chem_comp.formula
 _chem_comp.formula_weight
-ALA 'L-peptide linking' ALANINE 'C3 H7 N O2' 89.094
-CYS 'L-peptide linking' CYSTEINE 'C3 H7 N O2 S' 121.154
-GLY 'peptide linking' GLYCINE 'C2 H5 N O2' 75.067
-THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120
+_chem_comp.ma_provenance
+ALA 'L-peptide linking' ALANINE 'C3 H7 N O2' 89.094 'CCD Core'
+C1 non-polymer C1 . . 'CCD Core'
+C2 non-polymer C2 . . 'CCD Core'
+C3 non-polymer C3 . . 'CCD MA'
+C4 non-polymer C4 . . 'CCD local'
+CYS 'L-peptide linking' CYSTEINE 'C3 H7 N O2 S' 121.154 'CCD Core'
+GLY 'peptide linking' GLYCINE 'C2 H5 N O2' 75.067 'CCD Core'
+THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120 'CCD Core'
+#
+""")
+
+    def test_chem_comp_dumper_bad_ccd(self):
+        """Test ChemCompDumper with invalid value for ccd"""
+        system = modelcif.System()
+
+        c1 = ihm.NonPolymerChemComp('C1', name='C1')
+        c1.ccd = 'garbage'
+
+        e1 = modelcif.Entity([c1])
+        system.entities.append(e1)
+
+        dumper = modelcif.dumper._ChemCompDumper()
+        self.assertRaises(KeyError, _get_dumper_output, dumper, system)
+
+    def test_chem_comp_descriptor_dumper(self):
+        """Test ChemCompDescriptorDumper"""
+        class MockObject(object):
+            pass
+
+        system = modelcif.System()
+
+        # Old-style ChemComp without descriptors
+        c1 = ihm.NonPolymerChemComp('C1', name='C1name')
+        if hasattr(c1, 'descriptor'):
+            del c1.descriptors
+
+        c2 = ihm.NonPolymerChemComp('C2', name='C2name')
+        c2.ccd = None
+        soft = MockObject()
+        soft._id = 42
+        c2.descriptors = [modelcif.descriptor.IUPACName("foo"),
+                          modelcif.descriptor.PubChemCID(
+                              "bar", details="test details", software=soft)]
+
+        e1 = modelcif.Entity(['A', 'C', c1, c2])
+        system.entities.append(e1)
+
+        dumper = modelcif.dumper._ChemCompDescriptorDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_chem_comp_descriptor.ordinal_id
+_ma_chem_comp_descriptor.chem_comp_id
+_ma_chem_comp_descriptor.chem_comp_name
+_ma_chem_comp_descriptor.type
+_ma_chem_comp_descriptor.value
+_ma_chem_comp_descriptor.details
+_ma_chem_comp_descriptor.software_id
+1 C2 C2name 'IUPAC Name' foo . .
+2 C2 C2name 'PubChem CID' bar 'test details' 42
 #
 """)
 

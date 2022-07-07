@@ -1014,6 +1014,60 @@ _ma_template_non_poly.details
         self.assertEqual(s1.type, 'non-polymer')
         self.assertIsInstance(s1, ihm.NonPolymerChemComp)
 
+    def test_chem_comp_handler(self):
+        """Test ChemCompHandler and ChemCompDescriptorHandler"""
+        cif = """
+loop_
+_chem_comp.id
+_chem_comp.type
+_chem_comp.name
+_chem_comp.formula
+_chem_comp.ma_provenance
+MET 'L-peptide linking' . . .
+CYS 'D-peptide linking' CYSTEINE . ?
+ALA 'L-peptide linking' ALANINE . 'CCD Core'
+MATYPE 'L-PEPTIDE LINKING' 'MODELARCHIVE COMPONENT' . 'CCD MA'
+MYTYPE 'L-PEPTIDE LINKING' 'MY CUSTOM COMPONENT' . 'CCD local'
+#
+loop_
+_ma_chem_comp_descriptor.ordinal_id
+_ma_chem_comp_descriptor.chem_comp_id
+_ma_chem_comp_descriptor.chem_comp_name
+_ma_chem_comp_descriptor.type
+_ma_chem_comp_descriptor.value
+_ma_chem_comp_descriptor.details
+_ma_chem_comp_descriptor.software_id
+1 MYTYPE 'ignored' 'InChI Key' XDAOLTSRNUSPPH-XMMPIXPASA-N foo 1
+2 MYTYPE ? 'IUPAC Name' foobar . .
+#
+loop_
+_entity_poly_seq.entity_id
+_entity_poly_seq.num
+_entity_poly_seq.mon_id
+_entity_poly_seq.hetero
+1 1 MET .
+1 2 CYS .
+1 3 ALA .
+1 4 MATYPE .
+1 5 MYTYPE .
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        e1, = s.entities
+        s = e1.sequence
+        self.assertEqual(len(s), 5)
+        self.assertEqual(s[2].ccd, 'core')
+        self.assertEqual(s[3].ccd, 'ma')
+        self.assertEqual(s[4].ccd, 'local')
+        d1, d2 = s[4].descriptors
+        self.assertIsInstance(d1, modelcif.descriptor.InChIKey)
+        self.assertEqual(d1.value, 'XDAOLTSRNUSPPH-XMMPIXPASA-N')
+        self.assertEqual(d1.details, 'foo')
+        self.assertEqual(d1.software._id, '1')
+        self.assertIsInstance(d2, modelcif.descriptor.IUPACName)
+        self.assertEqual(d2.value, 'foobar')
+        self.assertIsNone(d2.details)
+        self.assertIsNone(d2.software)
+
 
 if __name__ == '__main__':
     unittest.main()

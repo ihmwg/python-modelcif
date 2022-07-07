@@ -175,8 +175,22 @@ class System(object):
                 else:
                     for s in sg:
                         yield s
+
+        def _all_entities():
+            return itertools.chain(
+                self.entities, (t.entity for t in self.templates))
+
+        def _all_descriptor_software():
+            comps = frozenset(comp for e in _all_entities()
+                              for comp in e.sequence)
+            for comp in comps:
+                if hasattr(comp, 'descriptors') and comp.descriptors:
+                    for desc in comp.descriptors:
+                        if desc.software:
+                            yield desc.software
         return (itertools.chain(
-            self.software, _all_software_in_groups()))
+            self.software, _all_software_in_groups(),
+            _all_descriptor_software()))
 
     def _all_assemblies(self):
         """Iterate over all Assemblies in the system.
