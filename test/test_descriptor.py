@@ -12,6 +12,7 @@ class Tests(unittest.TestCase):
         """Test Descriptor classes"""
         base = modelcif.descriptor.Descriptor("1abc")
         self.assertEqual(base.value, "1abc")
+        _ = repr(base)
 
 
 if __name__ == '__main__':
