@@ -812,6 +812,7 @@ _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
 1 3 1 . 'target-template pairwise alignment' global
 2 4 1 . 'target-template pairwise alignment' global
+3 5 1 . 'target-template pairwise alignment' global
 #
 #
 loop_
@@ -826,6 +827,7 @@ _ma_alignment_details.percent_sequence_identity
 _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1.0 45.000 'Length of the shorter sequence' .
+2 3 1 A 'HHblits e-value' . 2.0 45.000 'Length of the shorter sequence' .
 #
 loop_
 _ma_alignment.ordinal_id
@@ -834,6 +836,8 @@ _ma_alignment.target_template_flag
 _ma_alignment.sequence
 1 1 1 DSYV-ETLD
 2 1 2 DMACDTFIK
+3 1 1 DSYV-ETLD
+4 1 2 DMACDTFIK
 #
 loop_
 _ma_target_template_poly_mapping.id
@@ -842,9 +846,10 @@ _ma_target_template_poly_mapping.target_asym_id
 _ma_target_template_poly_mapping.target_seq_id_begin
 _ma_target_template_poly_mapping.target_seq_id_end
 1 1 A 1 8
+2 1 A 1 8
 """
         s, = modelcif.reader.read(StringIO(cif))
-        a1, a2, = s.alignments
+        a1, a2, a3, = s.alignments
         self.assertIs(a1.__class__, a2.__class__)
         self.assertIsInstance(a1, modelcif.alignment.Global)
         self.assertIsInstance(a1, modelcif.alignment.Pairwise)
@@ -862,6 +867,9 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertEqual(p.target.asym._id, 'A')
         self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
         self.assertEqual(p.target.seq_id_range, (1, 8))
+        p, = a3.pairs
+        self.assertIsInstance(p.score, modelcif.alignment.HHblitsEValue)
+        self.assertAlmostEqual(p.score.value, 2.0, delta=1e-6)
 
     def test_associated_files(self):
         """Test _AssociatedHandler and _AssociatedArchiveHandler"""
