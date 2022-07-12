@@ -138,3 +138,10 @@ class BLASTEValue(Score):
     """BLAST e-value for an alignment. See :class:`Score` for more details."""
     type = "BLAST e-value"
     other_details = None
+
+
+class HHblitsEValue(Score):
+    """E-value computed by HHblits for an alignment. See :class:`Score` for
+    more details."""
+    type = "HHblits e-value"
+    other_details = None

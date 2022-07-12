@@ -557,9 +557,18 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         aln = Alignment(name='testaln', pairs=[p])
         aln._data_id = 100
         system.alignments.append(aln)
+        # The same alignment using HHblits e-value
+        p = modelcif.alignment.Pair(
+            template=p.template,
+            target=p.target,
+            score=modelcif.alignment.HHblitsEValue("1e-14"),
+            identity=p.identity)
+        aln = Alignment(name='testaln', pairs=[p])
+        aln._data_id = 101
+        system.alignments.append(aln)
         # Alignment with no pairs
         aln2 = Alignment(name='testaln2', pairs=[])
-        aln2._data_id = 101
+        aln2._data_id = 102
         system.alignments.append(aln2)
         system._before_write()  # populate system.templates
 
@@ -580,6 +589,7 @@ _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 1 'reference database' polymer 42 99 A H . 1 Z
+2 1 'reference database' polymer 42 99 A H . 1 Z
 #
 #
 loop_
@@ -615,6 +625,7 @@ _ma_target_template_poly_mapping.target_asym_id
 _ma_target_template_poly_mapping.target_seq_id_begin
 _ma_target_template_poly_mapping.target_seq_id_end
 1 1 A 1 3
+2 1 A 1 3
 #
 #
 loop_
@@ -625,7 +636,8 @@ _ma_alignment_info.alignment_length
 _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
 1 100 . 4 'target-template pairwise alignment' global
-2 101 . . 'target-template pairwise alignment' global
+2 101 . 4 'target-template pairwise alignment' global
+3 102 . . 'target-template pairwise alignment' global
 #
 #
 loop_
@@ -640,6 +652,7 @@ _ma_alignment_details.percent_sequence_identity
 _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1e-15 42.000 'Length of the shorter sequence' .
+2 2 1 A 'HHblits e-value' . 1e-14 42.000 'Length of the shorter sequence' .
 #
 #
 loop_
@@ -649,6 +662,8 @@ _ma_alignment.target_template_flag
 _ma_alignment.sequence
 1 1 1 ACE-
 2 1 2 AC-G
+3 2 1 ACE-
+4 2 2 AC-G
 #
 """)
 

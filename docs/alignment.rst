@@ -34,3 +34,6 @@ The :mod:`modelcif.alignment` Python module
 
 .. autoclass:: BLASTEValue
    :members:
+
+.. autoclass:: HHblitsEValue
+   :members:
