@@ -318,6 +318,11 @@ This is implemented as a simple list of asymmetric units (or parts of
 them), i.e. a list of :class:`AsymUnit` and/or :class:`AsymUnitRange`
 objects. An Assembly is typically passed to the :class:`modelcif.model.Model`
 constructor.
+
+Note that the ModelCIF dictionary has deprecated the corresponding
+``ma_struct_assembly`` category, so any name or description of the assembly
+will not be written to the mmCIF file. The ModelCIF dictionary requires that all
+models have the same composition.
 """
 
 

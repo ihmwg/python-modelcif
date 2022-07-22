@@ -439,14 +439,13 @@ _ma_model_list.model_id
 _ma_model_list.model_group_id
 _ma_model_list.model_name
 _ma_model_list.model_group_name
-_ma_model_list.assembly_id
 _ma_model_list.data_id
 _ma_model_list.model_type
 _ma_model_list.model_type_other_details
-1 1 1 'test model' 'test group' 2 42 'Homology model' .
-2 2 1 model2 'test group' 2 43 'Ab initio model' .
-3 3 1 model3 'test group' 2 44 Other 'custom model'
-4 1 2 'test model' 'second group' 2 42 'Homology model' .
+1 1 1 'test model' 'test group' 42 'Homology model' .
+2 2 1 model2 'test group' 43 'Ab initio model' .
+3 3 1 model3 'test group' 44 Other 'custom model'
+4 1 2 'test model' 'second group' 42 'Homology model' .
 #
 #
 loop_
@@ -840,42 +839,6 @@ _ma_target_entity_instance.asym_id
 _ma_target_entity_instance.entity_id
 _ma_target_entity_instance.details
 X 42 foo
-#
-""")
-
-    def test_assembly_dumper(self):
-        """Test AssemblyDumper"""
-        system = modelcif.System()
-        e1 = modelcif.Entity('ACGT')
-        e1._id = 42
-        system.entities.append(e1)
-        asym = modelcif.AsymUnit(e1, 'foo')
-        system.asym_units.append(asym)
-        asmb = modelcif.Assembly((asym,), name='foo', description='bar')
-        system.assemblies.append(asmb)
-
-        dumper = ihm.dumper._StructAsymDumper()  # Assign _ordinal_id
-        dumper.finalize(system)
-
-        dumper = modelcif.dumper._AssemblyDumper()
-        dumper.finalize(system)
-        out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, """#
-loop_
-_ma_struct_assembly.ordinal_id
-_ma_struct_assembly.assembly_id
-_ma_struct_assembly.entity_id
-_ma_struct_assembly.asym_id
-_ma_struct_assembly.seq_id_begin
-_ma_struct_assembly.seq_id_end
-1 1 42 A 1 4
-#
-#
-loop_
-_ma_struct_assembly_details.assembly_id
-_ma_struct_assembly_details.assembly_name
-_ma_struct_assembly_details.assembly_description
-1 foo bar
 #
 """)
 

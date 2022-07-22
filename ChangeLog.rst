@@ -1,3 +1,9 @@
+HEAD
+====
+ - The ``ma_struct_assembly`` category is no longer written out to mmCIF
+   files, as this is deprecated by ModelCIF (all models are required to
+   have the same composition).
+
 0.5 - 2022-05-10
 ================
  - A new class :class:`modelcif.ReferenceDatabase` allows describing

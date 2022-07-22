@@ -318,40 +318,6 @@ class _DataRefDBDumper(Dumper):
                          if d.release_date else None)
 
 
-class _AssemblyDumper(Dumper):
-    def finalize(self, system):
-        for n, asmb in enumerate(system.assemblies):
-            asmb._id = n + 1
-
-    def dump(self, system, writer):
-        self.dump_summary(system, writer)
-        self.dump_details(system, writer)
-
-    def dump_summary(self, system, writer):
-        ordinal = itertools.count(1)
-        with writer.loop("_ma_struct_assembly",
-                         ["ordinal_id", "assembly_id", "entity_id", "asym_id",
-                          "seq_id_begin", "seq_id_end"]) as lp:
-            for a in system.assemblies:
-                for comp in a:
-                    entity = comp.entity if hasattr(comp, 'entity') else comp
-                    lp.write(
-                        ordinal_id=next(ordinal), assembly_id=a._id,
-                        entity_id=entity._id,
-                        asym_id=comp._id if hasattr(comp, 'entity') else None,
-                        seq_id_begin=comp.seq_id_range[0],
-                        seq_id_end=comp.seq_id_range[1])
-
-    def dump_details(self, system, writer):
-        with writer.loop("_ma_struct_assembly_details",
-                         ["assembly_id", "assembly_name",
-                          "assembly_description"]) as lp:
-            for a in system.assemblies:
-                lp.write(assembly_id=a._id,
-                         assembly_name=a.name,
-                         assembly_description=a.description)
-
-
 class _TemplateTransformDumper(Dumper):
     def finalize(self, system):
         for n, trans in enumerate(system.template_transformations):
@@ -606,7 +572,7 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
         ordinal = itertools.count(1)
         with writer.loop("_ma_model_list",
                          ["ordinal_id", "model_id", "model_group_id",
-                          "model_name", "model_group_name", "assembly_id",
+                          "model_name", "model_group_name",
                           "data_id", "model_type",
                           "model_type_other_details"]) as lp:
             for group in system.model_groups:
@@ -614,7 +580,6 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
                     lp.write(ordinal_id=next(ordinal), model_id=model._id,
                              model_group_id=group._id, model_name=model.name,
                              model_group_name=group.name,
-                             assembly_id=model.assembly._id,
                              data_id=model._data_id,
                              model_type=model.model_type,
                              model_type_other_details=model.other_details)
@@ -834,8 +799,7 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper, _DataGroupDumper, _DataRefDBDumper,
-        _TargetEntityDumper, _AssemblyDumper,
-        _TemplateTransformDumper, _AlignmentDumper,
+        _TargetEntityDumper, _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _AssociatedDumper, _QAMetricDumper]
 
     def get_dumpers(self):
