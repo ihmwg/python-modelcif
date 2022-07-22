@@ -321,8 +321,8 @@ constructor.
 
 Note that the ModelCIF dictionary has deprecated the corresponding
 ``ma_struct_assembly`` category, so any name or description of the assembly
-will not be written to the mmCIF file. The ModelCIF dictionary requires that all
-models have the same composition.
+will not be written to the mmCIF file. The ModelCIF dictionary requires that
+all models have the same composition.
 """
 
 
