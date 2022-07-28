@@ -810,8 +810,15 @@ class ModelCIFVariant(Variant):
         # associated files (the rest use the default writer)
         category_map = {}
         copy_category_map = {}
-        for r in system.repositories:
+
+        def _all_repo_files(r):
             for f in r.files:
+                yield f
+                if hasattr(f, 'files'):
+                    for subf in f.files:
+                        yield subf
+        for r in system.repositories:
+            for f in _all_repo_files(r):
                 if (not hasattr(f, 'categories')
                         or (not f.categories and not f.copy_categories)):
                     continue

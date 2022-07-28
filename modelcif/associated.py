@@ -62,7 +62,8 @@ class CIFFile(File):
               if written (by specifying ``categories`` or ``copy_categories``).
        :param str local_path: File name that will be used for ``categories``
               or ``copy_categories``. If not given, it defaults to the same
-              as ``path``.
+              as ``path``. (The file is always written directly to the local
+              disk, even if this object is placed inside a :class:`ZipFile`.)
        :param bool binary: If False (the default), any output file is written
               in mmCIF format; if True, the file is written in BinaryCIF.
     """

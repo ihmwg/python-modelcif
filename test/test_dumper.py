@@ -916,6 +916,32 @@ _ma_associated_archive_file_details.description
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertNotIn('_audit_conform.dict_name', main_file)
 
+    def test_write_associated_in_zip(self):
+        """Test write() function with associated files in a ZipFile"""
+        s = modelcif.System(id='system1')
+
+        f = modelcif.associated.CIFFile(
+            path='test_write_associated_in_zip.cif',
+            categories=['exptl', '_AUDIT_CONFORM'],
+            entry_details='test details', entry_id='testcif')
+        zf = modelcif.associated.ZipFile(path='t.zip', files=[f])
+        r = modelcif.associated.Repository(url_root='https://example.com',
+                                           files=[zf])
+        s.repositories.append(r)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        main_file = fh.getvalue()
+        with open('test_write_associated_in_zip.cif') as fh:
+            assoc_file = fh.read()
+        os.unlink('test_write_associated_in_zip.cif')
+        # exptl and audit_conform categories should be in associated file,
+        # not the main file
+        self.assertIn('_exptl.entry_id', assoc_file)
+        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_audit_conform.dict_name', assoc_file)
+        self.assertNotIn('_audit_conform.dict_name', main_file)
+
     def test_write_associated_copy(self):
         """Test write() function with associated files, copy_categories"""
         s = modelcif.System(id='system1')
