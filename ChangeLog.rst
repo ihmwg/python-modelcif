@@ -1,8 +1,19 @@
 HEAD
 ====
+ - :class:`ihm.ChemComp` now allows for custom chemical components to be
+   defined in a chemical component dictionary (CCD) outside of the wwPDB CCD,
+   such as the ModelArchive CCD, or in the file itself using descriptors such
+   as SMILES or InChI in the :mod:`modelcif.descriptor` module.
  - The ``ma_struct_assembly`` category is no longer written out to mmCIF
    files, as this is deprecated by ModelCIF (all models are required to
    have the same composition).
+ - Templates can now be described in AlphaFoldDB or PubChem using new
+   :class:`modelcif.reference.TemplateReference` subclasses.
+ - HHblits e-values can now be used as alignment scores, using
+   :class:`modelcif.alignment.HHblitsEValue`.
+ - Bugfix: :class:`modelcif.associated.CIFFile` now writes local files
+   (if requested via ``categories`` or ``copy_categories``) even if it
+   is placed inside a :class:`modelcif.associated.ZipFile` (#26).
 
 0.5 - 2022-05-10
 ================
