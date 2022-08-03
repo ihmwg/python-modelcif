@@ -136,7 +136,7 @@ class PubChem(TemplateReference):
        constructor.
 
        See :class:`TemplateReference` for a description of the parameters. Use
-       the PubChem CID ass accession code.
+       the PubChem CID as the accession code.
     """
     name = 'PubChem'
     other_details = None
