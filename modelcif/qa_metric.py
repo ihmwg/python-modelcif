@@ -90,9 +90,9 @@ class LocalPairwise(MetricMode):
         self.value = value
 
     def __repr__(self):
-        return("<%s(residue1=%r, residue2=%r, value=%r)>"
-               % (type(self).__name__, self.residue1, self.residue2,
-                  self.value))
+        return ("<%s(residue1=%r, residue2=%r, value=%r)>"
+                % (type(self).__name__, self.residue1, self.residue2,
+                   self.value))
 
 
 class MetricType(object):
@@ -167,8 +167,8 @@ class ContactProbability(MetricType):
 
 
 class PLDDT(MetricType):
-    """Predicted lDDT-CA score in [0,100] (higher score, means better accuracy).
-       See :class:`MetricType` for more information."""
+    """Predicted lDDT-CA score in [0,100] (higher score, means better
+       accuracy). See :class:`MetricType` for more information."""
     type = "pLDDT"
     other_details = None
 

@@ -376,8 +376,8 @@ class SoftwareParameter(object):
         self.description = description
 
     def __repr__(self):
-        return("<SoftwareParameter(name=%r, value=%r)>"
-               % (self.name, self.value))
+        return ("<SoftwareParameter(name=%r, value=%r)>"
+                % (self.name, self.value))
 
 
 class Transformation(object):
