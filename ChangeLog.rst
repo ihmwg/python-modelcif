@@ -1,5 +1,5 @@
-HEAD
-====
+0.6 - 2022-08-03
+================
  - :class:`ihm.ChemComp` now allows for custom chemical components to be
    defined in a chemical component dictionary (CCD) outside of the wwPDB CCD,
    such as the ModelArchive CCD, or in the file itself using descriptors such
