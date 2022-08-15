@@ -426,6 +426,7 @@ _ma_struct_assembly.seq_id_begin
 _ma_struct_assembly.seq_id_end
 1 1 1 A 1 2
 2 1 1 A 1 1
+3 1 1 A . .
 #
 loop_
 _ma_struct_assembly_details.assembly_id
@@ -437,12 +438,14 @@ _ma_struct_assembly_details.assembly_description
         a, = s.assemblies
         self.assertEqual(a.name, 'foo')
         self.assertEqual(a.description, 'bar')
-        self.assertEqual(len(a), 2)
+        self.assertEqual(len(a), 3)
         # Complete asym
         self.assertIsInstance(a[0], modelcif.AsymUnit)
         # asym range
         self.assertIsInstance(a[1], modelcif.AsymUnitRange)
         self.assertEqual(a[1].seq_id_range, (1, 1))
+        # No specified range -> complete asym
+        self.assertIsInstance(a[2], modelcif.AsymUnit)
 
     def test_template_poly_segment_handler(self):
         """Test _TemplatePolySegmentHandler"""
