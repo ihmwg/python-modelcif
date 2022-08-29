@@ -88,11 +88,17 @@ class TemplateReference(object):
                "my custom database"
 
        :param str accession: The database accession.
+       :param db_version_date: Versioning date, e.g. for PDB entries this is
+                               usually the value of
+                               ``_pdbx_audit_revision_history.revision_date``.
+       :type db_version_date: :class:`datetime.date` or
+                              :class:`datetime.datetime`
     """
     name = 'Other'
 
-    def __init__(self, accession):
+    def __init__(self, accession, db_version_date=None):
         self.accession = accession
+        self.db_version_date = db_version_date
 
     def _get_other_details(self):
         if (type(self) is not TemplateReference

@@ -448,10 +448,11 @@ class _TemplateRefDBHandler(Handler):
             modelcif.reference, modelcif.reference.TemplateReference)
 
     def __call__(self, template_id, db_name, db_name_other_details,
-                 db_accession_code):
+                 db_accession_code, db_version_date):
         t = self.sysr.templates.get_by_id(template_id)
         typ = self.type_map.get(db_name, db_name_other_details)
-        ref = typ(accession=db_accession_code)
+        ref = typ(accession=db_accession_code,
+                  db_version_date=_get_date(db_version_date))
         t.references.append(ref)
 
 

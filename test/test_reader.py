@@ -287,25 +287,29 @@ _ma_template_ref_db_details.template_id
 _ma_template_ref_db_details.db_name
 _ma_template_ref_db_details.db_name_other_details
 _ma_template_ref_db_details.db_accession_code
-1 PDB . 3nc1
-1 MIS . testacc
-1 Other foo acc2
-1 PubChem . 1046
-1 AlphaFoldDB . I6XD65
+_ma_template_ref_db_details.db_version_date
+1 PDB . 3nc1 2021-10-06
+1 MIS . testacc .
+1 Other foo acc2 .
+1 PubChem . 1046 .
+1 AlphaFoldDB . I6XD65 2022-06-01
 """
         s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
         r1, r2, r3, r4, r5 = t.references
         self.assertIsInstance(r1, modelcif.reference.PDB)
         self.assertEqual(r1.accession, '3nc1')
+        self.assertEqual(r1.db_version_date, date(2021, 10, 6))
         self.assertEqual(r2.name, 'MIS')
         self.assertIsNone(r2.other_details)
+        self.assertIsNone(r2.db_version_date)
         self.assertEqual(r3.name, 'Other')
         self.assertEqual(r3.other_details, 'foo')
         self.assertIsInstance(r4, modelcif.reference.PubChem)
         self.assertEqual(r4.accession, '1046')
         self.assertIsInstance(r5, modelcif.reference.AlphaFoldDB)
         self.assertEqual(r5.accession, 'I6XD65')
+        self.assertEqual(r5.db_version_date, date(2022, 6, 1))
 
     def _get_models_cif(self):
         cif = """
