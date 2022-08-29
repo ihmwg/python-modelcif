@@ -537,10 +537,12 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         asym = modelcif.AsymUnit(tgt_e, id='A')
         asym._id = 'A'
         system.asym_units.append(asym)
-        ref1 = modelcif.reference.PDB('1abc')
+        ref1 = modelcif.reference.PDB('1abc',
+                                      db_version_date=date(1979, 11, 22))
         ref2 = CustomRef('2xyz')
         ref3 = modelcif.reference.PubChem("1234")
-        ref4 = modelcif.reference.AlphaFoldDB("P12345")
+        ref4 = modelcif.reference.AlphaFoldDB("P12345",
+                                              db_version_date=date(2022, 6, 1))
         tr = modelcif.Transformation.identity()
         tr._id = 42
         t = modelcif.Template(tmp_e, asym_id='H', model_num=1, name='testtmp',
@@ -611,10 +613,11 @@ _ma_template_ref_db_details.template_id
 _ma_template_ref_db_details.db_name
 _ma_template_ref_db_details.db_name_other_details
 _ma_template_ref_db_details.db_accession_code
-1 PDB . 1abc
-1 Other 'my custom ref' 2xyz
-1 PubChem . 1234
-1 AlphaFoldDB . P12345
+_ma_template_ref_db_details.db_version_date
+1 PDB . 1abc 1979-11-22
+1 Other 'my custom ref' 2xyz .
+1 PubChem . 1234 .
+1 AlphaFoldDB . P12345 2022-06-01
 #
 #
 loop_

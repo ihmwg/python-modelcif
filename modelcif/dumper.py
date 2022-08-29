@@ -454,12 +454,15 @@ class _AlignmentDumper(Dumper):
         with writer.loop(
                 "_ma_template_ref_db_details",
                 ["template_id", "db_name", "db_name_other_details",
-                 "db_accession_code"]) as lp:
+                 "db_accession_code", "db_version_date"]) as lp:
             for tmpl in system.templates:
                 for ref in tmpl.references:
                     lp.write(template_id=tmpl._id, db_name=ref.name,
                              db_name_other_details=ref.other_details,
-                             db_accession_code=ref.accession)
+                             db_accession_code=ref.accession,
+                             db_version_date=date.isoformat(
+                                 ref.db_version_date)
+                             if ref.db_version_date else None)
 
     def dump_target_template_poly_mapping(self, system, writer):
         ordinal = itertools.count(1)
