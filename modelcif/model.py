@@ -84,7 +84,7 @@ class Model(modelcif.data.Data):
            if the atoms are already stored somewhere else, e.g. in the
            software's own data structures. It is recommended to subclass
            and provide a more efficient implementation. For example,
-           `the modbase_pdb_to_cif script <https://github.com/salilab/modbase_utils/blob/model_archive/modbase_pdb_to_cif.py>`_
+           `the modbase_pdb_to_cif script <https://github.com/salilab/modbase_utils/blob/main/modbase_pdb_to_cif.py>`_
            uses a custom ``MyModel`` subclass that creates Atom objects on
            the fly from PDB ATOM or HETATM lines.
         """  # noqa: E501

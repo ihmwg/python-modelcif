@@ -5,7 +5,7 @@
 
 # For a more complete (but less documented) script to convert a complete
 # ModBase PDB file into a corresponding mmCIF or BinaryCIF file, see
-# https://github.com/salilab/modbase_utils/blob/model_archive/modbase_pdb_to_cif.py
+# https://github.com/salilab/modbase_utils/blob/main/modbase_pdb_to_cif.py
 
 # Import used classes.
 import modelcif
