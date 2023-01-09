@@ -75,14 +75,6 @@ class Tests(unittest.TestCase):
         self.assertEqual(out, "_database_2.database_code bar\n"
                               "_database_2.database_id foo\n")
 
-    def test_exptl_dumper(self):
-        """Test ExptlDumper"""
-        system = modelcif.System(id='foo')
-        dumper = modelcif.dumper._ExptlDumper()
-        out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, "_exptl.entry_id foo\n"
-                              "_exptl.method 'THEORETICAL MODEL'\n")
-
     def test_software_group_dumper(self):
         """Test SoftwareGroupDumper"""
         class MockObject(object):
@@ -899,7 +891,7 @@ _ma_associated_archive_file_details.description
 
         f = modelcif.associated.CIFFile(
             path='test_write_associated.cif',
-            categories=['exptl', '_AUDIT_CONFORM'],
+            categories=['struct', '_AUDIT_CONFORM'],
             entry_details='test details', entry_id='testcif')
         f2 = modelcif.associated.File(path='foo.txt', details='test file')
         r = modelcif.associated.Repository(url_root='https://example.com',
@@ -912,10 +904,10 @@ _ma_associated_archive_file_details.description
         with open('test_write_associated.cif') as fh:
             assoc_file = fh.read()
         os.unlink('test_write_associated.cif')
-        # exptl and audit_conform categories should be in associated file,
+        # struct and audit_conform categories should be in associated file,
         # not the main file
-        self.assertIn('_exptl.entry_id', assoc_file)
-        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_struct.title', assoc_file)
+        self.assertNotIn('_struct.title', main_file)
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertNotIn('_audit_conform.dict_name', main_file)
 
@@ -925,7 +917,7 @@ _ma_associated_archive_file_details.description
 
         f = modelcif.associated.CIFFile(
             path='test_write_associated_in_zip.cif',
-            categories=['exptl', '_AUDIT_CONFORM'],
+            categories=['struct', '_AUDIT_CONFORM'],
             entry_details='test details', entry_id='testcif')
         zf = modelcif.associated.ZipFile(path='t.zip', files=[f])
         r = modelcif.associated.Repository(url_root='https://example.com',
@@ -938,10 +930,10 @@ _ma_associated_archive_file_details.description
         with open('test_write_associated_in_zip.cif') as fh:
             assoc_file = fh.read()
         os.unlink('test_write_associated_in_zip.cif')
-        # exptl and audit_conform categories should be in associated file,
+        # struct and audit_conform categories should be in associated file,
         # not the main file
-        self.assertIn('_exptl.entry_id', assoc_file)
-        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_struct.title', assoc_file)
+        self.assertNotIn('_struct.title', main_file)
         self.assertIn('_audit_conform.dict_name', assoc_file)
         self.assertNotIn('_audit_conform.dict_name', main_file)
 
@@ -956,7 +948,7 @@ _ma_associated_archive_file_details.description
         f = modelcif.associated.CIFFile(
             path='/not/exist/foo.cif',
             local_path='test_write_associated_copy.cif',
-            categories=['exptl'], copy_categories=['entity', 'audit_conform'],
+            categories=['struct'], copy_categories=['entity', 'audit_conform'],
             entry_details='test details', entry_id='testcif')
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f])
@@ -968,9 +960,9 @@ _ma_associated_archive_file_details.description
         with open('test_write_associated_copy.cif') as fh:
             assoc_file = fh.read()
         os.unlink('test_write_associated_copy.cif')
-        # exptl category should be in associated file, not the main file
-        self.assertIn('_exptl.entry_id', assoc_file)
-        self.assertNotIn('_exptl.entry_id', main_file)
+        # struct category should be in associated file, not the main file
+        self.assertIn('_struct.title', assoc_file)
+        self.assertNotIn('_struct.title', main_file)
         # entity and audit conform categories should be in *both* files
         self.assertIn('_entity.type', assoc_file)
         self.assertIn('_entity.type', main_file)
@@ -990,7 +982,7 @@ _ma_associated_archive_file_details.description
         fh = StringIO()
         modelcif.dumper.write(fh, [s])
         main_file = fh.getvalue()
-        self.assertIn('_exptl.entry_id', main_file)
+        self.assertIn('_struct.title', main_file)
         self.assertIn('_audit_conform.dict_name', main_file)
 
     @unittest.skipIf(msgpack is None, "needs Python 3 and msgpack")
@@ -1000,7 +992,7 @@ _ma_associated_archive_file_details.description
 
         f = modelcif.associated.CIFFile(
             path='test_write_associated_binary.bcif',
-            categories=['exptl', '_AUDIT_CONFORM'],
+            categories=['struct', '_AUDIT_CONFORM'],
             entry_details='test details', entry_id='testcif', binary=True)
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f])
@@ -1015,8 +1007,8 @@ _ma_associated_archive_file_details.description
         assoc_cats = frozenset(
             x['name'] for x in assoc_file['dataBlocks'][0]['categories'])
 
-        self.assertIn('_exptl', assoc_cats)
-        self.assertNotIn('_exptl.entry_id', main_file)
+        self.assertIn('_struct', assoc_cats)
+        self.assertNotIn('_struct.title', main_file)
         self.assertIn('_audit_conform', assoc_cats)
         self.assertNotIn('_audit_conform.dict_name', main_file)
 

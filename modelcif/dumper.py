@@ -30,12 +30,6 @@ class _EntryLinkDumper(Dumper):
             lp.write(id=1, entry_id=system.id, details=system.entry_details)
 
 
-class _ExptlDumper(Dumper):
-    def dump(self, system, writer):
-        with writer.category("_exptl") as lp:
-            lp.write(entry_id=system.id, method='THEORETICAL MODEL')
-
-
 class _DatabaseDumper(Dumper):
     def dump(self, system, writer):
         if system.database:
@@ -790,7 +784,7 @@ class ModelCIFVariant(Variant):
        See :func:`write` and :class:`ihm.dumper.Variant`."""
     _dumpers = [
         ihm.dumper._EntryDumper,  # must be first
-        ihm.dumper._StructDumper, _ExptlDumper, ihm.dumper._CommentDumper,
+        ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
         _AuditConformDumper, _DatabaseDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
         ihm.dumper._AuditAuthorDumper,
