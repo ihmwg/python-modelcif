@@ -5,8 +5,10 @@ Usage of the library for output consists of first creating a hierarchy of
 Python objects that together describe the system, and then dumping that
 hierarchy to an mmCIF or BinaryCIF file.
 
-For a complete worked example, see the
-`ModBase example <https://github.com/ihmwg/python-ma/blob/main/examples/mkmodbase.py>`_.
+For complete worked examples, see the
+`ModBase example <https://github.com/ihmwg/python-ma/blob/main/examples/mkmodbase.py>`_
+or the
+`ligands example <https://github.com/ihmwg/python-modelcif/blob/main/examples/ligands.py>`_.
 
 The top level of the hierarchy is the :class:`modelcif.System`. All other
 objects are referenced from a System object (either directly or via another
@@ -98,3 +100,13 @@ Input
 Hierarchies of classes can also be read from mmCIF or BinaryCIF files.
 This is done using the :func:`modelcif.reader.read` function, which returns
 a list of :class:`modelcif.System` objects.
+
+Validation
+==========
+
+The library is designed to generate files that are consistent with the
+`PDBx <https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Index/>`_
+and `ModelCIF <https://mmcif.wwpdb.org/dictionaries/mmcif_ma.dic/Index/>`_
+dictionaries by construction. However, the library can also be used to validate
+ModelCIF (or other mmCIF/BinaryCIF files) if desired; see the
+`validator example <https://github.com/ihmwg/python-modelcif/blob/main/examples/validate_modbase.py>`_.
