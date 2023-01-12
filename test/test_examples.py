@@ -2,7 +2,12 @@ import utils
 import os
 import unittest
 import sys
+import shutil
 import subprocess
+try:
+    import msgpack
+except ImportError:
+    msgpack = None
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
@@ -58,6 +63,23 @@ class Tests(unittest.TestCase):
             self.assertEqual(len(contents), 323)
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 s, = modelcif.reader.read(fh)
+
+    @unittest.skipIf(msgpack is None, "BinaryCIF needs msgpack")
+    def test_convert_bcif_example(self):
+        """Test convert_bcif example"""
+        with utils.temporary_directory() as tmpdir:
+            from_input = get_example_path("input")
+            to_input = os.path.join(tmpdir, 'input')
+            os.mkdir(to_input)
+            shutil.copy(os.path.join(from_input, "ligands.cif"), to_input)
+            subprocess.check_call([sys.executable,
+                                   get_example_path("convert_bcif.py")],
+                                  cwd=tmpdir)
+
+            # Make sure that a complete output file was produced and that we
+            # can read it
+            with open(os.path.join(tmpdir, 'ligands.bcif'), 'rb') as fh:
+                s, = modelcif.reader.read(fh, format='BCIF')
 
 
 if __name__ == '__main__':

@@ -101,6 +101,11 @@ Hierarchies of classes can also be read from mmCIF or BinaryCIF files.
 This is done using the :func:`modelcif.reader.read` function, which returns
 a list of :class:`modelcif.System` objects.
 
+The library can be employed to easily convert a ModelCIF file between mmCIF
+and BinaryCIF format by simply reading in one format and then writing in
+another. See the
+`convert_bcif example <https://github.com/ihmwg/python-modelcif/blob/main/examples/convert_bcif.py>`_.
+
 Validation
 ==========
 
