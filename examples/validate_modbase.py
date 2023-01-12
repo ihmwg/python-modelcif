@@ -1,6 +1,6 @@
 # This example demonstrates the use of the Python IHM library's validator.
 # A structure is downloaded from the ModBase database and checked against
-# the PDBx and ModelCIF dictionaries for compliance. This validator can be used
+# the ModelCIF dictionary for compliance. This validator can be used
 # to perform basic integrity checking against any mmCIF dictionary.
 
 import io
@@ -11,23 +11,12 @@ try:
 except ImportError:
     import urllib2  # Python 2
 
-# Read in the PDBx dictionary from wwPDB as a Dictionary object
-fh = urllib2.urlopen(
-    'http://mmcif.wwpdb.org/dictionaries/ascii/mmcif_pdbx_v50.dic')
-d_pdbx = ihm.dictionary.read(fh)
-fh.close()
-
-# Also read in the ModelCIF dictionary
+# Read in the ModelCIF dictionary from wwPDB as a Dictionary object.
+# Note that the ModelCIF dictionary also includes the PDBx dictionary,
+# so we don't need to read that in separately
 fh = urllib2.urlopen('https://mmcif.wwpdb.org/dictionaries/ascii/mmcif_ma.dic')
-d_mc = ihm.dictionary.read(fh)
+pdbx_mc = ihm.dictionary.read(fh)
 fh.close()
-
-# Deposited theoretical models should conform to both the PDBx dictionary
-# (used to define basic structural information such as residues and chains)
-# and the ModelCIF dictionary (used for information specific to theoretical
-# models). Make a dictionary that combines the PDBx and ModelCIF dictionaries
-# using the + operator.
-pdbx_mc = d_pdbx + d_mc
 
 # Validate a structure against PDBx+ModelCIF.
 # A correct structure here should result in no output; an invalid structure

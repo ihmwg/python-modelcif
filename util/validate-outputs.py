@@ -14,12 +14,8 @@ import ihm.dictionary
 import urllib.request
 
 with urllib.request.urlopen(
-        'http://mmcif.wwpdb.org/dictionaries/ascii/mmcif_pdbx_v50.dic') as fh:
-    d_pdbx = ihm.dictionary.read(fh)
-with urllib.request.urlopen(
         'https://mmcif.wwpdb.org/dictionaries/ascii/mmcif_ma.dic') as fh:
-    d_mcif = ihm.dictionary.read(fh)
-pdbx_mcif = d_pdbx + d_mcif
+    pdbx_mcif = ihm.dictionary.read(fh)
 
 for script in ('mkmodbase.py', 'ligands.py'):
     print(script)
