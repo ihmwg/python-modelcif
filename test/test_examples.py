@@ -29,10 +29,22 @@ class Tests(unittest.TestCase):
                      "AppVeyor environments have old SSL certs")
     @unittest.skipIf('GITHUB_ACTIONS' in os.environ,
                      "Example is slow and fails when ModBase is down")
-    def test_validator_example(self):
-        """Test validator example"""
+    def test_validate_modbase_example(self):
+        """Test validate_modbase example"""
         subprocess.check_call([sys.executable,
                                get_example_path("validate_modbase.py")])
+
+    @unittest.skipIf('APPVEYOR' in os.environ,
+                     "AppVeyor environments have old SSL certs")
+    @unittest.skipIf('GITHUB_ACTIONS' in os.environ,
+                     "Example is slow and fails when ModBase is down")
+    def test_validate_mmcif_example(self):
+        """Test validate_mmcif example"""
+        with utils.temporary_directory() as tmpdir:
+            subprocess.check_call([sys.executable,
+                                   get_example_path("validate_mmcif.py"),
+                                   get_example_path("input/ligands.cif")],
+                                  cwd=tmpdir)
 
     def test_mkmodbase_example(self):
         """Test mkmodbase example"""

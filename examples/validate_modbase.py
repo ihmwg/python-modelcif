@@ -2,6 +2,8 @@
 # A structure is downloaded from the ModBase database and checked against
 # the ModelCIF dictionary for compliance. This validator can be used
 # to perform basic integrity checking against any mmCIF dictionary.
+# See also validate_mmcif.py for a simpler Python3 script to validate a
+# user-provided mmCIF file.
 
 import io
 import sys

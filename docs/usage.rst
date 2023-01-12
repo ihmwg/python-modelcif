@@ -114,4 +114,4 @@ The library is designed to generate files that are consistent with the
 and `ModelCIF <https://mmcif.wwpdb.org/dictionaries/mmcif_ma.dic/Index/>`_
 dictionaries by construction. However, the library can also be used to validate
 ModelCIF (or other mmCIF/BinaryCIF files) if desired; see the
-`validator example <https://github.com/ihmwg/python-modelcif/blob/main/examples/validate_modbase.py>`_.
+`validator example <https://github.com/ihmwg/python-modelcif/blob/main/examples/validate_mmcif.py>`_.
