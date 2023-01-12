@@ -74,6 +74,8 @@ class Tests(unittest.TestCase):
         p = modelcif.protocol.Protocol()
         p.steps.append(modelcif.protocol.ModelingStep(
             input_data=e1, output_data=e2))
+        p.steps.append(modelcif.protocol.ModelingStep(
+            input_data=None, output_data=None))
         s.protocols.append(p)
 
         d = s._all_data_groups()

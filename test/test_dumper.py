@@ -370,6 +370,8 @@ _ma_qa_metric_local_pairwise.metric_value
             input_data=indat, output_data=outdat))
         p.steps.append(modelcif.protocol.ModelingStep(
             name='modstep', input_data=indat, output_data=outdat))
+        p.steps.append(modelcif.protocol.ModelingStep(
+            name='nullstep', input_data=None, output_data=None))
         system.protocols.append(p)
         dumper = modelcif.dumper._ProtocolDumper()
         dumper.finalize(system)
@@ -387,6 +389,7 @@ _ma_protocol_step.input_data_group_id
 _ma_protocol_step.output_data_group_id
 1 1 1 'template search' tsstep 'some details' 42 1 2
 2 1 2 modeling modstep . . 1 2
+3 1 3 modeling nullstep . . . .
 #
 """)
 

@@ -236,8 +236,10 @@ class System(object):
         """Return all DataGroup (or singleton Data) objects"""
         return itertools.chain(
             self.data_groups,
-            (step.input_data for p in self.protocols for step in p.steps),
-            (step.output_data for p in self.protocols for step in p.steps))
+            (step.input_data for p in self.protocols for step in p.steps
+             if step.input_data),
+            (step.output_data for p in self.protocols for step in p.steps
+             if step.output_data))
 
     def _all_software_groups(self):
         """Return all SoftwareGroup (or singleton Software) objects"""

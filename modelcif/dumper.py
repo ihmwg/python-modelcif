@@ -555,8 +555,10 @@ class _ProtocolDumper(Dumper):
                              step_name=s.name, details=s.details,
                              software_group_id=s.software._group_id
                              if s.software else None,
-                             input_data_group_id=s.input_data._data_group_id,
-                             output_data_group_id=s.output_data._data_group_id)
+                             input_data_group_id=s.input_data._data_group_id
+                             if s.input_data else None,
+                             output_data_group_id=s.output_data._data_group_id
+                             if s.output_data else None)
 
 
 class _ModelDumper(ihm.dumper._ModelDumperBase):
