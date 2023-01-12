@@ -15,6 +15,8 @@ jobs:
           python-version: '3.6'
         - os: macos-latest
           python-version: '3.10'
+    env:
+      PY2: ${{ startsWith(matrix.python-version, 2) && 'on' || 'off' }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -31,5 +33,9 @@ jobs:
     - name: Test
       run: |
         pytest --cov=ma --cov-branch --cov-report=xml --cov-append -v .
-        flake8 --ignore E402,W503,W504
+        if [ "${{ env.PY2 }}" == "on" ]; then
+          flake8 --ignore E402,W503,W504 --exclude util/make-mmcif.py
+        else
+          flake8 --ignore E402,W503,W504
+        fi
     - uses: codecov/codecov-action@v1
