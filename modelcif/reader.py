@@ -361,7 +361,7 @@ class _EnumerationMapper(object):
             self._map[name] = ExtraType
             return ExtraType
         # If name is "Other" then treat other_details as the key
-        other_det_up = other_det.upper()
+        other_det_up = other_det if other_det is None else other_det.upper()
         if other_det_up not in self._other_map:
             class CustomType(self._base_class):
                 other_details = other_det
