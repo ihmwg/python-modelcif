@@ -34,6 +34,8 @@ class Tests(unittest.TestCase):
         subprocess.check_call([sys.executable,
                                get_example_path("validate_modbase.py")])
 
+    @unittest.skipIf(sys.version_info[0] < 3,
+                     "validate_mmcif.py needs Python 3")
     @unittest.skipIf('APPVEYOR' in os.environ,
                      "AppVeyor environments have old SSL certs")
     @unittest.skipIf('GITHUB_ACTIONS' in os.environ,
