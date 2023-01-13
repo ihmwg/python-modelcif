@@ -101,10 +101,22 @@ Hierarchies of classes can also be read from mmCIF or BinaryCIF files.
 This is done using the :func:`modelcif.reader.read` function, which returns
 a list of :class:`modelcif.System` objects.
 
+Format conversion
+=================
+
 The library can be employed to easily convert a ModelCIF file between mmCIF
 and BinaryCIF format by simply reading in one format and then writing in
 another. See the
 `convert_bcif example <https://github.com/ihmwg/python-modelcif/blob/main/examples/convert_bcif.py>`_.
+
+Conversion from legacy PDB format to mmCIF or BinaryCIF is not generally
+possible because PDB format has no defined standard for including information
+about modeling protocols, alignments, and so on. This extra information must be
+deduced from other sources, for example custom PDB REMARK records or separate
+files, and provided to the library. For reference, a script that uses the
+library to convert `ModBase <https://modbase.compbio.ucsf.edu/>`_ models from
+PDB format to mmCIF can be
+`seen here <https://github.com/salilab/modbase_utils/blob/main/modbase_pdb_to_cif.py>`_.
 
 Validation
 ==========
