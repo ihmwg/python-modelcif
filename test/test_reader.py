@@ -279,6 +279,48 @@ _ma_template_non_poly.details
         self.assertIs(a.template, t)
         self.assertTrue(a.explicit)
 
+    def test_entity_nonpoly_bad_model_mode(self):
+        """Test pdbx_entity_nonpoly with missing ma_model_mode"""
+        cif = """
+loop_
+_pdbx_entity_nonpoly.entity_id
+_pdbx_entity_nonpoly.name
+_pdbx_entity_nonpoly.comp_id
+_pdbx_entity_nonpoly.ma_model_mode
+1 test1 TE1 explicit
+2 test2 TE2 .
+3 test3 TE3 ?
+#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 'reference database' non-polymer 1 2 A A 1 4 Z
+2 2 'reference database' non-polymer 1 3 B B 2 4 Z
+3 3 'reference database' non-polymer 1 4 C C 3 4 Z
+#
+loop_
+_ma_template_non_poly.template_id
+_ma_template_non_poly.comp_id
+_ma_template_non_poly.details
+1 TE1 test1
+2 TE2 test2
+3 TE3 test3
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        a1, a2, a3 = s.asym_units
+        self.assertTrue(a1.explicit)
+        self.assertIsNone(a2.explicit)
+        self.assertIs(a3.explicit, ihm.unknown)
+
     def test_template_ref_db_handler(self):
         """Test _TemplateRefDBHandler"""
         cif = """

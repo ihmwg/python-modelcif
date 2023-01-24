@@ -205,7 +205,11 @@ class _EntityNonPolyHandler(Handler):
     def __call__(self, entity_id, comp_id, ma_model_mode):
         s = self.sysr.entities.get_by_id(entity_id)
         s.sequence = (self.sysr.chem_comps.get_by_id(comp_id),)
-        self.sysr.ma_model_mode_map[s] = self._mmmap.get(ma_model_mode.lower())
+        if ma_model_mode in (None, ihm.unknown):
+            self.sysr.ma_model_mode_map[s] = ma_model_mode
+        else:
+            self.sysr.ma_model_mode_map[s] = self._mmmap.get(
+                ma_model_mode.lower())
 
 
 class _TemplatePolyHandler(Handler):
