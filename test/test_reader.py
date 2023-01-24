@@ -283,6 +283,13 @@ _ma_template_non_poly.details
         """Test pdbx_entity_nonpoly with missing ma_model_mode"""
         cif = """
 loop_
+_struct_asym.id
+_struct_asym.entity_id
+A 1
+B 2
+C 3
+#
+loop_
 _pdbx_entity_nonpoly.entity_id
 _pdbx_entity_nonpoly.name
 _pdbx_entity_nonpoly.comp_id
