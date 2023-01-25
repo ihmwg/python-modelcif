@@ -19,6 +19,7 @@ then writing it out again, so
 
 import modelcif.reader
 import modelcif.dumper
+import ihm
 import sys
 
 
@@ -31,6 +32,13 @@ def add_modelcif_info(s):
             name='modeling', input_data=None, output_data=None)
         default_protocol.steps.append(step)
         s.protocols.append(default_protocol)
+    # Entity description is also used by python-modelcif for ma_data.name,
+    # which is mandatory, so it cannot be unknown/?
+    for mg in s.model_groups:
+        for m in mg:
+            for asym in m.assembly:
+                if asym.entity.description is ihm.unknown:
+                    asym.entity.description = "target"
     return s
 
 
