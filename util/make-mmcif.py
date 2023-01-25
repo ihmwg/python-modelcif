@@ -14,6 +14,11 @@ then writing it out again, so
   b) input files that aren't compliant with the PDBx dictionary, or that
      contain syntax errors or other problems, may crash or otherwise confuse
      python-modelcif.
+
+While a best effort is made, it is not guaranteed that the output file is
+valid. It is recommended that it is run through a validator such as
+../examples/validate_mmcif.py and any errors corrected or reported as
+issues..
 """
 
 
