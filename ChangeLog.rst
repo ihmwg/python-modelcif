@@ -1,3 +1,16 @@
+0.7 - 2023-01-25
+================
+ - More examples have been added to demonstrate interconversion between
+   mmCIF and BinaryCIF, and to validate mmCIF files.
+ - A utility script ``util/make-mmcif.py`` has been added which can add
+   minimal ModelCIF-related tables to an mmCIF file, to add in deposition.
+ - The reader is now more robust when handling files that are not ModelCIF
+   compliant (#31).
+ - The ``exptl`` table is no longer written to output mmCIF files, to conform
+   with wwPDB's recommendation. Instead, the
+   ``struct.pdbx_structure_determination_methodology`` data item denotes
+   that the model is computational (#29).
+
 0.6 - 2022-08-03
 ================
  - :class:`ihm.ChemComp` now allows for custom chemical components to be
@@ -60,4 +73,4 @@
  - First stable release. This provides support for single-chain single-template
    models using the ModelCIF extension dictionary, and will read and
    write mmCIF and BinaryCIF files that are compliant with the PDBx and
-   ModelCIF dictionaries.
+   :class:`modelcif.alignment.HHblitsEValue`.
