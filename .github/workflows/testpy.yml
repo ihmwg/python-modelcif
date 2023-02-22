@@ -32,7 +32,7 @@ jobs:
         pip install -r requirements.txt
     - name: Test
       run: |
-        pytest --cov=ma --cov-branch --cov-report=xml --cov-append -v .
+        pytest --cov=modelcif --cov-branch --cov-report=xml --cov-append -v .
         if [ "${{ env.PY2 }}" == "on" ]; then
           flake8 --ignore E402,W503,W504 --exclude util/make-mmcif.py,examples/validate_mmcif.py
         else
