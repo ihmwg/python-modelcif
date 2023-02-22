@@ -7,6 +7,7 @@ utils.set_search_paths(TOPDIR)
 import modelcif
 import modelcif.protocol
 import modelcif.descriptor
+import modelcif.associated
 import ihm
 
 
@@ -25,9 +26,13 @@ class Tests(unittest.TestCase):
         e4 = modelcif.Entity("M")
         s.data_groups.append(modelcif.data.DataGroup([e1, e4]))
 
+        e5 = modelcif.Entity("M")
+        f = modelcif.associated.File(path='foo', details='bar', data=e5)
+        s.repositories.append(modelcif.associated.Repository('/', [f]))
+
         d = s._all_data()
         # List may contain duplicates
-        self.assertEqual(list(d), [e1, e3, e1, e2, e1, e4])
+        self.assertEqual(list(d), [e1, e3, e1, e2, e1, e4, e5])
 
     def test_all_asym_units(self):
         """Test _all_asym_units() method"""

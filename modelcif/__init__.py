@@ -224,13 +224,24 @@ class System(object):
                 if isinstance(dg, list):
                     for data in dg:
                         yield data
+
+        def _all_data_in_files():
+            for repo in self.repositories:
+                for f in repo.files:
+                    if f.data:
+                        yield f.data
+                    if hasattr(f, 'files'):
+                        for subf in f.files:
+                            if subf.data:
+                                yield subf.data
         return itertools.chain(
             self.data,
             self.templates,
             self.target_entities,
             self.alignments,
             (model for group, model in self._all_models()),
-            _all_data_in_groups())
+            _all_data_in_groups(),
+            _all_data_in_files())
 
     def _all_data_groups(self):
         """Return all DataGroup (or singleton Data) objects"""

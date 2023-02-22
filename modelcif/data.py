@@ -6,10 +6,11 @@
 
 class Data(object):
     """Some part of the system that is input or output by part of
-       the modeling protocol.
+       the modeling protocol, and/or stored in a file.
 
        Usually a subclass is passed to :class:`modelcif.protocol.Step`
-       to describe the input or output:
+       to describe the input or output, or to :class:`modelcif.associated.File`
+       to point to where the data are stored:
 
         - A database of possible template sequences/structures to construct
           or search (:class:`modelcif.ReferenceDatabase`)

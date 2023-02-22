@@ -741,7 +741,7 @@ class _AssociatedHandler(Handler):
         self._type_map, self._binary_type_map = _get_assoc_type_maps()
 
     def __call__(self, id, file_url, file_type, file_format, file_content,
-                 details):
+                 details, data_id):
         filecls = _get_assoc_class(
             file_content, file_format, self._type_map, self._binary_type_map)
         # Assume everything before last slash (if any) is URL root
@@ -752,9 +752,15 @@ class _AssociatedHandler(Handler):
             r = modelcif.associated.Repository(url_root=url_root, files=[])
             self._repos_by_root[url_root] = r
             self.system.repositories.append(r)
-        c = filecls(path=path, details=details)
+        c = filecls(path=path, details=details, data=data_id)
         r.files.append(c)
         self.sysr.assoc_by_id[id] = c
+
+    def finalize(self):
+        # Map data_id to Data objects
+        for repo in self.system.repositories:
+            for f in repo.files:
+                f.data = self.sysr.data_by_id.get(f.data)
 
 
 class _AssociatedArchiveHandler(Handler):
@@ -766,10 +772,10 @@ class _AssociatedArchiveHandler(Handler):
         self._archive_files = collections.defaultdict(list)
 
     def __call__(self, id, archive_file_id, file_path, file_format,
-                 file_content, description):
+                 file_content, description, data_id):
         filecls = _get_assoc_class(
             file_content, file_format, self._type_map, self._binary_type_map)
-        c = filecls(path=file_path, details=description)
+        c = filecls(path=file_path, details=description, data=data_id)
         # Top-level archive file might not exist yet
         self._archive_files[archive_file_id].append(c)
 
@@ -778,6 +784,9 @@ class _AssociatedArchiveHandler(Handler):
         for archive_file_id, files in self._archive_files.items():
             archive = self.sysr.assoc_by_id.get(archive_file_id)
             if archive:
+                # Map data_id to Data objects
+                for f in files:
+                    f.data = self.sysr.data_by_id.get(f.data)
                 archive.files = files
 
 

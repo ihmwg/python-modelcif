@@ -33,13 +33,16 @@ class File(object):
 
        :param str path: File name.
        :param str details: Any additional information about the file.
+       :param data: If available, the data (e.g. sequence, structure,
+              alignment) that are stored in the file.
+       :type data: :class:`~modelcif.data.Data`
     """
     file_type = 'file'
     file_content = 'other'
     file_format = 'other'
 
-    def __init__(self, path, details=None):
-        self.path, self.details = path, details
+    def __init__(self, path, details=None, data=None):
+        self.path, self.details, self.data = path, details, data
 
 
 class CIFFile(File):
@@ -49,6 +52,9 @@ class CIFFile(File):
        :param str path: File name that will be used to construct URLs in the
               main mmCIF file (see :class:`Repository` or :class:`ZipFile`).
        :param str details: Any additional information about the file.
+       :param data: If available, the data (e.g. sequence, structure,
+              alignment) that are stored in the file.
+       :type data: :class:`~modelcif.data.Data`
        :param list categories: If given, any mmCIF category names in this list
               are written out to ``local_path`` by
               :func:`modelcif.dumper.write` instead of to the primary file
@@ -74,8 +80,8 @@ class CIFFile(File):
 
     def __init__(self, path, details=None, categories=[], copy_categories=[],
                  entry_id='model', entry_details=None, local_path=None,
-                 binary=False):
-        super(CIFFile, self).__init__(path, details)
+                 binary=False, data=None):
+        super(CIFFile, self).__init__(path, details, data)
         self.categories = categories
         self.copy_categories = copy_categories
         self.id = entry_id
@@ -103,6 +109,6 @@ class ZipFile(File):
     file_content = 'archive with multiple files'
     file_format = 'zip'
 
-    def __init__(self, path, details=None, files=[]):
-        super(ZipFile, self).__init__(path, details)
+    def __init__(self, path, details=None, files=[], data=None):
+        super(ZipFile, self).__init__(path, details, data)
         self.files = files

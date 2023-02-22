@@ -843,17 +843,23 @@ X 42 foo
     def test_associated_dumper(self):
         """Test AssociatedDumper"""
         system = modelcif.System()
+        e = modelcif.Entity('M')
         # File in a repository
         f1 = modelcif.associated.File(path='foo.txt', details='test file')
         # File in an archive
         f2 = modelcif.associated.File(path='bar.txt', details='test file2')
         zf = modelcif.associated.ZipFile(path='t.zip', files=[f2])
-        # Local file
-        f3 = modelcif.associated.File(path='baz.txt', details='test file3')
+        # Local file with data
+        f3 = modelcif.associated.File(path='baz.txt', details='test file3',
+                                      data=e)
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f1, zf])
         r2 = modelcif.associated.Repository(url_root=None, files=[f3])
         system.repositories.extend((r, r2))
+
+        system._before_write()  # populate data
+        dumper = modelcif.dumper._DataDumper()
+        dumper.finalize(system)  # Assign Data IDs
 
         dumper = modelcif.dumper._AssociatedDumper()
         dumper.finalize(system)
@@ -867,9 +873,10 @@ _ma_entry_associated_files.file_type
 _ma_entry_associated_files.file_format
 _ma_entry_associated_files.file_content
 _ma_entry_associated_files.details
-1 model https://example.com/foo.txt file other other 'test file'
-2 model https://example.com/t.zip archive zip 'archive with multiple files' .
-3 model baz.txt file other other 'test file3'
+_ma_entry_associated_files.data_id
+1 model https://example.com/foo.txt file other other 'test file' .
+2 model https://example.com/t.zip archive zip 'archive with multiple files' . .
+3 model baz.txt file other other 'test file3' 1
 #
 #
 loop_
@@ -879,7 +886,8 @@ _ma_associated_archive_file_details.file_path
 _ma_associated_archive_file_details.file_format
 _ma_associated_archive_file_details.file_content
 _ma_associated_archive_file_details.description
-1 2 bar.txt other other 'test file2'
+_ma_associated_archive_file_details.data_id
+1 2 bar.txt other other 'test file2' .
 #
 """)
 

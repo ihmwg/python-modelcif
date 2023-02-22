@@ -606,19 +606,20 @@ class _AssociatedDumper(Dumper):
         with writer.loop(
                 "_ma_entry_associated_files",
                 ["id", "entry_id", "file_url", "file_type", "file_format",
-                 "file_content", "details"]) as lp:
+                 "file_content", "details", "data_id"]) as lp:
             for repo in system.repositories:
                 for f in repo.files:
                     lp.write(id=f._id, entry_id=system.id,
                              file_url=repo.get_url(f), file_type=f.file_type,
                              file_format=f.file_format,
-                             file_content=f.file_content, details=f.details)
+                             file_content=f.file_content, details=f.details,
+                             data_id=f.data._data_id if f.data else None)
 
     def dump_archive_files(self, system, writer):
         with writer.loop(
                 "_ma_associated_archive_file_details",
                 ["id", "archive_file_id", "file_path", "file_format",
-                 "file_content", "description"]) as lp:
+                 "file_content", "description", "data_id"]) as lp:
             for repo in system.repositories:
                 for f in repo.files:
                     if not hasattr(f, 'files'):
@@ -627,7 +628,8 @@ class _AssociatedDumper(Dumper):
                         lp.write(id=af._id, archive_file_id=f._id,
                                  file_path=af.path, file_format=af.file_format,
                                  file_content=af.file_content,
-                                 description=af.details)
+                                 description=af.details,
+                                 data_id=af.data._data_id if af.data else None)
 
 
 class _QAMetricDumper(Dumper):
