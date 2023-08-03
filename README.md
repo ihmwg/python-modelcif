@@ -23,6 +23,12 @@ If you are using [Anaconda Python](https://www.anaconda.com/), install with
 conda install -c conda-forge modelcif
 ```
 
+On a Fedora or RedHat Enterprise Linux box, install with
+
+```
+dnf copr enable salilab/salilab; dnf install python3-modelcif
+```
+
 Alternatively, install with pip:
 
 ```
