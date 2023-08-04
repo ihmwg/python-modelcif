@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 import sys
 
-VERSION = "0.7"
+VERSION = "0.8"
 
 copy_args = sys.argv[1:]
 
