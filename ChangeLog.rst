@@ -1,3 +1,10 @@
+0.8 - 2023-08-04
+================
+ - :class:`modelcif.associated.File` now takes an optional ``data``
+   argument to allow describing any modeling input/output that is stored
+   in that file.
+ - RPM packages are now provided for Fedora and RedHat Enterprise Linux.
+
 0.7 - 2023-01-25
 ================
  - More examples have been added to demonstrate interconversion between
