@@ -162,8 +162,10 @@ class Tests(unittest.TestCase):
         s2 = modelcif.Software(
             name='foo', version='2.0',
             classification='4', description='5', location='6')
+        p = modelcif.SoftwareParameter(name='foo', value='bar')
+        s2param = modelcif.SoftwareWithParameters(s2, [p])
         s = modelcif.System()
-        s.software_groups.append(modelcif.SoftwareGroup((s1, s2)))
+        s.software_groups.append(modelcif.SoftwareGroup((s1, s2param)))
         s.software_groups.append(s1)
 
         e1 = modelcif.Entity("DDDD")
@@ -201,6 +203,23 @@ class Tests(unittest.TestCase):
         self.assertEqual(p.value, 42)
         self.assertIsNone(p.description)
         _ = repr(p)
+
+    def test_software_with_parameters(self):
+        """Test SoftwareWithParameters class"""
+        s = modelcif.Software(
+            name='foo', version='1.0',
+            classification='1', description='2', location='3')
+        p = modelcif.SoftwareParameter(name='foo', value=42)
+        swp = modelcif.SoftwareWithParameters(software=s, parameters=[p])
+        self.assertEqual(swp.software.name, 'foo')
+        self.assertEqual(swp.parameters, [p])
+        self.assertEqual(swp.name, 'foo')
+        self.assertEqual(swp.classification, '1')
+        self.assertEqual(swp.description, '2')
+        self.assertEqual(swp.location, '3')
+        self.assertEqual(swp.type, 'program')
+        self.assertEqual(swp.version, '1.0')
+        self.assertIsNone(swp.citation)
 
     def test_template(self):
         """Test Template class"""

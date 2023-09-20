@@ -185,11 +185,14 @@ class _SoftwareGroupDumper(Dumper):
             # Use _group_id rather than _id as the "group" might be a
             # singleton Software, which already has its own id
             s._group_id = n + 1
-            if (isinstance(s, modelcif.SoftwareGroup) and s.parameters
-                    and id(s.parameters) not in self._param_groups):
-                self._param_groups.append(s.parameters)
-                self._param_group_id[id(s.parameters)] \
-                    = len(self._param_groups)
+            if isinstance(s, modelcif.SoftwareGroup):
+                for soft in s:
+                    if (isinstance(soft, modelcif.SoftwareWithParameters)
+                            and soft.parameters
+                            and id(soft.parameters) not in self._param_groups):
+                        self._param_groups.append(soft.parameters)
+                        self._param_group_id[id(soft.parameters)] \
+                            = len(self._param_groups)
 
     def dump(self, system, writer):
         self.dump_parameters(system, writer)
@@ -208,12 +211,16 @@ class _SoftwareGroupDumper(Dumper):
                     lp.write(ordinal_id=next(ordinal), group_id=g._group_id,
                              software_id=g._id)
                 else:
-                    param = None
-                    if g.parameters:
-                        param = self._param_group_id[id(g.parameters)]
                     for s in g:
+                        param = None
+                        if isinstance(s, modelcif.SoftwareWithParameters):
+                            soft_id = s.software._id
+                            if s.parameters:
+                                param = self._param_group_id[id(s.parameters)]
+                        else:
+                            soft_id = s._id
                         lp.write(ordinal_id=next(ordinal),
-                                 group_id=g._group_id, software_id=s._id,
+                                 group_id=g._group_id, software_id=soft_id,
                                  parameter_group_id=param)
 
     def _handle_list(self, value):

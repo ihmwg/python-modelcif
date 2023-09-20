@@ -19,6 +19,9 @@ The :mod:`modelcif` Python module
 .. autoclass:: SoftwareGroup
    :members:
 
+.. autoclass:: SoftwareWithParameters
+   :members:
+
 .. autoclass:: SoftwareParameter
    :members:
 

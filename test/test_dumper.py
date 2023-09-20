@@ -110,8 +110,9 @@ class Tests(unittest.TestCase):
         aln2.software = s3
         aln3 = MockObject()
         aln3.pairs = []
-        aln3.software = modelcif.SoftwareGroup(
-            (s2, s3), parameters=[p1, p2, p3, intlist, floatlist, mixlist])
+        s3param = modelcif.SoftwareWithParameters(
+            software=s3, parameters=[p1, p2, p3, intlist, floatlist, mixlist])
+        aln3.software = modelcif.SoftwareGroup((s2, s3param))
         system.alignments.extend((aln1, aln2, aln3))
         system._before_write()  # populate system.software_groups
         dumper = modelcif.dumper._SoftwareGroupDumper()
@@ -143,7 +144,7 @@ _ma_software_group.parameter_group_id
 1 1 1 .
 2 1 2 .
 3 2 3 .
-4 3 2 1
+4 3 2 .
 5 3 3 1
 #
 """)
@@ -157,10 +158,12 @@ _ma_software_group.parameter_group_id
             version=1, location='http://test.org')
         system = modelcif.System()
         system.software.append(s1)
-        sg1 = modelcif.SoftwareGroup([s1], parameters=[p1])
+        s1param = modelcif.SoftwareWithParameters(s1, parameters=[p1])
+        sg1 = modelcif.SoftwareGroup([s1param])
         system.software_groups.append(sg1)
         dumper = modelcif.dumper._SoftwareGroupDumper()
         dumper.finalize(system)
+        # Only lists of ints or floats are supported, not strings
         self.assertRaises(TypeError, _get_dumper_output, dumper, system)
 
     def test_data_dumper(self):

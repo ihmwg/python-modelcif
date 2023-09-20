@@ -267,7 +267,10 @@ class _SoftwareGroupHandler(Handler):
         s = self.sysr.software.get_by_id(software_id)
         # Don't need to handle None or ihm.unknown specially here; this will
         # map them to an empty list
-        g.parameters = self.sysr.software_parameters[parameter_group_id]
+        parameters = self.sysr.software_parameters[parameter_group_id]
+        if parameters:
+            s = modelcif.SoftwareWithParameters(software=s,
+                                                parameters=parameters)
         g.append(s)
 
 

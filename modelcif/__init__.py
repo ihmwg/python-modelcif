@@ -174,7 +174,10 @@ class System(object):
                     yield sg
                 else:
                     for s in sg:
-                        yield s
+                        if isinstance(s, SoftwareWithParameters):
+                            yield s.software
+                        else:
+                            yield s
 
         def _all_entities():
             return itertools.chain(
@@ -354,7 +357,8 @@ class Database(object):
 
 
 class SoftwareGroup(list):
-    """A number of :class:`Software` objects that are grouped together.
+    """A number of :class:`Software` and/or :class:`SoftwareWithParameters`
+       objects that are grouped together.
 
        This class can be used to group together multiple :class:`Software`
        objects if multiple pieces of software were used together to generate
@@ -363,20 +367,45 @@ class SoftwareGroup(list):
        calculate a model quality score (see :mod:`modelcif.qa_metric`).
        It behaves like a regular Python list.
 
-       :param sequence elements: Initial set of :class:`Software` objects.
-       :param parameters: All parameters input to this software group.
-       :type parameters: sequence of :class:`SoftwareParameter`
+       :class:`SoftwareWithParameters` allows including both a piece of
+       software, and the parameters with which it was used, in the group.
+
+       :param sequence elements: Initial set of :class:`Software`
+              and/or :class:`SoftwareWithParameters` objects.
     """
 
-    def __init__(self, elements=(), parameters=None):
+    def __init__(self, elements=()):
         super(SoftwareGroup, self).__init__(elements)
+
+
+class SoftwareWithParameters(object):
+    """A piece of software and the parameters with which it was used.
+
+       See :class:`SoftwareGroup`.
+
+       :param software: The software that was used.
+       :type software: :class:`modelcif.Software`
+       :param sequence parameters: sequence of parameters for the software,
+              as :class:`SoftwareParameter` objects.
+    """
+    def __init__(self, software, parameters=None):
+        self.software = software
         self.parameters = [] if parameters is None else parameters
+
+    # Pass Software-specific fields through
+    name = property(lambda self: self.software.name)
+    classification = property(lambda self: self.software.classification)
+    description = property(lambda self: self.software.description)
+    location = property(lambda self: self.software.location)
+    type = property(lambda self: self.software.type)
+    version = property(lambda self: self.software.version)
+    citation = property(lambda self: self.software.citation)
 
 
 class SoftwareParameter(object):
     """A single parameter given to software used in modeling.
 
-       See :class:`SoftwareGroup`.
+       See :class:`SoftwareWithParameters`, :class:`SoftwareGroup`.
 
        :param str name: A short name for this parameter.
        :param value: Parameter value.

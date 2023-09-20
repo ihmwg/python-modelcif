@@ -1,3 +1,9 @@
+HEAD
+====
+ - Bugfix: :class:`modelcif.SoftwareGroup` now allows for parameters to
+   be associated with each piece of software in the group, rather than
+   with the group as a whole (#33).
+
 0.8 - 2023-08-04
 ================
  - :class:`modelcif.associated.File` now takes an optional ``data``

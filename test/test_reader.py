@@ -78,18 +78,24 @@ _ma_software_group.software_id
 _ma_software_group.parameter_group_id
 1 1 1 .
 2 1 2 .
-3 2 3 1
+3 2 3 .
+4 2 4 1
 """
         s, = modelcif.reader.read(StringIO(cif))
-        s1, s2, s3 = s.software
+        s1, s2, s3, s4 = s.software
         g1, g2 = s.software_groups
         self.assertEqual(len(g1), 2)
-        self.assertEqual(len(g2), 1)
-        self.assertEqual(g1.parameters, [])
+        self.assertEqual(len(g2), 2)
+        self.assertIsInstance(g1[0], modelcif.Software)
+        self.assertIsInstance(g1[1], modelcif.Software)
         self.assertEqual(g1[0], s1)
         self.assertEqual(g1[1], s2)
+
+        self.assertIsInstance(g2[0], modelcif.Software)
+        self.assertIsInstance(g2[1], modelcif.SoftwareWithParameters)
         self.assertEqual(g2[0], s3)
-        p1, p2, p3, intlist, floatlist = g2.parameters
+        self.assertEqual(g2[1].software, s4)
+        p1, p2, p3, intlist, floatlist = g2[1].parameters
         self.assertEqual(p1.name, 'foo')
         self.assertEqual(p1.value, 42)
         self.assertEqual(p1.description, 'foodesc')
