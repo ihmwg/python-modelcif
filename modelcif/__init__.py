@@ -1,4 +1,5 @@
 import itertools
+import warnings
 from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
@@ -374,8 +375,14 @@ class SoftwareGroup(list):
               and/or :class:`SoftwareWithParameters` objects.
     """
 
-    def __init__(self, elements=()):
+    def __init__(self, elements=(), parameters=None):
         super(SoftwareGroup, self).__init__(elements)
+        if parameters:
+            warnings.warn(
+                "Parameters for SofwareGroup are ignored. To specify "
+                "parameters for a piece of software, use the "
+                "SoftwareWithParameters class.")
+        self.parameters = [] if parameters is None else parameters
 
 
 class SoftwareWithParameters(object):

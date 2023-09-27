@@ -229,6 +229,15 @@ class Tests(unittest.TestCase):
         self.assertEqual(t1.seq_id_range, (1, 4))
         self.assertEqual(t1.template, t1)
 
+    def test_software_group_parameters(self):
+        """Test old-style SoftwareGroup construction with parameters"""
+        s = modelcif.Software(
+            name='foo', version='1.0',
+            classification='1', description='2', location='3')
+        p = modelcif.SoftwareParameter(name='foo', value=42)
+        self.assertWarns(UserWarning,
+                         modelcif.SoftwareGroup, [s], parameters=[p])
+
 
 if __name__ == '__main__':
     unittest.main()

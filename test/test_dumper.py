@@ -105,6 +105,8 @@ class Tests(unittest.TestCase):
         aln1 = MockObject()
         aln1.pairs = []
         aln1.software = modelcif.SoftwareGroup((s1, s2))
+        # SoftwareGroup.parameters should be ignored
+        aln1.software.parameters.append('garbage')
         aln2 = MockObject()
         aln2.pairs = []
         aln2.software = s3
