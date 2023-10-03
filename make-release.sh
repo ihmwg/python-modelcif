@@ -3,6 +3,7 @@
 # First, do
 # - Update AuditConformDumper to match latest MA dictionary if necessary
 # - Run util/validate-outputs.py to make sure all example outputs validate
+#   (cd util; PYTHONPATH=.. python3 ./validate-outputs.py)
 # - If we need a newer python-ihm, update the version requirement in
 #   requirements.txt, setup.py, and README.md.
 # - Update ChangeLog.rst and util/python-modelcif.spec with the release number
@@ -18,3 +19,4 @@
 VERSION=$(python3 setup.py --version)
 python3 setup.py sdist
 echo "Now use 'twine upload dist/modelcif-${VERSION}.tar.gz' to publish the release on PyPi"
+echo "Then, update the conda-forge, COPR, and Homebrew packages to match."
