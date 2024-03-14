@@ -78,7 +78,7 @@ class TemplateReference(object):
 
        These objects are typically passed to the :class:`modelcif.Template`
        constructor for template sequences (for target sequences, see
-       :class:`Targeteference`).
+       :class:`TargetReference`).
 
        Typically a subclass such as :class:`PDB` is used,
        although to use a custom database, make a new subclass and provide

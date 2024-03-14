@@ -69,7 +69,7 @@ class Pair(object):
               of one-letter codes.
        :type template: :class:`modelcif.TemplateSegment`
        :param target: The target segment that is aligned.
-       :type target: :class:`ihm.AsymUnitSegment`
+       :type target: output from :meth:`ihm.AsymUnit.segment`
        :param identity: The sequence identity between target and template.
        :type identity: :class:`Identity`
        :param score: A measure of the quality of the alignment.
