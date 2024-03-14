@@ -34,9 +34,10 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.intersphinx']
 
-# Link to IHM docs
+# Link to IHM docs or Python standard library
 intersphinx_mapping = {'ihm': ('https://python-ihm.readthedocs.io/en/latest/',
-                               None)}
+                               None),
+                       'python': ('https://docs.python.org/3', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
