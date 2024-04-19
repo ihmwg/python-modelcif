@@ -1,7 +1,11 @@
 """Classes for linking back to a sequence or structure database."""
 
+import warnings
+import ihm.reference
+from ihm.reference import Alignment, SeqDif  # noqa: F401
 
-class TargetReference(object):
+
+class TargetReference(ihm.reference.Sequence):
     """Point to the sequence of a target :class:`modelcif.Entity` in a sequence
        database. Typically a subclass such as :class:`UniProt` is used,
        although to use a custom database, make a new subclass and provide
@@ -14,14 +18,15 @@ class TargetReference(object):
        multiple sequences used in template searches or alignment
        construction; this class relates to just the modeled sequence itself.
 
+       See also :attr:`alignments` to describe the correspondence between
+       the database and entity sequences.
+
        :param str code: The name of the sequence in the database.
        :param str accession: The database accession.
        :param int align_begin: Beginning index of the sequence in the database.
-              If omitted, it will be assumed that the Entity corresponds to
-              the full database sequence.
+              Deprecated; use :attr:`alignments` instead.
        :param int align_end: Ending index of the sequence in the database.
-              If omitted, it will be assumed that the Entity corresponds to
-              the full database sequence.
+              Deprecated; use :attr:`alignments` instead.
        :param str isoform: Sequence isoform, if applicable.
        :param str ncbi_taxonomy_id: Taxonomy identifier provided by NCBI.
        :param str organism_scientific: Scientific name of the organism.
@@ -32,6 +37,10 @@ class TargetReference(object):
                                     :class:`datetime.datetime`
        :param str sequence_crc64: The CRC64 sum of the original database
                                   sequence.
+       :param str sequence: The complete database sequence, as a string of
+              one-letter codes. If omitted, will default to the canonical
+              sequence of the associated :class:`Entity`.
+       :param str details: Longer text describing the sequence.
     """
 
     name = 'Other'
@@ -39,14 +48,28 @@ class TargetReference(object):
     def __init__(self, code, accession, align_begin=None, align_end=None,
                  isoform=None, ncbi_taxonomy_id=None,
                  organism_scientific=None, sequence_version_date=None,
-                 sequence_crc64=None):
-        self.code, self.accession = code, accession
+                 sequence_crc64=None, sequence=None, details=None):
+        super(TargetReference, self).__init__(
+            db_name=self.name, db_code=code, accession=accession,
+            sequence=sequence, details=details)
         self.align_begin, self.align_end = align_begin, align_end
         self.isoform = isoform
         self.ncbi_taxonomy_id = ncbi_taxonomy_id
         self.organism_scientific = organism_scientific
         self.sequence_version_date = sequence_version_date
         self.sequence_crc64 = sequence_crc64
+        if align_begin or align_end:
+            warnings.warn(
+                "align_begin and align_end are deprecated, and will be "
+                "removed in a future python-modelcif release. Specify the "
+                "database sequence and provide one or more "
+                "modelcif.reference.Alignment objects intead.", stacklevel=2)
+        if sequence is None:
+            warnings.warn(
+                "No sequence provided. The canonical sequence of the Entity "
+                "will be used instead.", stacklevel=2)
+
+    code = property(lambda self: self.db_code)
 
     def _get_other_details(self):
         if (type(self) is not TargetReference

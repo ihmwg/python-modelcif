@@ -1,4 +1,5 @@
 from datetime import date
+import warnings
 import utils
 import os
 import unittest
@@ -484,16 +485,36 @@ C
             """my custom ref"""
 
         system = modelcif.System()
-        ref1 = modelcif.reference.UniProt(
-            code='testcode', accession='testacc', align_begin=4, align_end=8,
-            isoform='testiso', ncbi_taxonomy_id='1234',
-            organism_scientific='testorg',
-            sequence_version_date=date(1979, 11, 22),
-            sequence_crc64="A123B456C789D1E2")
-        ref2 = modelcif.reference.UniProt(code='c2', accession='a2')
-        ref3 = CustomRef(code='c3', accession='a3', isoform=ihm.unknown)
+        # Default alignment but with explicit align begin, end
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            ref1 = modelcif.reference.UniProt(
+                code='testcode', accession='testacc', align_begin=4,
+                align_end=8, isoform='testiso', ncbi_taxonomy_id='1234',
+                organism_scientific='testorg',
+                sequence_version_date=date(1979, 11, 22),
+                sequence_crc64="A123B456C789D1E2",
+                sequence='ACGT')
+        # Default alignment (entire sequence)
+        ref2 = modelcif.reference.UniProt(code='c2', accession='a2',
+                                          sequence='ACGT')
+        ref3 = CustomRef(code='c3', accession='a3', isoform=ihm.unknown,
+                         sequence='ACGT')
 
-        e1 = modelcif.Entity('ACGT', references=[ref1, ref2, ref3])
+        # Explicit alignment that extends to the end of the db sequence
+        ref4 = modelcif.reference.UniProt(code='c4', accession='a4',
+                                          sequence='CCACGT')
+        ref4.alignments.append(modelcif.reference.Alignment(db_begin=3))
+
+        # Explicit alignment with explicit db_end
+        ref5 = modelcif.reference.UniProt(code='c5', accession='a5',
+                                          sequence='XXXACXXGTXXX')
+        ref5.alignments.append(modelcif.reference.Alignment(
+            db_begin=4, db_end=5))
+        ref5.alignments.append(modelcif.reference.Alignment(
+            db_begin=8, db_end=9))
+
+        e1 = modelcif.Entity('ACGT', references=[ref1, ref2, ref3, ref4, ref5])
         e1._id = 1
         system.target_entities.append(e1)
 
@@ -517,6 +538,8 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
 1 UNP . testcode testacc testiso 4 8 1234 testorg 1979-11-22 A123B456C789D1E2
 1 UNP . c2 a2 . 1 4 . . . .
 1 Other 'my custom ref' c3 a3 ? 1 4 . . . .
+1 UNP . c4 a4 . 3 6 . . . .
+1 UNP . c5 a5 . 4 9 . . . .
 #
 """)
 
@@ -1175,6 +1198,89 @@ _ma_chem_comp_descriptor.details
 _ma_chem_comp_descriptor.software_id
 1 C2 C2name 'IUPAC Name' foo . .
 2 C2 C2name 'PubChem CID' bar 'test details' 42
+#
+""")
+
+    def test_struct_ref(self):
+        """Test StructRefDumper"""
+        system = ihm.System()
+        lpep = ihm.LPeptideAlphabet()
+        sd = modelcif.reference.SeqDif(
+            seq_id=2, db_monomer=lpep['W'],
+            monomer=lpep['S'], details='Test mutation')
+        # Test non-mandatory db_monomer
+        sd2 = modelcif.reference.SeqDif(
+            seq_id=3, db_monomer=None,
+            monomer=lpep['P'], details='Test mutation')
+        r1 = modelcif.reference.UniProt(
+            code='NUP84_YEAST', accession='P52891', sequence='MELWPTYQT',
+            details='test sequence')
+        r1.alignments.append(modelcif.reference.Alignment(
+            db_begin=3, seq_dif=[sd, sd2]))
+        r2 = modelcif.reference.UniProt(
+            code='testcode', accession='testacc', sequence='MELSPTYQT',
+            details='test2')
+        r2.alignments.append(modelcif.reference.Alignment(
+            db_begin=4, db_end=5, entity_begin=2, entity_end=3))
+        r2.alignments.append(modelcif.reference.Alignment(
+            db_begin=9, db_end=9, entity_begin=4, entity_end=4))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r3 = modelcif.reference.UniProt(
+                code='testcode2', accession='testacc2', sequence=None)
+        r3.alignments.append(modelcif.reference.Alignment(
+            db_begin=4, db_end=5, entity_begin=2, entity_end=3))
+        r4 = modelcif.reference.UniProt(
+            code='testcode3', accession='testacc3', sequence=ihm.unknown)
+        r4.alignments.append(modelcif.reference.Alignment(
+            db_begin=4, db_end=5, entity_begin=2, entity_end=3))
+        system.entities.append(modelcif.Entity(
+            'LSPT', references=[r1, r2, r3, r4]))
+        dumper = ihm.dumper._EntityDumper()
+        dumper.finalize(system)  # Assign entity IDs
+
+        dumper = ihm.dumper._StructRefDumper()
+        dumper.finalize(system)  # Assign IDs
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_struct_ref.id
+_struct_ref.entity_id
+_struct_ref.db_name
+_struct_ref.db_code
+_struct_ref.pdbx_db_accession
+_struct_ref.pdbx_align_begin
+_struct_ref.pdbx_seq_one_letter_code
+_struct_ref.details
+1 1 UNP NUP84_YEAST P52891 3 LWPTYQT 'test sequence'
+2 1 UNP testcode testacc 4 SPTYQT test2
+3 1 UNP testcode2 testacc2 4 . .
+4 1 UNP testcode3 testacc3 4 ? .
+#
+#
+loop_
+_struct_ref_seq.align_id
+_struct_ref_seq.ref_id
+_struct_ref_seq.seq_align_beg
+_struct_ref_seq.seq_align_end
+_struct_ref_seq.db_align_beg
+_struct_ref_seq.db_align_end
+1 1 1 4 3 6
+2 2 2 3 4 5
+3 2 4 4 9 9
+4 3 2 3 4 5
+5 4 2 3 4 5
+#
+#
+loop_
+_struct_ref_seq_dif.pdbx_ordinal
+_struct_ref_seq_dif.align_id
+_struct_ref_seq_dif.seq_num
+_struct_ref_seq_dif.db_mon_id
+_struct_ref_seq_dif.mon_id
+_struct_ref_seq_dif.details
+1 1 2 TRP SER 'Test mutation'
+2 1 3 ? PRO 'Test mutation'
 #
 """)
 

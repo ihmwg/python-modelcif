@@ -12,6 +12,12 @@ The :mod:`modelcif.reference` Python module
 
 .. autoclass:: UniProt
 
+.. autoclass:: Alignment
+   :members:
+
+.. autoclass:: SeqDif
+   :members:
+
 .. autoclass:: TemplateReference
    :members:
 

@@ -54,7 +54,8 @@ template_e = modelcif.Entity('DMACDTFIKCC', description='Template subunit')
 
 # Next, the target (model) sequence, together with a link to the reference
 # sequence (in UniProt):
-s = modelcif.reference.UniProt(code='MED1_YEAST', accession='Q12321')
+s = modelcif.reference.UniProt(code='MED1_YEAST', accession='Q12321',
+                               sequence='DSYVETLDCC')
 model_e = modelcif.Entity('DSYVETLDCC', description='Model subunit',
                           references=[s])
 

@@ -30,12 +30,21 @@ class Tests(unittest.TestCase):
 
     def test_target_reference(self):
         """Test TargetReference classes"""
-        ref = modelcif.reference.UniProt("code", "acc")
+        ref = modelcif.reference.UniProt("code", "acc", sequence='CC')
         self.assertEqual(ref.name, "UNP")
         self.assertIsNone(ref.other_details)
 
+        # Reference with (deprecated) align begin, end
+        self.assertWarns(UserWarning, modelcif.reference.UniProt,
+                         "code", "acc", align_begin=1, align_end=10,
+                         sequence='CC')
+
+        # Reference without explicit sequence
+        self.assertWarns(UserWarning, modelcif.reference.UniProt,
+                         "code", "acc")
+
         # generic "other" reference
-        ref = modelcif.reference.TargetReference("code", "acc")
+        ref = modelcif.reference.TargetReference("code", "acc", sequence='CC')
         self.assertEqual(ref.name, "Other")
         self.assertIsNone(ref.other_details)
 
@@ -44,7 +53,7 @@ class Tests(unittest.TestCase):
             """foo
                bar"""
 
-        ref = CustomRef("code", "acc")
+        ref = CustomRef("code", "acc", sequence='CC')
         self.assertEqual(ref.name, "Other")
         self.assertEqual(ref.other_details, "foo")
 

@@ -120,6 +120,15 @@ class System(object):
             self._all_software_groups()))
         self.software = list(_remove_identical(
             self._all_ref_software()))
+        self._add_missing_reference_sequence()
+
+    def _add_missing_reference_sequence(self):
+        """If any TargetReference has no sequence, use that of the Entity"""
+        for e in self.entities + self.target_entities:
+            for r in e.references:
+                if r.sequence is None:
+                    r.sequence = "".join(comp.code_canonical
+                                         for comp in e.sequence)
 
     def _check_after_write(self):
         pass

@@ -19,6 +19,7 @@ import operator
 import inspect
 import collections
 import functools
+import warnings
 
 
 def _get_date(iso_date_str):
@@ -401,14 +402,17 @@ class _TargetRefDBHandler(Handler):
                  seq_db_sequence_version_date, seq_db_sequence_checksum):
         e = self.sysr.entities.get_by_id(target_entity_id)
         typ = self.type_map.get(db_name, db_name_other_details)
-        ref = typ(code=db_code, accession=db_accession,
-                  align_begin=self.get_int(seq_db_align_begin),
-                  align_end=self.get_int(seq_db_align_end),
-                  isoform=seq_db_isoform, ncbi_taxonomy_id=ncbi_taxonomy_id,
-                  organism_scientific=organism_scientific,
-                  sequence_version_date=_get_date(
-                      seq_db_sequence_version_date),
-                  sequence_crc64=seq_db_sequence_checksum)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            ref = typ(code=db_code, accession=db_accession,
+                      align_begin=self.get_int(seq_db_align_begin),
+                      align_end=self.get_int(seq_db_align_end),
+                      isoform=seq_db_isoform,
+                      ncbi_taxonomy_id=ncbi_taxonomy_id,
+                      organism_scientific=organism_scientific,
+                      sequence_version_date=_get_date(
+                          seq_db_sequence_version_date),
+                      sequence_crc64=seq_db_sequence_checksum)
         e.references.append(ref)
 
 

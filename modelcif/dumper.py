@@ -117,10 +117,19 @@ class _TargetRefDBDumper(Dumper):
                  "seq_db_sequence_checksum"]) as lp:
             for e in entities:
                 for r in e.references:
-                    db_begin = (e.seq_id_range[0] if r.align_begin is None
-                                else r.align_begin)
-                    db_end = (e.seq_id_range[1] if r.align_end is None
-                              else r.align_end)
+                    if r.align_begin is None:
+                        db_begin = min(a.db_begin for a in r._get_alignments())
+                    else:
+                        db_begin = r.align_begin
+                    if r.align_end is None:
+                        aligns = [a for a in r._get_alignments()
+                                  if a.db_end is not None]
+                        if aligns:
+                            db_end = max(a.db_end for a in aligns)
+                        else:
+                            db_end = len(r.sequence)
+                    else:
+                        db_end = r.align_end
                     lp.write(target_entity_id=e._id, db_name=r.name,
                              db_name_other_details=r.other_details,
                              db_code=r.code, db_accession=r.accession,
@@ -802,7 +811,8 @@ class ModelCIFVariant(Variant):
         ihm.dumper._GrantDumper, _ChemCompDumper, _ChemCompDescriptorDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
-        ihm.dumper._EntitySrcSynDumper, _TargetRefDBDumper,
+        ihm.dumper._EntitySrcSynDumper, ihm.dumper._StructRefDumper,
+        _TargetRefDBDumper,
         ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
