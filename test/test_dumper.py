@@ -173,7 +173,7 @@ _ma_software_group.parameter_group_id
         """Test DataDumper"""
         system = modelcif.System()
         entity = modelcif.Entity("DMA", description='test entity')
-        system.target_entities.append(entity)
+        system.entities.append(entity)
         # Template and target use same entity here (but different data IDs)
         template = modelcif.Template(
             entity, asym_id="A", model_num=1, name="test template",
@@ -206,7 +206,7 @@ _ma_data.content_type_other_details
         tgt_e1._data_id = 1
         tgt_e2._data_id = 2
         tgt_e3._data_id = 3
-        system.target_entities.extend((tgt_e1, tgt_e2, tgt_e3))
+        system.entities.extend((tgt_e1, tgt_e2, tgt_e3))
         dg12 = modelcif.data.DataGroup((tgt_e1, tgt_e2))
         p = modelcif.protocol.Protocol()
         p.steps.append(modelcif.protocol.ModelingStep(
@@ -516,7 +516,7 @@ C
 
         e1 = modelcif.Entity('ACGT', references=[ref1, ref2, ref3, ref4, ref5])
         e1._id = 1
-        system.target_entities.append(e1)
+        system.entities.append(e1)
 
         dumper = modelcif.dumper._TargetRefDBDumper()
         dumper.finalize(system)
@@ -844,7 +844,7 @@ _ma_template_trans_matrix.tr_vector[3]
         e1 = modelcif.Entity("D")
         e1._id = 42
         e1._data_id = 99
-        system.target_entities.append(e1)
+        system.entities.append(e1)
 
         a1 = modelcif.AsymUnit(e1, 'foo')
         a1._id = 'X'

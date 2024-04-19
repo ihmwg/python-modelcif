@@ -17,7 +17,7 @@ class Tests(unittest.TestCase):
         s = modelcif.System()
         e1 = modelcif.Entity("D")
         e2 = modelcif.Entity("M")
-        s.target_entities.extend((e1, e2))
+        s.entities.extend((e1, e2))
 
         e3 = modelcif.Entity("A")
         s.data.extend((e1, e3))
@@ -85,24 +85,6 @@ class Tests(unittest.TestCase):
 
         d = s._all_data_groups()
         self.assertEqual(list(d), [e1, e1, e2])
-
-    def test_all_target_entities(self):
-        """Test _all_target_entities() method"""
-        s = modelcif.System()
-        e1 = modelcif.Entity("D")
-        e2 = modelcif.Entity("M")
-        s.target_entities.extend((e1, e2))
-
-        template_e = modelcif.Entity("M")
-        s.entities.extend((e1, e2, template_e))
-
-        asym = modelcif.AsymUnit(e1, 'foo')
-        s.asym_units.append(asym)
-        s.assemblies.append(modelcif.Assembly((asym,)))
-
-        te = s._all_target_entities()
-        # List may contain duplicates, but no template entities
-        self.assertEqual(list(te), [e1, e2, e1])
 
     def test_all_template_transformations(self):
         """Test _all_template_transformations() method"""

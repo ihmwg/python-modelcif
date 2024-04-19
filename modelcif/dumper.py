@@ -103,10 +103,6 @@ class _ChemCompDescriptorDumper(Dumper):
 
 class _TargetRefDBDumper(Dumper):
     def dump(self, system, writer):
-        # Since target_entities is a *subset* of all entities, they may not
-        # be ordered by ID. Sort them so the output is prettier.
-        entities = sorted(system.target_entities,
-                          key=operator.attrgetter('_id'))
         with writer.loop(
                 "_ma_target_ref_db_details",
                 ["target_entity_id", "db_name", "db_name_other_details",
@@ -115,7 +111,7 @@ class _TargetRefDBDumper(Dumper):
                  "ncbi_taxonomy_id", "organism_scientific",
                  "seq_db_sequence_version_date",
                  "seq_db_sequence_checksum"]) as lp:
-            for e in entities:
+            for e in system.entities:
                 for r in e.references:
                     if r.align_begin is None:
                         db_begin = min(a.db_begin for a in r._get_alignments())
@@ -167,12 +163,10 @@ class _EntityNonPolyDumper(Dumper):
 
 class _TargetEntityDumper(Dumper):
     def dump(self, system, writer):
-        entities = sorted(system.target_entities,
-                          key=operator.attrgetter('_id'))
         with writer.loop(
                 "_ma_target_entity",
                 ["entity_id", "data_id", "origin"]) as lp:
-            for e in entities:
+            for e in system.entities:
                 lp.write(entity_id=e._id, data_id=e._data_id,
                          origin="reference database" if e.references
                          else "designed")

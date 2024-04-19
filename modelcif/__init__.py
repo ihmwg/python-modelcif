@@ -76,7 +76,6 @@ class System(object):
 
         self.entities = []
         self.asym_units = []
-        self.target_entities = []
         self.templates = []
         self.template_segments = []
         self.template_transformations = []
@@ -109,8 +108,6 @@ class System(object):
         self.entities = list(_remove_identical(self._all_entities()))
         self.template_transformations = list(_remove_identical(
             self._all_template_transformations()))
-        self.target_entities = list(_remove_identical(
-            self._all_target_entities()))
         self.data_groups = list(_remove_identical(
             self._all_data_groups()))
         self.data = list(_remove_identical(
@@ -124,7 +121,7 @@ class System(object):
 
     def _add_missing_reference_sequence(self):
         """If any TargetReference has no sequence, use that of the Entity"""
-        for e in self.entities + self.target_entities:
+        for e in self.entities:
             for r in e.references:
                 if r.sequence is None:
                     r.sequence = "".join(comp.code_canonical
@@ -159,13 +156,6 @@ class System(object):
             self.citations,
             (software.citation for software in self._all_software()
              if software.citation)))
-
-    def _all_target_entities(self):
-        """Iterate over all Entities that are used for targets rather than
-           templates."""
-        return (itertools.chain(
-            self.target_entities,
-            (asym.entity for asmb in self.assemblies for asym in asmb)))
 
     def _all_software(self):
         """Utility method used by ihm.dumper to get all Software. To initially
@@ -223,7 +213,6 @@ class System(object):
             self.asym_units, _all_asym_in_assemblies())
 
     def _all_entities(self):
-        # Note that template entities are not included by default
         return itertools.chain(
             self.entities,
             (asym.entity for asym in self.asym_units))
@@ -250,7 +239,7 @@ class System(object):
         return itertools.chain(
             self.data,
             self.templates,
-            self.target_entities,
+            self.entities,
             self.alignments,
             (model for group, model in self._all_models()),
             _all_data_in_groups(),
