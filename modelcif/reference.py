@@ -39,7 +39,7 @@ class TargetReference(ihm.reference.Sequence):
                                   sequence.
        :param str sequence: The complete database sequence, as a string of
               one-letter codes. If omitted, will default to the canonical
-              sequence of the associated :class:`Entity`.
+              sequence of the associated :class:`~modelcif.Entity`.
        :param str details: Longer text describing the sequence.
     """
 
@@ -68,6 +68,10 @@ class TargetReference(ihm.reference.Sequence):
             warnings.warn(
                 "No sequence provided. The canonical sequence of the Entity "
                 "will be used instead.", stacklevel=2)
+        #: All alignments between the reference and entity sequences, as
+        #: :class:`Alignment` objects. If none are provided, a simple 1:1
+        #: alignment is assumed.
+        self.alignments = []
 
     code = property(lambda self: self.db_code)
 
