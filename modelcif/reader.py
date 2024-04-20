@@ -49,6 +49,16 @@ class _AuditConformHandler(Handler):
                 pass
 
 
+class _ReferenceIDMapper(IDMapper):
+    """Add extra handling to IDMapper for ihm.reference.Reference objects"""
+
+    def _make_new_object(self, newcls=None):
+        if newcls is None or newcls is ihm.reference.Sequence:
+            return self._cls(*(None,) * 4)
+        else:
+            return newcls(*(None,) * 3)
+
+
 class _SystemReader(object):
     def __init__(self, model_class, starting_model_class):
         self.system = modelcif.System()
@@ -108,6 +118,9 @@ class _SystemReader(object):
 
         self.protocols = IDMapper(self.system.protocols,
                                   modelcif.protocol.Protocol)
+
+        self.references = _ReferenceIDMapper(None, ihm.reference.Sequence)
+        self.alignments = IDMapper(None, ihm.reference.Alignment)
 
         self.assoc_by_id = {}
 
@@ -414,6 +427,40 @@ class _TargetRefDBHandler(Handler):
                           seq_db_sequence_version_date),
                       sequence_crc64=seq_db_sequence_checksum)
         e.references.append(ref)
+
+    def finalize(self):
+        # Combine information from struct_ref (ihm.reference objects)
+        # with that from _ma_target_ref_db_details (modelcif.reference).
+        # Use db_name/db_code/accession as the key.
+        # We start with two distinct lists, as python-ihm uses struct_ref.id
+        # as the key, which _ma_target_ref_db_details does not use.
+        for e in self.system.entities:
+            ihm_refs = [r for r in e.references
+                        if not isinstance(r,
+                                          modelcif.reference.TargetReference)]
+            ma_refs = [r for r in e.references
+                       if isinstance(r, modelcif.reference.TargetReference)]
+            e.references = ma_refs
+            ma_refs = dict(((r.db_name, r.db_code, r.accession), r)
+                           for r in ma_refs)
+            for ir in ihm_refs:
+                k = (ir.db_name, ir.db_code, ir.accession)
+                mr = ma_refs.get(k)
+                if mr is None:
+                    # Change type from ihm to modelcif class
+                    typ = self.type_map.get(ir.db_name, None)
+                    ir.__class__ = typ
+                    e.references.append(ir)
+                    # Add missing fields only present in modelcif class
+                    ir.isoform = ir.ncbi_taxonomy_id = None
+                    ir.organism_scientific = ir.sequence_version_date = None
+                    ir.sequence_crc64 = None
+                    ir.align_begin = ir.align_end = None
+                else:
+                    # Add struct_ref info to corresponding modelcif object
+                    mr.sequence = ir.sequence
+                    mr.details = ir.details
+                    mr.alignments = ir.alignments
 
 
 class _TransformationHandler(Handler):
@@ -891,7 +938,8 @@ class ModelCIFVariant(Variant):
         ihm.reader._StructAsymHandler, _SoftwareGroupHandler,
         _DatabaseHandler, _SoftwareParameterHandler,
         _DataHandler, _DataGroupHandler, _DataRefDBHandler,
-        _TargetEntityHandler,
+        _TargetEntityHandler, ihm.reader._StructRefHandler,
+        ihm.reader._StructRefSeqHandler, ihm.reader._StructRefSeqDifHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
         _TemplatePolyHandler, _TemplateNonPolyHandler,

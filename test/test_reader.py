@@ -185,12 +185,97 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         self.assertEqual(r1.ncbi_taxonomy_id, 'test_tax')
         self.assertEqual(r1.organism_scientific, 'test_org')
         self.assertEqual(r1.sequence_version_date, date(1996, 11, 1))
+        self.assertIsNone(r1.sequence)
+        self.assertIsNone(r1.details)
+        self.assertEqual(r1.alignments, [])
         self.assertEqual(r2.name, 'Other')
         self.assertEqual(r2.other_details, 'foo')
         self.assertEqual(r3.name, 'Other')
         self.assertEqual(r3.other_details, 'bar')
         self.assertEqual(r4.name, 'MIS')
         self.assertIsNone(r4.other_details)  # should be ignored
+
+    def test_target_ref_db_handler_with_struct_ref(self):
+        """Test TargetRefDBHander combined with struct_ref info"""
+        cif = """
+loop_
+_struct_ref.id
+_struct_ref.entity_id
+_struct_ref.db_name
+_struct_ref.db_code
+_struct_ref.pdbx_db_accession
+_struct_ref.pdbx_align_begin
+_struct_ref.pdbx_seq_one_letter_code
+_struct_ref.details
+1 1 UNP MED1_YEAST Q12321 1 DSYVETLDCC "test details"
+2 1 UNP sr_only_code sr_only_acc 1 DSYVETLDPP .
+#
+#
+loop_
+_struct_ref_seq.align_id
+_struct_ref_seq.ref_id
+_struct_ref_seq.seq_align_beg
+_struct_ref_seq.seq_align_end
+_struct_ref_seq.db_align_beg
+_struct_ref_seq.db_align_end
+1 1 1 10 1 10
+2 2 1 10 1 10
+#
+loop_
+_ma_target_ref_db_details.target_entity_id
+_ma_target_ref_db_details.db_name
+_ma_target_ref_db_details.db_name_other_details
+_ma_target_ref_db_details.db_code
+_ma_target_ref_db_details.db_accession
+_ma_target_ref_db_details.seq_db_isoform
+_ma_target_ref_db_details.seq_db_align_begin
+_ma_target_ref_db_details.seq_db_align_end
+_ma_target_ref_db_details.ncbi_taxonomy_id
+_ma_target_ref_db_details.organism_scientific
+_ma_target_ref_db_details.seq_db_sequence_version_date
+_ma_target_ref_db_details.seq_db_sequence_checksum
+1 UNP . MED1_YEAST Q12321 test_iso 1 10 test_tax test_org 1996-11-01
+637FEA3E78D915BC
+1 UNP . rd_only_code rd_only_acc rd_only_iso . . . . . .
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        e, = s.entities
+        r1, r2, r3 = e.references
+        # r1 should contain both target_ref_db and struct_ref info
+        self.assertIsInstance(r1, modelcif.reference.UniProt)
+        self.assertEqual(r1.code, 'MED1_YEAST')
+        self.assertEqual(r1.accession, 'Q12321')
+        self.assertEqual(r1.isoform, 'test_iso')
+        self.assertEqual(r1.align_begin, 1)
+        self.assertEqual(r1.align_end, 10)
+        self.assertEqual(r1.ncbi_taxonomy_id, 'test_tax')
+        self.assertEqual(r1.organism_scientific, 'test_org')
+        self.assertEqual(r1.sequence_version_date, date(1996, 11, 1))
+        self.assertEqual(r1.sequence, 'DSYVETLDCC')
+        self.assertEqual(r1.details, "test details")
+        a, = r1.alignments
+        self.assertEqual(a.db_begin, 1)
+        self.assertEqual(a.db_end, 10)
+        self.assertEqual(a.entity_begin, 1)
+        self.assertEqual(a.entity_end, 10)
+        # r2 should contain only target_ref_db info
+        self.assertIsInstance(r2, modelcif.reference.UniProt)
+        self.assertEqual(r2.code, 'rd_only_code')
+        self.assertEqual(r2.accession, 'rd_only_acc')
+        self.assertEqual(r2.isoform, 'rd_only_iso')
+        self.assertIsNone(r2.sequence)
+        # r3 should contain only struct_ref info
+        self.assertIsInstance(r3, modelcif.reference.UniProt)
+        self.assertEqual(r3.code, 'sr_only_code')
+        self.assertEqual(r3.accession, 'sr_only_acc')
+        self.assertIsNone(r3.isoform)
+        self.assertIsNone(r3.ncbi_taxonomy_id)
+        self.assertEqual(r3.sequence, 'DSYVETLDPP')
+        a, = r3.alignments
+        self.assertEqual(a.db_begin, 1)
+        self.assertEqual(a.db_end, 10)
+        self.assertEqual(a.entity_begin, 1)
+        self.assertEqual(a.entity_end, 10)
 
     def test_transformation_handler(self):
         """Test _TransformationHandler"""
