@@ -1,3 +1,13 @@
+1.0 - 2024-06-20
+================
+ - Reference information in the ``struct_ref`` mmCIF table is now supported
+   in addition to the ModelCIF-specific tables such as
+   ``ma_target_ref_db_details``. :class:`modelcif.reference.TargetReference`
+   now inherits from ``ihm.reference.Sequence`` and allows for the full
+   database sequence, plus any differences between it and the modeled sequence,
+   to be recorded. The ``align_begin`` and ``align_end`` arguments are now
+   deprecated (#34).
+
 0.9 - 2023-10-02
 ================
  - Bugfix: :class:`modelcif.SoftwareGroup` now allows for parameters to

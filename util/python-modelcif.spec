@@ -28,6 +28,9 @@ compliant with the ModelCIF extension. It works with Python 2.7 or Python 3.
 %defattr(-,root,root)
 
 %changelog
+* Thu Jun 20 2024 Ben Webb <ben@salilab.org>   1.0-1
+- Update to latest upstream.
+
 * Mon Oct 02 2023 Ben Webb <ben@salilab.org>   0.9-1
 - Update to latest upstream.
 
