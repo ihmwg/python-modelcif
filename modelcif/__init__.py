@@ -84,6 +84,7 @@ class System(object):
         self.software = []
         self.software_groups = []
         self.assemblies = []
+        self._orphan_chem_comps = []
 
     def _all_models(self):
         """Iterate over all Models in the system"""

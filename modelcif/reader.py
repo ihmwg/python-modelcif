@@ -87,7 +87,8 @@ class _SystemReader(object):
         self.asym_units = IDMapper(self.system.asym_units, ihm.AsymUnit, None)
 
         #: Mapping from ID to :class:`ihm.ChemComp` objects
-        self.chem_comps = _ChemCompIDMapper(None, ihm.ChemComp, *(None,) * 3)
+        self.chem_comps = _ChemCompIDMapper(self.system._orphan_chem_comps,
+                                            ihm.ChemComp, *(None,) * 3)
 
         self.software_groups = IDMapper(self.system.software_groups,
                                         modelcif.SoftwareGroup)
