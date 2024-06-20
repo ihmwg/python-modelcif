@@ -1,7 +1,7 @@
 Name:          python3-modelcif
 License:       MIT
 Group:         Applications/Engineering
-Version:       0.9
+Version:       1.0
 Release:       1%{?dist}
 Summary:       Package for handling ModelCIF mmCIF and BinaryCIF files
 Packager:      Ben Webb <ben@salilab.org>
