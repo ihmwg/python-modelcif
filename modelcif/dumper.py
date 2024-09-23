@@ -192,7 +192,8 @@ class _SoftwareGroupDumper(Dumper):
                 for soft in s:
                     if (isinstance(soft, modelcif.SoftwareWithParameters)
                             and soft.parameters
-                            and id(soft.parameters) not in self._param_groups):
+                            and id(soft.parameters)
+                            not in self._param_group_id):
                         self._param_groups.append(soft.parameters)
                         self._param_group_id[id(soft.parameters)] \
                             = len(self._param_groups)
