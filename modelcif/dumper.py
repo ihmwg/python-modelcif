@@ -50,11 +50,10 @@ class _ChemCompDumper(Dumper):
             system.entities, (t.entity for t in system.templates))
 
     def _get_provenance(self, comp):
-        # Older python-ihm does not provide ChemComp.ccd
-        ccd = comp.ccd if hasattr(comp, 'ccd') else None
+        ccd = comp.ccd
         if ccd is None:
             ccd = 'core'
-            if hasattr(comp, 'descriptors') and comp.descriptors:
+            if comp.descriptors:
                 ccd = 'local'
         val = self._prov_map.get(ccd)
         if not val:

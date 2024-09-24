@@ -1109,10 +1109,8 @@ _pdbx_entity_nonpoly.ma_model_mode
         """Test ChemCompDumper"""
         system = modelcif.System()
 
-        # Old-style ChemComp without ccd
+        # ChemComp without ccd
         c1 = ihm.NonPolymerChemComp('C1', name='C1')
-        if hasattr(c1, 'ccd'):
-            del c1.ccd
 
         # ChemComp using core CCD
         c2 = ihm.NonPolymerChemComp('C2', name='C2')
