@@ -663,7 +663,7 @@ class _AssemblyHandler(Handler):
         if seq_id_begin is None and seq_id_end is None:
             a.append(asym)
         else:
-            a.append(asym(int(seq_id_begin), int(seq_id_end)))
+            a.append(asym(int(seq_id_begin), int(seq_id_end), _check=False))
 
     def finalize(self):
         # Any AsymUnitRange which covers an entire asym,
@@ -899,7 +899,7 @@ class _QAMetricLocalHandler(Handler):
         model = self.sysr.models.get_by_id(model_id)
         asym = self.sysr.asym_units.get_by_id(label_asym_id)
         seq_id = self.get_int(label_seq_id)
-        residue = asym.residue(seq_id)
+        residue = asym.residue(seq_id, _check=False)
         metric_class = self.sysr.qa_by_id[metric_id]
         model.qa_metrics.append(metric_class(residue,
                                              self.get_float(metric_value)))
@@ -913,10 +913,10 @@ class _QAMetricPairwiseHandler(Handler):
         model = self.sysr.models.get_by_id(model_id)
         asym1 = self.sysr.asym_units.get_by_id(label_asym_id_1)
         seq_id1 = self.get_int(label_seq_id_1)
-        residue1 = asym1.residue(seq_id1)
+        residue1 = asym1.residue(seq_id1, _check=False)
         asym2 = self.sysr.asym_units.get_by_id(label_asym_id_2)
         seq_id2 = self.get_int(label_seq_id_2)
-        residue2 = asym2.residue(seq_id2)
+        residue2 = asym2.residue(seq_id2, _check=False)
         metric_class = self.sysr.qa_by_id[metric_id]
         model.qa_metrics.append(metric_class(residue1, residue2,
                                              self.get_float(metric_value)))
