@@ -62,6 +62,10 @@ class Model(modelcif.data.Data):
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
+        # ModelCIF doesn't support not-modeled residue ranges, but python-ihm
+        # uses this information to populate the pdbx_poly_seq_scheme table,
+        # so add an empty range here
+        self.not_modeled_residue_ranges = []
         #: Quality scores for the model or part of it (a simple list of
         #: metric objects; see :mod:`modelcif.qa_metric`)
         self.qa_metrics = []

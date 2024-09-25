@@ -485,6 +485,48 @@ C
 #
 """)
 
+    def test_poly_seq_scheme_dumper(self):
+        """Test PolySeqSchemeDumper with ModelCIF models"""
+        system = modelcif.System()
+        e1 = modelcif.Entity('ACGT')
+        e1._id = 9
+        system.entities.append(e1)
+        asym = modelcif.AsymUnit(e1, 'foo')
+        asym._id = 'A'
+        system.asym_units.append(asym)
+        asmb = modelcif.Assembly((asym,))
+        asmb._id = 2
+        model1 = modelcif.model.HomologyModel(assembly=asmb, name='test model')
+        model1._data_id = 42
+        model1._atoms = [modelcif.model.Atom(asym_unit=asym, seq_id=1,
+                                             atom_id='C', type_symbol='C',
+                                             x=1.0, y=2.0, z=3.0)]
+        mg = modelcif.model.ModelGroup((model1,),
+                                       name='test group')
+        # Add at least one model, since the PolySeqSchemeDumper checks all
+        # models' not_modeled_residue_ranges member when writing the table
+        system.model_groups.append(mg)
+        dumper = ihm.dumper._PolySeqSchemeDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.mon_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.auth_seq_num
+_pdbx_poly_seq_scheme.pdb_mon_id
+_pdbx_poly_seq_scheme.auth_mon_id
+_pdbx_poly_seq_scheme.pdb_strand_id
+_pdbx_poly_seq_scheme.pdb_ins_code
+A 9 1 ALA 1 1 ALA ALA A .
+A 9 2 CYS 2 2 CYS CYS A .
+A 9 3 GLY 3 3 GLY GLY A .
+A 9 4 THR 4 4 THR THR A .
+#
+""")
+
     def test_target_ref_db_dumper(self):
         """Test TargetRefDBDumper"""
 
