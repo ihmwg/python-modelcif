@@ -14,6 +14,11 @@ then writing it out again, so
   b) input files that aren't compliant with the PDBx dictionary, or that
      contain syntax errors or other problems, may crash or otherwise confuse
      python-modelcif.
+
+While a best effort is made, it is not guaranteed that the output file is
+valid. It is recommended that it is run through a validator such as
+examples/validate_mmcif.py and any errors corrected or reported as
+issues.
 """
 
 
@@ -28,9 +33,21 @@ import argparse
 def add_modelcif_info(s):
     if not s.title:
         s.title = 'Auto-generated system'
+    if not s.protocols:
+        default_protocol = modelcif.protocol.Protocol()
+        step = modelcif.protocol.ModelingStep(
+            name='modeling', input_data=None, output_data=None)
+        default_protocol.steps.append(step)
+        s.protocols.append(default_protocol)
 
     for model_group in s.model_groups:
         for model in model_group:
+            # Entity description is also used by python-modelcif for
+            # ma_data.name, which is mandatory, so it cannot be unknown/?
+            for asym in model.assembly:
+                if asym.entity.description is ihm.unknown:
+                    asym.entity.description = "target"
+
             model.not_modeled_residue_ranges.extend(
                 _get_not_modeled_residues(model))
     return s
