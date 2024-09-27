@@ -19,3 +19,4 @@ VERSION=$(python3 setup.py --version)
 python3 setup.py sdist
 echo "Now use 'twine upload dist/modelcif-${VERSION}.tar.gz' to publish the release on PyPi"
 echo "Then, update the conda-forge and COPR packages to match."
+echo "For COPR, use dist/modelcif-${VERSION}.tar.gz together with util/python-modelcif.spec"
