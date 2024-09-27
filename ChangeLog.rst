@@ -1,3 +1,15 @@
+1.1 - 2024-09-27
+================
+ - The new class :class:`modelcif.model.NotModeledResidueRange` allows for
+   the annotation of residue ranges that were explicitly not modeled.
+   Any residue marked as not-modeled in all models will be excluded from
+   the ``pdbx_poly_seq_scheme`` table.
+ - The ``util/make-mmcif.py`` script is now included in the installed package,
+   so can be run if desired with ``python3 -m modelcif.util.make_mmcif``.
+ - The ``make_mmcif`` utility script will now automatically add any
+   missing :class:`modelcif.model.NotModeledResidueRange` objects for
+   not-modeled residue ranges.
+
 1.0 - 2024-06-20
 ================
  - Reference information in the ``struct_ref`` mmCIF table is now supported
