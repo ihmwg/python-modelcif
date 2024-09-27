@@ -70,7 +70,7 @@ class Tests(unittest.TestCase):
         with open('output.cif') as fh:
             contents = fh.readlines()
         loop = contents.index("_pdbx_poly_seq_scheme.pdb_ins_code\n")
-        scheme = "".join(contents[loop-11:loop+11])
+        scheme = "".join(contents[loop - 11:loop + 11])
         # Residues 5 and 6 in chain A, and 2 in chain B, are missing from
         # atom_site, so should now be missing from the scheme table.
         self.assertEqual(scheme, """#

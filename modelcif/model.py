@@ -126,7 +126,7 @@ class NotModeledResidueRange(object):
        See :attr:`Model.not_modeled_residue_ranges`.
        These ranges are not explicitly stored in the mmCIF file,
        but they will be excluded from the ``pdbx_poly_seq_scheme`` table.
-        
+
        :param asym_unit: The asymmetric unit to which the residues belong.
        :type asym_unit: :class:`~modelcif.AsymUnit`
        :param int seq_id_begin: Starting residue in the range.
