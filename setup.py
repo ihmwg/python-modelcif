@@ -22,7 +22,7 @@ setup(name='modelcif',
       author='Ben Webb',
       author_email='ben@salilab.org',
       url='https://github.com/ihmwg/python-modelcif',
-      packages=['modelcif'],
+      packages=['modelcif', 'modelcif.util'],
       install_requires=['ihm>=1.5'],
       classifiers=[
           "Programming Language :: Python :: 2.7",

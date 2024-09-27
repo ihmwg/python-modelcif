@@ -2,6 +2,8 @@ import sys
 import ihm.representation
 from ihm.model import Atom, ModelGroup  # noqa: F401
 import modelcif.data
+from ihm.util import _check_residue_range
+
 
 # Provide ma-specific docs for Atom
 if sys.version_info[0] >= 3:
@@ -62,10 +64,11 @@ class Model(modelcif.data.Data):
             [ihm.representation.AtomicSegment(seg, rigid=False)
              for seg in assembly])
         self._atoms = []
-        # ModelCIF doesn't support not-modeled residue ranges, but python-ihm
-        # uses this information to populate the pdbx_poly_seq_scheme table,
-        # so add an empty range here
+
+        #: List of residue ranges that were explicitly not modeled. See
+        #: :class:`NotModeledResidueRange`.
         self.not_modeled_residue_ranges = []
+
         #: Quality scores for the model or part of it (a simple list of
         #: metric objects; see :mod:`modelcif.qa_metric`)
         self.qa_metrics = []
@@ -116,3 +119,20 @@ class AbInitioModel(Model):
     """
     model_type = "Ab initio model"
     other_details = None
+
+
+class NotModeledResidueRange(object):
+    """A range of residues that were explicitly not modeled.
+       See :attr:`Model.not_modeled_residue_ranges`.
+       These ranges are not explicitly stored in the mmCIF file,
+       but they will be excluded from the ``pdbx_poly_seq_scheme`` table.
+        
+       :param asym_unit: The asymmetric unit to which the residues belong.
+       :type asym_unit: :class:`~modelcif.AsymUnit`
+       :param int seq_id_begin: Starting residue in the range.
+       :param int seq_id_end: Ending residue in the range.
+    """
+    def __init__(self, asym_unit, seq_id_begin, seq_id_end):
+        self.asym_unit = asym_unit
+        self.seq_id_begin, self.seq_id_end = seq_id_begin, seq_id_end
+        _check_residue_range((seq_id_begin, seq_id_end), asym_unit.entity)

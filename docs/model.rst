@@ -17,5 +17,7 @@ The :mod:`modelcif.model` Python module
 
 .. autoclass:: AbInitioModel
 
+.. autoclass:: NotModeledResidueRange
+
 .. autoclass:: ModelGroup
    :members:
