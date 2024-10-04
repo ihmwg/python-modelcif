@@ -86,6 +86,9 @@ class System(object):
         self.assemblies = []
         self._orphan_chem_comps = []
 
+        # Mapping from ID to QA metric classes
+        self._qa_by_id = {}
+
     def _all_models(self):
         """Iterate over all Models in the system"""
         # todo: raise an error if a model is present in multiple groups?

@@ -127,7 +127,7 @@ class _SystemReader(object):
 
         self.assoc_by_id = {}
 
-        self.qa_by_id = {}
+        self.qa_by_id = self.system._qa_by_id
 
         self.software_parameters = collections.defaultdict(list)
 
