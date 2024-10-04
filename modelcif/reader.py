@@ -60,8 +60,8 @@ class _ReferenceIDMapper(IDMapper):
 
 
 class _SystemReader(object):
-    def __init__(self, model_class, starting_model_class):
-        self.system = modelcif.System()
+    def __init__(self, model_class, starting_model_class, system=None):
+        self.system = system or modelcif.System()
 
         #: Mapping from ID to :class:`ihm.Software` objects
         self.software = IDMapper(self.system.software, ihm.Software,
@@ -110,6 +110,8 @@ class _SystemReader(object):
 
         self.default_model_class = model_class is modelcif.model.Model
         self._all_seen_models = []
+        for group, model in self.system._all_models():
+            self._all_seen_models.append(model)
         self.models = IDMapper(self._all_seen_models, model_class, [], None)
 
         self.model_groups = IDMapper(self.system.model_groups,
@@ -961,7 +963,8 @@ class ModelCIFVariant(Variant):
 
 def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
          warn_unknown_category=False, warn_unknown_keyword=False,
-         reject_old_file=False, variant=ModelCIFVariant):
+         reject_old_file=False, variant=ModelCIFVariant,
+         add_to_system=None):
     """Read data from the file handle `fh`.
 
        See :func:`ihm.reader.read` for more information. The function
@@ -983,4 +986,5 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
         fh, model_class=model_class, format=format, handlers=handlers,
         warn_unknown_category=warn_unknown_category,
         warn_unknown_keyword=warn_unknown_keyword,
-        reject_old_file=reject_old_file, variant=variant)
+        reject_old_file=reject_old_file, variant=variant,
+        add_to_system=add_to_system)
