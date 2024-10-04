@@ -13,6 +13,7 @@ utils.set_search_paths(TOPDIR)
 import modelcif.reader
 import modelcif.reference
 import ihm
+import ihm.reader
 
 
 class Tests(unittest.TestCase):
@@ -1242,6 +1243,12 @@ _entity_poly_seq.hetero
 
     def test_add_to_system(self):
         """Test adding new mmCIF input to existing System"""
+        # Skip test when using older python-ihm
+        try:
+            _ = ihm.reader.SystemReader(
+                model_class=None, starting_model_class=None, system=None)
+        except TypeError:
+            self.skipTest("needs newer python-ihm")
         s = modelcif.System()
         e = modelcif.Entity('AHC')
         e._id = '42'
