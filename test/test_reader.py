@@ -1240,6 +1240,27 @@ _entity_poly_seq.hetero
         self.assertIsNone(d2.details)
         self.assertIsNone(d2.software)
 
+    def test_add_to_system(self):
+        """Test adding new mmCIF input to existing System"""
+        s = modelcif.System()
+        e = modelcif.Entity('AHC')
+        e._id = '42'
+        s.entities.append(e)
+        fh = StringIO("""
+loop_
+_struct_asym.id
+_struct_asym.entity_id
+_struct_asym.details
+A 42 foo
+B 99 bar
+""")
+        s2, = modelcif.reader.read(fh, add_to_system=s)
+        self.assertIs(s2, s)
+        self.assertEqual(len(s.asym_units), 2)
+        # asym A should point to existing entity
+        self.assertEqual(s.asym_units[0].id, 'A')
+        self.assertIs(s.asym_units[0].entity, e)
+
 
 if __name__ == '__main__':
     unittest.main()
