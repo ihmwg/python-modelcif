@@ -13,6 +13,7 @@ import tempfile
 import shutil
 import modelcif.reader
 
+
 # Get any associated files containing pairwise QA scores
 def _get_zip_scores_files(s):
     for repo in s.repositories:
@@ -23,12 +24,15 @@ def _get_zip_scores_files(s):
                             zf, modelcif.associated.LocalPairwiseQAScoresFile):
                         yield zf, f, repo
 
+
 # Download entry ma-bak-cepc-0944 directly from ModelArchive
-url = "https://www.modelarchive.org/api/projects/ma-bak-cepc-0944?type=basic__model_file_name"
+url = ("https://www.modelarchive.org/api/projects/"
+       "ma-bak-cepc-0944?type=basic__model_file_name")
 with urllib.request.urlopen(url) as fh:
     s, = modelcif.reader.read(fh)
 
-# Get any referenced associated files containing QA scores. For ModelArchive, 
+
+# Get any referenced associated files containing QA scores. For ModelArchive,
 # these are stored in an mmCIF file that is then compressed into a zip file
 for scores, archive, repo in _get_zip_scores_files(s):
     url = repo.get_url(archive)
