@@ -13,6 +13,7 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 
 import modelcif.reader
+import ihm.reader
 
 
 def get_example_dir():
@@ -47,6 +48,19 @@ class Tests(unittest.TestCase):
                                    get_example_path("validate_mmcif.py"),
                                    get_example_path("input/ligands.cif")],
                                   cwd=tmpdir)
+
+    @unittest.skipIf(sys.version_info[0] < 3,
+                     "associated.py needs Python 3")
+    def test_associated_example(self):
+        """Test associated example"""
+        # Skip test when using older python-ihm
+        try:
+            _ = ihm.reader.SystemReader(
+                model_class=None, starting_model_class=None, system=None)
+        except TypeError:
+            self.skipTest("needs newer python-ihm")
+        subprocess.check_call([sys.executable,
+                               get_example_path("associated.py")])
 
     def test_mkmodbase_example(self):
         """Test mkmodbase example"""
