@@ -63,7 +63,7 @@ class TargetReference(ihm.reference.Sequence):
                 "align_begin and align_end are deprecated, and will be "
                 "removed in a future python-modelcif release. Specify the "
                 "database sequence and provide one or more "
-                "modelcif.reference.Alignment objects intead.", stacklevel=2)
+                "modelcif.reference.Alignment objects instead.", stacklevel=2)
         if sequence is None:
             warnings.warn(
                 "No sequence provided. The canonical sequence of the Entity "

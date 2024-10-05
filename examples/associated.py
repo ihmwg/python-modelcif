@@ -3,7 +3,7 @@
 # multiple mmCIF files, putting some of the quality score information not
 # into the main mmCIF file but into a separate "associated" file.
 # These associated files are referenced in the main file
-# (see System.repositories) so we can programatically download and
+# (see System.repositories) so we can programmatically download and
 # extract them.
 # This example requires Python 3.
 
