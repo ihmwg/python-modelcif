@@ -55,20 +55,14 @@ def add_modelcif_info(s):
 
 def _get_not_modeled_residues(model):
     """Yield NotModeledResidueRange objects for all residue ranges in the
-       Model that are not referenced by Atom, Sphere, or pre-existing
-       NotModeledResidueRange objects"""
+       Model that are not referenced by Atom objects"""
     for assem in model.assembly:
         asym = assem.asym if hasattr(assem, 'asym') else assem
         if not asym.entity.is_polymeric():
             continue
-        # Make a set of all residue indices of this asym "handled" either
-        # by being modeled (with Atom or Sphere objects) or by being
-        # explicitly marked as not-modeled
+        # Make a set of all residue indices of this asym "handled"
+        # by being modeled with Atom objects
         handled_residues = set()
-        for rr in model.not_modeled_residue_ranges:
-            if rr.asym_unit is asym:
-                for seq_id in range(rr.seq_id_begin, rr.seq_id_end + 1):
-                    handled_residues.add(seq_id)
         for atom in model._atoms:
             if atom.asym_unit is asym:
                 handled_residues.add(atom.seq_id)
