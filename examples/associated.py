@@ -26,8 +26,7 @@ def _get_zip_scores_files(s):
 
 
 # Download entry ma-bak-cepc-0944 directly from ModelArchive
-url = ("https://www.modelarchive.org/api/projects/"
-       "ma-bak-cepc-0944?type=basic__model_file_name")
+url = "https://www.modelarchive.org/doi/10.5452/ma-bak-cepc-0944.cif"
 with urllib.request.urlopen(url) as fh:
     s, = modelcif.reader.read(fh)
 
