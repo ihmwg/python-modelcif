@@ -40,8 +40,8 @@ for scores, archive, repo in _get_zip_scores_files(s):
         with tempfile.NamedTemporaryFile() as f_zip:
             shutil.copyfileobj(f_url, f_zip)
             # Extract the scores file from the zip file
-            with zipfile.ZipFile(f_zip) as f_zip:
-                with f_zip.open(scores.path) as f_scores:
+            with zipfile.ZipFile(f_zip) as zf:
+                with zf.open(scores.path) as f_scores:
                     # Add scores in the file to our existing System
                     modelcif.reader.read(f_scores, add_to_system=s)
 
