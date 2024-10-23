@@ -978,10 +978,12 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
 
        If the input file references any associated files, they will be
        listed in :attr:`modelcif.System.repositories`. The files will not be
-       downloaded or read in, however.
+       automatically downloaded or read in, but it is straightforward to do
+       this in Python; see the
+       `associated files example <https://github.com/ihmwg/python-ma/blob/main/examples/associated.py>`_.
 
       :return: A list of :class:`modelcif.System` objects.
-    """
+    """  # noqa: E501
     if add_to_system is None:
         # Work for now with stable python-ihm release
         return ihm.reader.read(
