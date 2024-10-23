@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Python-ModelCIF'
-copyright = u'2021-2023, Benjamin Webb'
+copyright = u'2021-2024, Benjamin Webb'
 author = u'Benjamin Webb'
 
 # The version info for the project you're documenting, acts as replacement for
