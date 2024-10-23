@@ -7,8 +7,8 @@ Summary:       Package for handling ModelCIF mmCIF and BinaryCIF files
 Packager:      Ben Webb <ben@salilab.org>
 URL:           https://pypi.python.org/pypi/modelcif
 Source:        modelcif-%{version}.tar.gz
-BuildRequires: python3-devel, python3-setuptools, python3-ihm >= 1.6
-Requires:      python3-ihm >= 1.6
+BuildRequires: python3-devel, python3-setuptools, python3-ihm >= 1.7
+Requires:      python3-ihm >= 1.7
 BuildArch:     noarch
 
 %description

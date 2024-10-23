@@ -53,12 +53,6 @@ class Tests(unittest.TestCase):
                      "associated.py needs Python 3")
     def test_associated_example(self):
         """Test associated example"""
-        # Skip test when using older python-ihm
-        try:
-            _ = ihm.reader.SystemReader(
-                model_class=None, starting_model_class=None, system=None)
-        except TypeError:
-            self.skipTest("needs newer python-ihm")
         subprocess.check_call([sys.executable,
                                get_example_path("associated.py")])
 
