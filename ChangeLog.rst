@@ -1,3 +1,12 @@
+1.2 - 2024-10-23
+================
+  - Data that have been split over multiple mmCIF or BinaryCIF files can now
+    be combined into a single :class:`ihm.System` object using the new
+    ``add_to_system`` argument to :func:`modelcif.reader.read`.
+  - A new example, ``associated.py``, has been added to demonstrate reading
+    in data that has been split into multiple "associated" mmCIF files using
+    :class:`modelcif.associated.CIFFile`.
+
 1.1 - 2024-09-27
 ================
  - The new class :class:`modelcif.model.NotModeledResidueRange` allows for
