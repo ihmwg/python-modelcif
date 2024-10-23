@@ -13,7 +13,6 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 
 import modelcif.reader
-import ihm.reader
 
 
 def get_example_dir():
