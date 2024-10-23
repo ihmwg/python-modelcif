@@ -76,7 +76,8 @@ class CIFFile(File):
 
     _binary_ff_map = {True: 'bcif', False: 'cif'}
 
-    file_format = property(lambda self: self._binary_ff_map[self.binary])
+    file_format = property(lambda self: self._binary_ff_map[self.binary],
+                           doc="Format of the file (BinaryCIF or mmCIF)")
 
     def __init__(self, path, details=None, categories=[], copy_categories=[],
                  entry_id='model', entry_details=None, local_path=None,
