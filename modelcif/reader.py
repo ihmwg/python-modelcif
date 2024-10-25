@@ -984,17 +984,9 @@ def read(fh, model_class=modelcif.model.Model, format='mmCIF', handlers=[],
 
       :return: A list of :class:`modelcif.System` objects.
     """  # noqa: E501
-    if add_to_system is None:
-        # Work for now with stable python-ihm release
-        return ihm.reader.read(
-            fh, model_class=model_class, format=format, handlers=handlers,
-            warn_unknown_category=warn_unknown_category,
-            warn_unknown_keyword=warn_unknown_keyword,
-            reject_old_file=reject_old_file, variant=variant)
-    else:
-        return ihm.reader.read(
-            fh, model_class=model_class, format=format, handlers=handlers,
-            warn_unknown_category=warn_unknown_category,
-            warn_unknown_keyword=warn_unknown_keyword,
-            reject_old_file=reject_old_file, variant=variant,
-            add_to_system=add_to_system)
+    return ihm.reader.read(
+        fh, model_class=model_class, format=format, handlers=handlers,
+        warn_unknown_category=warn_unknown_category,
+        warn_unknown_keyword=warn_unknown_keyword,
+        reject_old_file=reject_old_file, variant=variant,
+        add_to_system=add_to_system)
