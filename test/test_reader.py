@@ -320,14 +320,44 @@ _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 1 'reference database' polymer 1 2 A B 3 4 Z
 2 2 'reference database' polymer 2 3 . B 3 4 Z
+3 3 customized polymer 2 3 . B 3 4 Z
 """
         s, = modelcif.reader.read(StringIO(cif))
-        t, t2 = s.templates
+        t, t2, t3 = s.templates
+        self.assertIsInstance(t, modelcif.Template)
+        self.assertIsInstance(t2, modelcif.Template)
+        self.assertIsInstance(t3, modelcif.CustomTemplate)
         self.assertEqual(t.entity_id, '3')
         self.assertEqual(t.model_num, 4)
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
         self.assertEqual(len(s.alignments), 0)
+
+    def test_template_customized_handler(self):
+        """Test _TemplateCustomizedHandler"""
+        cif = """
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+1 1
+#
+loop_
+_ma_template_customized.template_id
+_ma_template_customized.details
+1 'details x'
+2 'details y'
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        t1, t2 = s.templates
+        # template_details does not specify template_origin, so template #1
+        # will be initially instantiated as a Template, and should be corrected
+        # to CustomTemplate on reading template_customized:
+        self.assertIsInstance(t1, modelcif.CustomTemplate)
+        self.assertEqual(t1.details, 'details x')
+        self.assertEqual(len(t1.atoms), 0)
+        self.assertIsInstance(t2, modelcif.CustomTemplate)
+        self.assertEqual(t2.details, 'details y')
+        self.assertEqual(len(t2.atoms), 0)
 
     def test_template_details_handler_nonpoly(self):
         """Test _TemplateDetailsHandler with nonpolymeric template"""
@@ -370,6 +400,76 @@ _ma_template_non_poly.details
         self.assertIsInstance(a, modelcif.NonPolymerFromTemplate)
         self.assertIs(a.template, t)
         self.assertTrue(a.explicit)
+
+    def test_custom_template_coord_handler(self):
+        """Test reading of coordinates for CustomTemplate"""
+        cif = """
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 customized polymer 2 3 . B 3 4 Z
+#
+loop_
+_ma_template_customized.template_id
+_ma_template_customized.details
+1 'Provided by user'
+#
+loop_
+_ma_template_coord.template_id
+_ma_template_coord.group_PDB
+_ma_template_coord.ordinal_id
+_ma_template_coord.type_symbol
+_ma_template_coord.label_atom_id
+_ma_template_coord.label_comp_id
+_ma_template_coord.label_seq_id
+_ma_template_coord.label_asym_id
+_ma_template_coord.auth_seq_id
+_ma_template_coord.auth_asym_id
+_ma_template_coord.auth_atom_id
+_ma_template_coord.auth_comp_id
+_ma_template_coord.Cartn_x
+_ma_template_coord.Cartn_y
+_ma_template_coord.Cartn_z
+_ma_template_coord.occupancy
+_ma_template_coord.label_entity_id
+_ma_template_coord.B_iso_or_equiv
+_ma_template_coord.formal_charge
+1 ATOM 1 C CA ALA 1 A 42 A X XXX 0 1.000 2.000 0.500 9 2.000 1.000
+1 ATOM 2 O OXT CYS 2 A . A . . 1.000 2.000 3.000 . 9 . .
+#
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        t, = s.templates
+        self.assertIsInstance(t, modelcif.CustomTemplate)
+        self.assertEqual(t.details, 'Provided by user')
+        self.assertEqual(len(t.atoms), 2)
+        a1 = t.atoms[0]
+        self.assertEqual(a1.seq_id, 1)
+        self.assertEqual(a1.atom_id, 'CA')
+        self.assertEqual(a1.type_symbol, 'C')
+        self.assertAlmostEqual(a1.x, 0.0, delta=1e-2)
+        self.assertAlmostEqual(a1.y, 1.0, delta=1e-2)
+        self.assertAlmostEqual(a1.z, 2.0, delta=1e-2)
+        self.assertAlmostEqual(a1.occupancy, 0.5, delta=1e-2)
+        self.assertAlmostEqual(a1.biso, 2.0, delta=1e-2)
+        self.assertAlmostEqual(a1.charge, 1.0, delta=1e-2)
+        self.assertEqual(a1.auth_seq_id, 42)
+        self.assertEqual(a1.auth_comp_id, 'XXX')
+        self.assertEqual(a1.auth_atom_id, 'X')
+
+        a2 = t.atoms[1]
+        self.assertEqual(a2.seq_id, 2)
+        self.assertEqual(a2.atom_id, 'OXT')
+        self.assertEqual(a2.type_symbol, 'O')
 
     def test_entity_nonpoly_bad_model_mode(self):
         """Test pdbx_entity_nonpoly with missing ma_model_mode"""

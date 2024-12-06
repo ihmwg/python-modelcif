@@ -59,6 +59,17 @@ class _ReferenceIDMapper(IDMapper):
             return newcls(*(None,) * 3)
 
 
+class _TemplateIDMapper(IDMapper):
+    """Add extra handling to IDMapper for modelcif.Template objects"""
+
+    def _update_old_object(self, obj, newcls=None):
+        super(_TemplateIDMapper, self)._update_old_object(obj, newcls)
+        # Add missing members if the wrong class was originally instantianted
+        if newcls is modelcif.CustomTemplate and not hasattr(obj, 'atoms'):
+            obj.details = None
+            obj.atoms = []
+
+
 class _SystemReader(object):
     def __init__(self, model_class, starting_model_class, system=None):
         self.system = system or modelcif.System()
@@ -101,8 +112,8 @@ class _SystemReader(object):
         self.transformations = IDMapper(self.system.template_transformations,
                                         modelcif.Transformation, *(None,) * 2)
 
-        self.templates = IDMapper(self.system.templates, modelcif.Template,
-                                  *(None,) * 4)
+        self.templates = _TemplateIDMapper(
+            self.system.templates, modelcif.Template, *(None,) * 4)
 
         self.template_segments = IDMapper(
             self.system.template_segments, modelcif.TemplateSegment,
@@ -483,8 +494,11 @@ class _TemplateDetailsHandler(Handler):
     def __call__(self, template_id, template_trans_matrix_id,
                  template_data_id, target_asym_id, template_label_asym_id,
                  template_label_entity_id, template_model_num,
-                 template_auth_asym_id):
-        template = self.sysr.templates.get_by_id(template_id)
+                 template_auth_asym_id, template_origin):
+        newcls = None
+        if template_origin and template_origin.lower() == 'customized':
+            newcls = modelcif.CustomTemplate
+        template = self.sysr.templates.get_by_id(template_id, newcls)
         template.transformation = self.sysr.transformations.get_by_id(
             template_trans_matrix_id)
         # Add empty sequence (hopefully will fill in from _ma_template_poly
@@ -526,6 +540,38 @@ class _TemplatePolySegmentHandler(Handler):
         segment.template = self.sysr.templates.get_by_id(template_id)
         segment.seq_id_range = (int(residue_number_begin),
                                 int(residue_number_end))
+
+
+class _TemplateCustomizedHandler(Handler):
+    category = '_ma_template_customized'
+
+    def __call__(self, template_id, details):
+        template = self.sysr.templates.get_by_id(template_id,
+                                                 modelcif.CustomTemplate)
+        template.details = details
+
+
+class _TemplateCoordHandler(Handler):
+    category = '_ma_template_coord'
+
+    def __call__(self, template_id, group_pdb, type_symbol, label_atom_id,
+                 label_seq_id, auth_seq_id, auth_atom_id, auth_comp_id,
+                 cartn_x, cartn_y, cartn_z, occupancy, b_iso_or_equiv,
+                 formal_charge):
+        template = self.sysr.templates.get_by_id(template_id,
+                                                 modelcif.CustomTemplate)
+        atom = modelcif.TemplateAtom(
+            het=group_pdb is not None and group_pdb != 'ATOM',
+            type_symbol=type_symbol, atom_id=label_atom_id,
+            seq_id=self.get_int(label_seq_id),
+            auth_seq_id=self.get_int(auth_seq_id),
+            auth_atom_id=auth_atom_id,
+            auth_comp_id=auth_comp_id,
+            x=float(cartn_x), y=float(cartn_y), z=float(cartn_z),
+            occupancy=self.get_float(occupancy),
+            biso=self.get_float(b_iso_or_equiv),
+            charge=self.get_float(formal_charge))
+        template.atoms.append(atom)
 
 
 def _get_align_class(type_class, mode_class, align_class_map):
@@ -945,6 +991,7 @@ class ModelCIFVariant(Variant):
         ihm.reader._StructRefSeqHandler, ihm.reader._StructRefSeqDifHandler,
         _TargetRefDBHandler, _TransformationHandler, _TemplateDetailsHandler,
         _TemplateRefDBHandler, _TemplatePolySegmentHandler,
+        _TemplateCustomizedHandler, _TemplateCoordHandler,
         _TemplatePolyHandler, _TemplateNonPolyHandler,
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,

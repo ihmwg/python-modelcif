@@ -475,46 +475,17 @@ class TemplateSegment(object):
         self.seq_id_range = (seq_id_begin, seq_id_end)
 
 
-class Template(modelcif.data.Data):
-    """A single chain that was used as a template structure for modeling.
+class _TemplateBase(modelcif.data.Data):
+    """Base class for all templates; use Template or CustomTemplate"""
 
-       After creating a polymer template, use :meth:`segment` to denote the
-       part of its sequence used in any modeling alignments
-       (see :class:`modelcif.alignment.Pair`).
-
-       Non-polymer templates do not have alignments, and should instead be
-       passed to one or more :class:`NonPolymerFromTemplate` objects.
-
-       Template objects can also be used as inputs or outputs in modeling
-       protocol steps; see :class:`modelcif.protocol.Step`.
-
-       :param entity: The sequence of the chain.
-       :type entity: :class:`Entity`
-       :param str asym_id: The asym or chain ID in the template structure.
-       :param int model_num: The model number of the template structure.
-       :param transformation: Rotation and translation applied to the original
-              template structure to get the starting model used in modeling.
-       :type transformation: :class:`Transformation`
-       :param str name: A short name for this template.
-       :param references: A list of pointers to reference databases (such as
-              PDB) from which the template structure was taken.
-       :type references: list of :class:`modelcif.reference.TemplateReference`
-             objects
-       :param str strand_id: PDB or "author-provided" strand/chain ID.
-              If not specified, it will be the same as the regular asym_id.
-       :param str entity_id: If known, the ID of the entity for this template
-              in its own mmCIF file.
-    """
     data_content_type = "template structure"
 
     def __init__(self, entity, asym_id, model_num, transformation,
-                 name=None, references=[], strand_id=None, entity_id=None):
-        super(Template, self).__init__(name)
+                 name=None, strand_id=None, entity_id=None):
+        super(_TemplateBase, self).__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
         self.transformation = transformation
-        self.references = []
-        self.references.extend(references)
         self._strand_id = strand_id
         self.entity_id = entity_id
 
@@ -535,6 +506,123 @@ class Template(modelcif.data.Data):
 
     strand_id = property(lambda self: self._strand_id or self.asym_id,
                          doc="PDB or author-provided strand/chain ID")
+
+
+class Template(_TemplateBase):
+    """A single database chain that was used as a template structure
+       for modeling.
+
+       After creating a polymer template, use :meth:`segment` to denote the
+       part of its sequence used in any modeling alignments
+       (see :class:`modelcif.alignment.Pair`).
+
+       Non-polymer templates do not have alignments, and should instead be
+       passed to one or more :class:`NonPolymerFromTemplate` objects.
+
+       Template objects can also be used as inputs or outputs in modeling
+       protocol steps; see :class:`modelcif.protocol.Step`.
+
+       This class is intended for templates that were taken from reference
+       databases such as PDB. For a non-deposited "custom" template,
+       use the :class:`CustomTemplate` class instead.
+
+       :param entity: The sequence of the chain.
+       :type entity: :class:`Entity`
+       :param str asym_id: The asym or chain ID in the template structure.
+       :param int model_num: The model number of the template structure.
+       :param transformation: Rotation and translation applied to the original
+              template structure to get the starting model used in modeling.
+       :type transformation: :class:`Transformation`
+       :param str name: A short name for this template.
+       :param references: A list of pointers to reference databases (such as
+              PDB) from which the template structure was taken.
+       :type references: list of :class:`modelcif.reference.TemplateReference`
+             objects
+       :param str strand_id: PDB or "author-provided" strand/chain ID.
+              If not specified, it will be the same as the regular asym_id.
+       :param str entity_id: If known, the ID of the entity for this template
+              in its own mmCIF file.
+    """
+
+    def __init__(self, entity, asym_id, model_num, transformation,
+                 name=None, references=[], strand_id=None, entity_id=None):
+        super(Template, self).__init__(
+            entity=entity, asym_id=asym_id, model_num=model_num,
+            transformation=transformation, name=name, strand_id=strand_id,
+            entity_id=entity_id)
+        self.references = []
+        self.references.extend(references)
+
+
+class CustomTemplate(_TemplateBase):
+    """A chain that was used as a template structure for modeling.
+
+       This class is intended for templates that have not been deposited
+       in a database such as PDB (for deposited templates, use the
+       :class:`Template` class instead). The coordinates of the atoms
+       in these "custom" templates will be included in the mmCIF file;
+       see the :attr:`atoms` member.
+
+       :param str details: Information on how the template was created.
+
+       See :class:`Template` for a description of the other parameters.
+    """
+    def __init__(self, entity, asym_id, model_num, transformation,
+                 name=None, strand_id=None, entity_id=None, details=None):
+        super(CustomTemplate, self).__init__(
+            entity=entity, asym_id=asym_id, model_num=model_num,
+            transformation=transformation, name=name, strand_id=strand_id,
+            entity_id=entity_id)
+        self.details = details
+
+        #: Coordinates of all atoms as :class:`TemplateAtom` objects
+        self.atoms = []
+
+
+class TemplateAtom(object):
+    """Coordinates of a single atom in a custom template.
+
+       This provides the coordinates for a template that has not been
+       deposited in a database. See :class:`CustomTemplate` for more
+       information. These objects are added to the
+       :attr:`CustomTemplate.atoms` list.
+
+       :param int seq_id: The sequence ID of the residue represented by this
+              atom. This should generally be a number starting at 1 for any
+              polymer chain, water, or oligosaccharide. For ligands, a seq_id
+              is not needed (as a given asym can only contain a single ligand),
+              so either 1 or None can be used.
+       :param str atom_id: The name of the atom in the residue
+       :param str type_symbol: Element name
+       :param float x: x coordinate of the atom
+       :param float y: y coordinate of the atom
+       :param float z: z coordinate of the atom
+       :param bool het: True for HETATM sites, False (default) for ATOM
+       :param float biso: Temperature factor or equivalent (if applicable)
+       :param float occupancy: Fraction of the atom type present
+              (if applicable)
+       :param float charge: Formal charge (if applicable)
+       :param int auth_seq_id: Author-provided sequence ID (if applicable;
+              this is optional for polymers but required for ligands).
+       :param str auth_atom_id: Author-provided atom name (if needed)
+       :param str auth_comp_id: Author-provided residue name (if needed)
+    """
+
+    # Reduce memory usage
+    __slots__ = ['seq_id', 'atom_id', 'type_symbol', 'x', 'y', 'z', 'het',
+                 'biso', 'occupancy', 'charge', 'auth_seq_id', 'auth_atom_id',
+                 'auth_comp_id']
+
+    def __init__(self, seq_id, atom_id, type_symbol, x, y, z,
+                 het=False, biso=None, occupancy=None, charge=None,
+                 auth_seq_id=None, auth_atom_id=None, auth_comp_id=None):
+        self.seq_id, self.atom_id = seq_id, atom_id
+        self.type_symbol = type_symbol
+        self.x, self.y, self.z = x, y, z
+        self.het, self.biso = het, biso
+        self.occupancy, self.charge = occupancy, charge
+        self.auth_seq_id = auth_seq_id
+        self.auth_atom_id, self.auth_comp_id = auth_atom_id, auth_comp_id
 
 
 class NonPolymerFromTemplate(AsymUnit):

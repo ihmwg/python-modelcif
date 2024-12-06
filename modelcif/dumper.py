@@ -358,6 +358,8 @@ class _AlignmentDumper(Dumper):
         self.dump_template_non_poly(system, writer)
         self.dump_template_ref_db(system, writer)
         self.dump_target_template_poly_mapping(system, writer)
+        self.dump_template_customized(system, writer)
+        self.dump_template_coord(system, writer)
         self.dump_info(system, writer)
         self.dump_details(system, writer)
         self.dump_sequences(system, writer)
@@ -366,8 +368,8 @@ class _AlignmentDumper(Dumper):
         ordinal = itertools.count(1)
 
         def write_template(tmpl, tgt_asym, lp):
-            org = ("reference database" if tmpl.references
-                   else "customized")
+            org = ("customized" if isinstance(tmpl, modelcif.CustomTemplate)
+                   else "reference database")
             poly = ("polymer" if tmpl.entity.is_polymeric()
                     else "non-polymer")
             lp.write(ordinal_id=next(ordinal),
@@ -460,6 +462,8 @@ class _AlignmentDumper(Dumper):
                 ["template_id", "db_name", "db_name_other_details",
                  "db_accession_code", "db_version_date"]) as lp:
             for tmpl in system.templates:
+                if not isinstance(tmpl, modelcif.Template):
+                    continue
                 for ref in tmpl.references:
                     lp.write(template_id=tmpl._id, db_name=ref.name,
                              db_name_other_details=ref.other_details,
@@ -467,6 +471,47 @@ class _AlignmentDumper(Dumper):
                              db_version_date=date.isoformat(
                                  ref.db_version_date)
                              if ref.db_version_date else None)
+
+    def dump_template_customized(self, system, writer):
+        with writer.loop(
+                "_ma_template_customized", ["template_id", "details"]) as lp:
+            for tmpl in system.templates:
+                if isinstance(tmpl, modelcif.CustomTemplate):
+                    lp.write(template_id=tmpl._id, details=tmpl.details)
+
+    def dump_template_coord(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_template_coord",
+                ["template_id", "group_PDB", "ordinal_id", "type_symbol",
+                 "label_atom_id", "label_comp_id", "label_seq_id",
+                 "label_asym_id", "auth_seq_id", "auth_asym_id",
+                 "auth_atom_id", "auth_comp_id",
+                 "Cartn_x", "Cartn_y", "Cartn_z",
+                 "occupancy", "label_entity_id", "B_iso_or_equiv",
+                 "formal_charge"]) as lp:
+            for tmpl in system.templates:
+                if not isinstance(tmpl, modelcif.CustomTemplate):
+                    continue
+                e = tmpl.entity
+                for atom in tmpl.atoms:
+                    lp.write(template_id=tmpl._id,
+                             group_PDB='HETATM' if atom.het else 'ATOM',
+                             ordinal_id=next(ordinal),
+                             type_symbol=atom.type_symbol,
+                             label_atom_id=atom.atom_id,
+                             label_comp_id=e.sequence[atom.seq_id - 1].id,
+                             label_seq_id=atom.seq_id,
+                             label_asym_id=tmpl.asym_id,
+                             auth_seq_id=atom.auth_seq_id,
+                             auth_asym_id=tmpl.strand_id,
+                             auth_atom_id=atom.auth_atom_id,
+                             auth_comp_id=atom.auth_comp_id,
+                             Cartn_x=atom.x, Cartn_y=atom.y, Cartn_z=atom.z,
+                             occupancy=atom.occupancy,
+                             label_entity_id=tmpl.entity_id,
+                             B_iso_or_equiv=atom.biso,
+                             formal_charge=atom.charge)
 
     def dump_target_template_poly_mapping(self, system, writer):
         ordinal = itertools.count(1)

@@ -777,8 +777,8 @@ _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
-1 1 customized polymer 42 99 . A 9 1 A
-2 2 customized non-polymer 42 100 . B 10 1 B
+1 1 'reference database' polymer 42 99 . A 9 1 A
+2 2 'reference database' non-polymer 42 100 . B 10 1 B
 #
 #
 loop_
@@ -837,8 +837,8 @@ _ma_template_details.template_label_asym_id
 _ma_template_details.template_label_entity_id
 _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
-1 2 customized non-polymer 42 99 X B 9 1 B
-2 1 customized polymer 42 98 . A . 1 A
+1 2 'reference database' non-polymer 42 99 X B 9 1 B
+2 1 'reference database' polymer 42 98 . A . 1 A
 #
 #
 loop_
@@ -853,6 +853,81 @@ _ma_template_non_poly.template_id
 _ma_template_non_poly.comp_id
 _ma_template_non_poly.details
 2 HEM heme
+#
+""")
+
+    def test_custom_template_unused(self):
+        """Test AlignmentDumper with custom template"""
+        system = modelcif.System()
+        e1 = ihm.Entity('ACGT')
+        t1 = modelcif.CustomTemplate(
+            e1, asym_id="A", model_num=1, name="test template",
+            transformation=modelcif.Transformation.identity(),
+            entity_id=9, details='my custom template')
+        t1.atoms.append(modelcif.TemplateAtom(
+            seq_id=1, atom_id='CA',
+            type_symbol='C', x=0.0, y=1.0, z=2.0, occupancy=0.5,
+            biso=2.0, charge=1.0, auth_seq_id=42, auth_comp_id='XXX',
+            auth_atom_id='X'))
+        t1.atoms.append(modelcif.TemplateAtom(
+            seq_id=2, atom_id='OXT',
+            type_symbol='O', x=1.0, y=2.0, z=3.0))
+        t1._id = 1
+        t1._data_id = 99
+        system.templates.append(t1)
+        dumper = modelcif.dumper._AlignmentDumper()
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_template_details.ordinal_id
+_ma_template_details.template_id
+_ma_template_details.template_origin
+_ma_template_details.template_entity_type
+_ma_template_details.template_trans_matrix_id
+_ma_template_details.template_data_id
+_ma_template_details.target_asym_id
+_ma_template_details.template_label_asym_id
+_ma_template_details.template_label_entity_id
+_ma_template_details.template_model_num
+_ma_template_details.template_auth_asym_id
+1 1 customized polymer 42 99 . A 9 1 A
+#
+#
+loop_
+_ma_template_poly.template_id
+_ma_template_poly.seq_one_letter_code
+_ma_template_poly.seq_one_letter_code_can
+1 ACGT ACGT
+#
+#
+loop_
+_ma_template_customized.template_id
+_ma_template_customized.details
+1 'my custom template'
+#
+#
+loop_
+_ma_template_coord.template_id
+_ma_template_coord.group_PDB
+_ma_template_coord.ordinal_id
+_ma_template_coord.type_symbol
+_ma_template_coord.label_atom_id
+_ma_template_coord.label_comp_id
+_ma_template_coord.label_seq_id
+_ma_template_coord.label_asym_id
+_ma_template_coord.auth_seq_id
+_ma_template_coord.auth_asym_id
+_ma_template_coord.auth_atom_id
+_ma_template_coord.auth_comp_id
+_ma_template_coord.Cartn_x
+_ma_template_coord.Cartn_y
+_ma_template_coord.Cartn_z
+_ma_template_coord.occupancy
+_ma_template_coord.label_entity_id
+_ma_template_coord.B_iso_or_equiv
+_ma_template_coord.formal_charge
+1 ATOM 1 C CA ALA 1 A 42 A X XXX 0 1.000 2.000 0.500 9 2.000 1.000
+1 ATOM 2 O OXT CYS 2 A . A . . 1.000 2.000 3.000 . 9 . .
 #
 """)
 
