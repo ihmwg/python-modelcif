@@ -13,8 +13,8 @@ import modelcif.data
 
 
 class _AuditConformDumper(Dumper):
-    URL = ("https://raw.githubusercontent.com/ihmwg/ModelCIF/%s/base/" +
-           "mmcif_ma-core.dic")
+    URL = ("https://raw.githubusercontent.com/ihmwg/ModelCIF/%s/dist/" +
+           "mmcif_ma.dic")
 
     def dump(self, system, writer):
         with writer.category("_audit_conform") as lp:
