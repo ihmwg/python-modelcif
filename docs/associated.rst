@@ -16,7 +16,7 @@ The :mod:`modelcif.associated` Python module
 .. autoclass:: CIFFile
    :members:
 
-.. autoclass:: LocalPairwiseQAScoresFile
+.. autoclass:: QAMetricsFile
    :members:
 
 .. autoclass:: ZipFile

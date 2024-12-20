@@ -21,7 +21,7 @@ def _get_zip_scores_files(s):
             if isinstance(f, modelcif.associated.ZipFile):
                 for zf in f.files:
                     if isinstance(
-                            zf, modelcif.associated.LocalPairwiseQAScoresFile):
+                            zf, modelcif.associated.QAMetricsFile):
                         yield zf, f, repo
 
 

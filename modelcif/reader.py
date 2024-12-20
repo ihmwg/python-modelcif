@@ -855,6 +855,10 @@ def _get_assoc_type_maps():
 def _get_assoc_class(file_content, file_format, type_map, binary_type_map):
     # Use previous mapping to get a subclass of modelcif.associated.File
     # from (file_content, file_format)
+
+    # Map deprecated file_content to new equivalent
+    if file_content.upper() == 'LOCAL PAIRWISE QA SCORES':
+        file_content = 'QA METRICS'
     k = (file_content.upper(), file_format.upper())
 
     filecls_bin = binary_type_map.get(k)

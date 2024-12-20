@@ -1019,9 +1019,11 @@ X 42 foo
         # Local file with data
         f3 = modelcif.associated.File(path='baz.txt', details='test file3',
                                       data=e)
+        f4 = modelcif.associated.QAMetricsFile(path='baz.txt',
+                                               details='test file4')
         r = modelcif.associated.Repository(url_root='https://example.com',
                                            files=[f1, zf])
-        r2 = modelcif.associated.Repository(url_root=None, files=[f3])
+        r2 = modelcif.associated.Repository(url_root=None, files=[f3, f4])
         system.repositories.extend((r, r2))
 
         system._before_write()  # populate data
@@ -1044,6 +1046,7 @@ _ma_entry_associated_files.data_id
 1 model https://example.com/foo.txt file other other 'test file' .
 2 model https://example.com/t.zip archive zip 'archive with multiple files' . .
 3 model baz.txt file other other 'test file3' 1
+4 model baz.txt file cif 'QA metrics' 'test file4' .
 #
 #
 loop_

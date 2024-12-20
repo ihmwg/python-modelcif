@@ -1242,6 +1242,7 @@ _ma_associated_archive_file_details.data_id
 2 99 99.txt other other 'test file99' .
 3 2 bar.cif cif other 'test mmCIF in zip' .
 4 2 bar.bcif bcif 'local pairwise QA scores' 'test BinaryCIF in zip' 99
+5 2 bar2.bcif bcif 'QA metrics' 'test BinaryCIF in zip' 99
 """
         s, = modelcif.reader.read(StringIO(cif))
         r1, r2 = s.repositories
@@ -1255,16 +1256,23 @@ _ma_associated_archive_file_details.data_id
         self.assertEqual(zf.path, 't.zip')
         self.assertIsNone(zf.details)
 
-        f2, f3, f4 = zf.files
+        f2, f3, f4, f5 = zf.files
         self.assertEqual(f2.path, 'bar.txt')
         self.assertEqual(f2.details, 'test file2')
         self.assertIsNone(f2.data)
         self.assertIsInstance(f3, modelcif.associated.CIFFile)
         self.assertFalse(f3.binary)
+        # QA metrics file using old "local pairwise QA scores" name
         self.assertIsInstance(
-            f4, modelcif.associated.LocalPairwiseQAScoresFile)
+            f4, modelcif.associated.QAMetricsFile)
+        self.assertEqual(f4.file_content, 'QA metrics')
         self.assertTrue(f4.binary)
         self.assertIsInstance(f4.data, modelcif.Entity)
+        self.assertIsInstance(
+            f5, modelcif.associated.QAMetricsFile)
+        self.assertEqual(f5.file_content, 'QA metrics')
+        self.assertTrue(f5.binary)
+        self.assertIsInstance(f5.data, modelcif.Entity)
 
         self.assertIsNone(r2.url_root)
         f3, f4, f5 = r2.files

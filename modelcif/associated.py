@@ -4,6 +4,7 @@
    added to :attr:`modelcif.System.repositories`."""
 
 import posixpath
+import warnings
 
 
 class Repository(object):
@@ -91,11 +92,19 @@ class CIFFile(File):
         self.binary = binary
 
 
-class LocalPairwiseQAScoresFile(CIFFile):
-    """An associated file in CIF format containing local pairwise QA scores.
+class QAMetricsFile(CIFFile):
+    """An associated file in CIF format containing QA metrics.
        See :class:`CIFFile` for more details.
     """
-    file_content = 'local pairwise QA scores'
+    file_content = 'QA metrics'
+
+
+# Map old class name to new equivalent
+class LocalPairwiseQAScoresFile(QAMetricsFile):
+    def __init__(self, *args, **keys):
+        warnings.warn("LocalPairwiseQAScoresFile is deprecated. "
+                      "Use QAMetricsFile instead.", stacklevel=2)
+        super(LocalPairwiseQAScoresFile, self).__init__(*args, **keys)
 
 
 class ZipFile(File):
