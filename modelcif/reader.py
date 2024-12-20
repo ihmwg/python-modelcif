@@ -745,34 +745,64 @@ class _ModelListHandler(Handler):
         self._type_map = _EnumerationMapper(
             modelcif.model, modelcif.model.Model,
             attr='model_type')
+        # Old-style model groups
+        self._old_group_for_model = {}
 
     def finalize(self):
         # Put all models not in a group in their own group
         models_in_groups = frozenset(m._id for mg in self.system.model_groups
                                      for m in mg)
         # Get ungrouped models in the order encountered in the file
-        ungrouped = [m for m in self.sysr._all_seen_models
-                     if m._id not in models_in_groups]
+        ungrouped = []
+        for m in self.sysr._all_seen_models:
+            if m._id not in models_in_groups:
+                # Use old-style group if present
+                mg = self._old_group_for_model.get(m._id)
+                if mg is None:
+                    ungrouped.append(m)
+                else:
+                    mg.append(m)
+
         if ungrouped:
             mg = modelcif.model.ModelGroup(ungrouped)
             self.system.model_groups.append(mg)
 
-    def __call__(self, model_id, model_group_id, model_name, model_group_name,
-                 assembly_id, data_id, model_type, model_type_other_details):
+    def __call__(self, ordinal_id, model_group_id, model_name,
+                 model_group_name, assembly_id, data_id, model_type,
+                 model_type_other_details):
         if self.sysr.default_model_class:
             model_type = self._type_map.get(
                 model_type, model_type_other_details)
-            model = self.sysr.models.get_by_id(model_id, model_type)
+            model = self.sysr.models.get_by_id(ordinal_id, model_type)
         else:
-            model = self.sysr.models.get_by_id(model_id)
+            model = self.sysr.models.get_by_id(ordinal_id)
             model.model_type = model_type
-        mg = self.sysr.model_groups.get_by_id(model_group_id)
-        mg.name = model_group_name
         model.name = model_name
         self.sysr.data_by_id[data_id] = model
         model._data_id = data_id
         model.assembly = self.sysr.assemblies.get_by_id(assembly_id)
-        mg.append(model)
+        # Get group info if present (old dictionary)
+        if model_group_id not in (None, ihm.unknown):
+            mg = self.sysr.model_groups.get_by_id(model_group_id)
+            mg.name = model_group_name
+            self._old_group_for_model[ordinal_id] = mg
+
+
+class _ModelGroupHandler(Handler):
+    category = '_ma_model_group'
+
+    def __call__(self, id, name, details):
+        model_group = self.sysr.model_groups.get_by_id(id)
+        self.copy_if_present(model_group, locals(), keys=('name', 'details'))
+
+
+class _ModelGroupLinkHandler(Handler):
+    category = '_ma_model_group_link'
+
+    def __call__(self, group_id, model_id):
+        model_group = self.sysr.model_groups.get_by_id(group_id)
+        model = self.sysr.models.get_by_id(model_id)
+        model_group.append(model)
 
 
 class _ProtocolHandler(Handler):
@@ -996,7 +1026,8 @@ class ModelCIFVariant(Variant):
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
-        _ModelListHandler, _ProtocolHandler,
+        _ModelListHandler, _ModelGroupHandler, _ModelGroupLinkHandler,
+        _ProtocolHandler,
         _AssociatedHandler, _AssociatedArchiveHandler, _QAMetricHandler,
         _QAMetricGlobalHandler, _QAMetricLocalHandler,
         _QAMetricPairwiseHandler]

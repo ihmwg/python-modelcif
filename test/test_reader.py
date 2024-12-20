@@ -552,8 +552,9 @@ _ma_template_ref_db_details.db_version_date
         self.assertEqual(r5.accession, 'I6XD65')
         self.assertEqual(r5.db_version_date, date(2022, 6, 1))
 
-    def _get_models_cif(self):
-        cif = """
+    def _get_models_cif(self, old=False):
+        if old:
+            cif = """
 loop_
 _ma_model_list.ordinal_id
 _ma_model_list.model_id
@@ -565,9 +566,40 @@ _ma_model_list.data_id
 _ma_model_list.model_type
 _ma_model_list.model_type_other_details
 1 1 1 'Best scoring model' 'All models' 99 4 'Homology model' .
-1 2 1 '2nd best scoring model' 'All models' 99 5 'Ab initio model' .
-1 3 2 'Best scoring model' 'group2' 99 6 'Other' 'Custom other model'
+2 2 1 '2nd best scoring model' 'All models' 99 5 'Ab initio model' .
+3 3 2 'Best scoring model' 'group2' 99 6 'Other' 'Custom other model'
 #
+"""
+        else:
+            cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 'Best scoring model' 99 4 'Homology model' .
+2 '2nd best scoring model' 99 5 'Ab initio model' .
+3 'Best scoring model' 99 6 'Other' 'Custom other model'
+#
+loop_
+_ma_model_group.id
+_ma_model_group.name
+_ma_model_group.details
+1 'All models' .
+2 'group2' 'second group details'
+#
+#
+loop_
+_ma_model_group_link.group_id
+_ma_model_group_link.model_id
+1 1
+1 2
+2 3
+#
+"""
+        cif += """
 loop_
 _atom_site.group_PDB
 _atom_site.id
@@ -592,9 +624,16 @@ ATOM 2 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 8
 """
         return cif
 
+    def test_model_list_handler_default_old(self):
+        """Test _ModelListHandler with default model class, old dictionary"""
+        self._test_model_list_handler_default(old=True)
+
     def test_model_list_handler_default(self):
         """Test _ModelListHandler with default model class"""
-        cif = self._get_models_cif()
+        self._test_model_list_handler_default(old=False)
+
+    def _test_model_list_handler_default(self, old):
+        cif = self._get_models_cif(old=old)
         s, = modelcif.reader.read(StringIO(cif))
         mg1, mg2, mg3 = s.model_groups
         self.assertEqual(mg1.name, 'All models')
@@ -621,6 +660,48 @@ ATOM 2 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 8
         self.assertEqual(m1._id, '6')
         self.assertEqual(m2.model_type, 'Other')
         self.assertEqual(m2._id, '8')
+
+    def test_model_list_handler_group_new_old(self):
+        """Test _ModelListHandler handling mix of new and old style groups"""
+        cif = """
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 . . 4 'Homology model' .
+2 2 . . . 4 'Homology model' .
+3 3 1 . . 4 'Homology model' .
+#
+#
+loop_
+_ma_model_group.id
+_ma_model_group.name
+_ma_model_group.details
+1 'group1' .
+2 'group2' .
+#
+#
+loop_
+_ma_model_group_link.model_id
+_ma_model_group_link.group_id
+2 1
+3 2
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        # model1 is in group1, using old-style tables;
+        # model2 is in group1, using new-style tables;
+        # model3 is in group2 according to new-style tables but group1
+        # according to old style (new-style should take precedence)
+        mg1, mg2 = s.model_groups
+        self.assertEqual(mg1._id, '1')
+        self.assertEqual(mg2._id, '2')
+        self.assertEqual([m._id for m in mg1], ['2', '1'])
+        self.assertEqual([m._id for m in mg2], ['3'])
 
     def test_model_list_handler_custom(self):
         """Test _ModelListHandler with custom model class"""

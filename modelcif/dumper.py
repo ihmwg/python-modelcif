@@ -619,24 +619,36 @@ class _ProtocolDumper(Dumper):
 class _ModelDumper(ihm.dumper._ModelDumperBase):
     def dump(self, system, writer):
         self.dump_model_list(system, writer)
+        self.dump_model_groups(system, writer)
         seen_types = self.dump_atoms(system, writer, add_ihm=False)
         self.dump_atom_type(seen_types, system, writer)
 
     def dump_model_list(self, system, writer):
-        ordinal = itertools.count(1)
         with writer.loop("_ma_model_list",
-                         ["ordinal_id", "model_id", "model_group_id",
-                          "model_name", "model_group_name",
+                         ["ordinal_id", "model_name",
                           "data_id", "model_type",
                           "model_type_other_details"]) as lp:
+            for group, model in sorted(system._all_models(),
+                                       key=lambda x: x[1]._id):
+                lp.write(ordinal_id=model._id, model_name=model.name,
+                         data_id=model._data_id, model_type=model.model_type,
+                         model_type_other_details=model.other_details)
+
+    def dump_model_groups(self, system, writer):
+        self.dump_model_group_summary(system, writer)
+        self.dump_model_group_link(system, writer)
+
+    def dump_model_group_summary(self, system, writer):
+        with writer.loop("_ma_model_group", ["id", "name", "details"]) as lp:
             for group in system.model_groups:
-                for model in group:
-                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
-                             model_group_id=group._id, model_name=model.name,
-                             model_group_name=group.name,
-                             data_id=model._data_id,
-                             model_type=model.model_type,
-                             model_type_other_details=model.other_details)
+                lp.write(id=group._id, name=group.name, details=group.details)
+
+    def dump_model_group_link(self, system, writer):
+        with writer.loop("_ma_model_group_link",
+                         ["group_id", "model_id"]) as lp:
+            for group in system.model_groups:
+                for model_id in sorted(set(model._id for model in group)):
+                    lp.write(model_id=model_id, group_id=group._id)
 
 
 class _AssociatedDumper(Dumper):

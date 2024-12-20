@@ -432,10 +432,10 @@ _ma_protocol_step.output_data_group_id
         mg = modelcif.model.ModelGroup((model1, model2, model3),
                                        name='test group')
         system.model_groups.append(mg)
-        # model1 is in both groups. We should see it twice in model_list
-        # but only once in atom_site.
+        # model1 is in both groups
         mg = modelcif.model.ModelGroup((model1,),
-                                       name='second group')
+                                       name='second group',
+                                       details='second group details')
         system.model_groups.append(mg)
         dumper = modelcif.dumper._ModelDumper()
         dumper.finalize(system)
@@ -443,17 +443,30 @@ _ma_protocol_step.output_data_group_id
         self.assertEqual(out, """#
 loop_
 _ma_model_list.ordinal_id
-_ma_model_list.model_id
-_ma_model_list.model_group_id
 _ma_model_list.model_name
-_ma_model_list.model_group_name
 _ma_model_list.data_id
 _ma_model_list.model_type
 _ma_model_list.model_type_other_details
-1 1 1 'test model' 'test group' 42 'Homology model' .
-2 2 1 model2 'test group' 43 'Ab initio model' .
-3 3 1 model3 'test group' 44 Other 'custom model'
-4 1 2 'test model' 'second group' 42 'Homology model' .
+1 'test model' 42 'Homology model' .
+2 model2 43 'Ab initio model' .
+3 model3 44 Other 'custom model'
+#
+#
+loop_
+_ma_model_group.id
+_ma_model_group.name
+_ma_model_group.details
+1 'test group' .
+2 'second group' 'second group details'
+#
+#
+loop_
+_ma_model_group_link.group_id
+_ma_model_group_link.model_id
+1 1
+1 2
+1 3
+2 1
 #
 #
 loop_
