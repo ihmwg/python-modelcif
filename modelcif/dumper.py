@@ -641,7 +641,10 @@ class _ModelDumper(ihm.dumper._ModelDumperBase):
     def dump_model_group_summary(self, system, writer):
         with writer.loop("_ma_model_group", ["id", "name", "details"]) as lp:
             for group in system.model_groups:
-                lp.write(id=group._id, name=group.name, details=group.details)
+                # ihm.model.ModelGroup only supports details after v1.8
+                lp.write(id=group._id, name=group.name,
+                         details=group.details
+                         if hasattr(group, 'details') else None)
 
     def dump_model_group_link(self, system, writer):
         with writer.loop("_ma_model_group_link",

@@ -434,8 +434,9 @@ _ma_protocol_step.output_data_group_id
         system.model_groups.append(mg)
         # model1 is in both groups
         mg = modelcif.model.ModelGroup((model1,),
-                                       name='second group',
-                                       details='second group details')
+                                       name='second group')
+        # ModelGroup constructor only supports details with python-ihm > 1.8
+        mg.details = 'second group details'
         system.model_groups.append(mg)
         dumper = modelcif.dumper._ModelDumper()
         dumper.finalize(system)
