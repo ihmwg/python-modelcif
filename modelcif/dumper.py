@@ -57,6 +57,8 @@ class _ChemCompDumper(Dumper):
                 ccd = 'local'
         val = self._prov_map.get(ccd)
         if not val:
+            if not self._check:
+                return ihm.unknown
             raise KeyError("Invalid ccd value %s for %s; can be %s, or None"
                            % (repr(comp.ccd), comp,
                               ", ".join(sorted(self._prov_map.keys()))))
@@ -921,10 +923,10 @@ class ModelCIFVariant(Variant):
 
 
 def write(fh, systems, format='mmCIF', dumpers=[],
-          variant=ModelCIFVariant):
+          variant=ModelCIFVariant, check=True):
     """Write out all `systems` to the file handle `fh`.
 
        See :func:`ihm.dumper.write` for more information. The function
        here behaves similarly but writes out files compliant with the
        ModelCIF extension directory rather than IHM."""
-    return ihm.dumper.write(fh, systems, format, dumpers, variant)
+    return ihm.dumper.write(fh, systems, format, dumpers, variant, check=check)

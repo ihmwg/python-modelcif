@@ -28,7 +28,8 @@ import ihm.format
 import ihm.dumper
 
 
-def _get_dumper_output(dumper, system):
+def _get_dumper_output(dumper, system, check=True):
+    dumper._check = check
     fh = StringIO()
     writer = ihm.format.CifWriter(fh)
     dumper.dump(system, writer)
@@ -1300,6 +1301,8 @@ THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120 'CCD Core'
 
         dumper = modelcif.dumper._ChemCompDumper()
         self.assertRaises(KeyError, _get_dumper_output, dumper, system)
+        # Should work with checks disabled
+        _ = _get_dumper_output(dumper, system, check=False)
 
     def test_chem_comp_descriptor_dumper(self):
         """Test ChemCompDescriptorDumper"""
