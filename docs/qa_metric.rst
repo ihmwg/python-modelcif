@@ -19,6 +19,12 @@ The :mod:`modelcif.qa_metric` Python module
 .. autoclass:: LocalPairwise
    :members:
 
+.. autoclass:: Feature
+   :members:
+
+.. autoclass:: FeaturePairwise
+   :members:
+
 .. autoclass:: MetricType
    :members:
 

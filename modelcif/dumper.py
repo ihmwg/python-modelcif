@@ -5,6 +5,7 @@ import itertools
 import operator
 import ihm.dumper
 import ihm
+from ihm import util
 import ihm.format
 import ihm.format_bcif
 from ihm.dumper import Dumper, Variant, _prettyprint_seq, _get_transform
@@ -704,6 +705,69 @@ class _AssociatedDumper(Dumper):
                                  data_id=af.data._data_id if af.data else None)
 
 
+class _FeatureDumper(Dumper):
+    def finalize(self, system):
+        seen_features = {}
+        self._features_by_id = []
+        for f in system._all_features():
+            util._remove_id(f)
+        for f in system._all_features():
+            util._assign_id(f, seen_features, self._features_by_id,
+                            seen_obj=f._signature())
+
+    def dump(self, system, writer):
+        self.dump_list(writer)
+        self.dump_atom(writer)
+        self.dump_residue(writer)
+        self.dump_instance(writer)
+
+    def dump_list(self, writer):
+        with writer.loop("_ma_feature_list",
+                         ["feature_id", "feature_type", "entity_type",
+                          "details"]) as lp:
+            for f in self._features_by_id:
+                lp.write(feature_id=f._id, feature_type=f.type,
+                         entity_type=f._get_entity_type(check=self._check),
+                         details=f.details)
+
+    def dump_atom(self, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_atom_feature",
+                         ["ordinal_id", "feature_id", "atom_id"]) as lp:
+            for f in self._features_by_id:
+                if not isinstance(f, modelcif.AtomFeature):
+                    continue
+                for a in f.atoms:
+                    lp.write(ordinal_id=next(ordinal), feature_id=f._id,
+                             atom_id=a)
+
+    def dump_residue(self, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_poly_residue_feature",
+                         ["ordinal_id", "feature_id", "label_asym_id",
+                          "label_seq_id", "label_comp_id"]) as lp:
+            for f in self._features_by_id:
+                if not isinstance(f, modelcif.PolyResidueFeature):
+                    continue
+                for r in f.residues:
+                    seq = r.entity.sequence
+                    lp.write(ordinal_id=next(ordinal), feature_id=f._id,
+                             label_asym_id=r.asym._id,
+                             label_seq_id=r.seq_id,
+                             label_comp_id=seq[r.seq_id - 1].id)
+
+    def dump_instance(self, writer):
+        ordinal = itertools.count(1)
+        with writer.loop("_ma_entity_instance_feature",
+                         ["ordinal_id", "feature_id", "label_asym_id"]) as lp:
+            for f in self._features_by_id:
+                if not isinstance(f, modelcif.EntityInstanceFeature):
+                    continue
+                for a in f.asym_units:
+                    lp.write(ordinal_id=next(ordinal), feature_id=f._id,
+                             label_asym_id=a._id)
+
+
 class _QAMetricDumper(Dumper):
     def finalize(self, system):
         # Get all metric classes used by all systems
@@ -874,7 +938,8 @@ class ModelCIFVariant(Variant):
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         _DataDumper, _DataGroupDumper, _DataRefDBDumper,
         _TargetEntityDumper, _TemplateTransformDumper, _AlignmentDumper,
-        _ProtocolDumper, _ModelDumper, _AssociatedDumper, _QAMetricDumper]
+        _ProtocolDumper, _ModelDumper, _AssociatedDumper, _FeatureDumper,
+        _QAMetricDumper]
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]

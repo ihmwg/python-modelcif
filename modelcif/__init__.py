@@ -1,5 +1,6 @@
 import itertools
 import warnings
+import ihm
 from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
@@ -267,6 +268,14 @@ class System(object):
              if step.software),
             (metric.software for group, model in self._all_models()
              for metric in model.qa_metrics if metric.software))
+
+    def _all_features(self):
+        """Return all Feature objects"""
+        for _, model in self._all_models():
+            for m in model.qa_metrics:
+                if hasattr(m, '_all_features'):
+                    for f in m._all_features:
+                        yield f
 
 
 # Provide ma-specific docs for Entity
@@ -676,3 +685,96 @@ class ReferenceDatabase(modelcif.data.Data):
     def __init__(self, name, url, version=None, release_date=None):
         super(ReferenceDatabase, self).__init__(name)
         self.url, self.version, self.release_date = url, version, release_date
+
+
+class Feature(object):
+    """Base class for selecting parts of the system.
+       This class should not be used itself; instead,
+       see :class:`AtomFeature`, :class:`PolyResidueFeature`,
+       and :class:`EntityInstanceFeature`.
+
+       Generally it is expected that the entities selected by a given
+       feature are all of the same type. For example, a feature should
+       not select both a ligand and a polymer.
+
+       Features are typically used in QA metrics, passed to
+       :class:`modelcif.qa_metric.Feature` or
+       :class:`modelcif.qa_metric.FeaturePairwise` objects.
+    """
+    def _get_entity_type(self, check=False):
+        return ihm.unknown
+
+    def _check_entity_types(self, types, check):
+        if check:
+            if len(types) > 1:
+                raise ValueError(
+                    "Feature %r selects entities of multiple types: %s"
+                    % (self, list(types)))
+            elif len(types) == 0:
+                raise ValueError("Feature %r doesn't select anything" % self)
+        return list(types)[0] if len(types) == 1 else 'other'
+
+
+class AtomFeature(Feature):
+    """Selection of one or more atoms from the system. See :class:`Feature`
+       for more information.
+
+       Note that currently support for atom features in python-modelcif
+       is rather rudimentary. They must be selected by their "id", not by
+       the Atom Python object.
+
+       :param sequence atoms: A list of atom indices (usually integers).
+       :param str details: Additional text describing this feature.
+    """
+
+    type = 'atom'
+
+    def __init__(self, atoms, details=None):
+        self.atoms, self.details = atoms, details
+
+    def _get_entity_type(self, check=False):
+        # We currently can't tell what type entity the atom IDs refer to
+        return 'other'
+
+    def _signature(self):
+        return tuple(self.atoms)
+
+
+class PolyResidueFeature(Feature):
+    """Selection of one or more polymer residues from the system.
+       See :class:`Feature` for more information.
+
+       :param sequence residues: A list of :class:`ihm.Residue` objects.
+       :param str details: Additional text describing this feature.
+    """
+    type = 'residue'
+
+    def __init__(self, residues, details=None):
+        self.residues, self.details = residues, details
+
+    def _get_entity_type(self, check=False):
+        types = frozenset(x.entity.type for x in self.residues)
+        return self._check_entity_types(types, check)
+
+    def _signature(self):
+        return tuple(self.residues)
+
+
+class EntityInstanceFeature(Feature):
+    """Selection of one or more asyms from the system.
+       See :class:`Feature` for more information.
+
+       :param sequence asym_units: A list of :class:`ihm.AsymUnit` objects.
+       :param str details: Additional text describing this feature.
+    """
+    type = 'entity instance'
+
+    def __init__(self, asym_units, details=None):
+        self.asym_units, self.details = asym_units, details
+
+    def _get_entity_type(self, check=False):
+        types = frozenset(x.entity.type for x in self.asym_units)
+        return self._check_entity_types(types, check)
+
+    def _signature(self):
+        return tuple(self.asym_units)

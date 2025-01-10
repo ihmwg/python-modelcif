@@ -57,3 +57,15 @@ The :mod:`modelcif` Python module
 
 .. autoclass:: ReferenceDatabase
    :members:
+
+.. autoclass:: Feature
+   :members:
+
+.. autoclass:: AtomFeature
+   :members:
+
+.. autoclass:: PolyResidueFeature
+   :members:
+
+.. autoclass:: EntityInstanceFeature
+   :members:

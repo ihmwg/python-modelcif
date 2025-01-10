@@ -364,6 +364,103 @@ _ma_qa_metric_local_pairwise.metric_value
 #
 """)
 
+    def test_feature_dumper(self):
+        """Test FeatureDumper"""
+        system = modelcif.System()
+
+        class MockObject(object):
+            pass
+
+        class TestScore(modelcif.qa_metric.Feature, modelcif.qa_metric.ZScore):
+            """test score"""
+            name = "test score"
+            software = None
+
+        e1 = modelcif.Entity('ACGT')
+        asym = modelcif.AsymUnit(e1, 'foo')
+        e2 = ihm.Entity([ihm.NonPolymerChemComp('HEM')])
+        heme = modelcif.AsymUnit(e2, 'heme')
+
+        asym._id = 'Y'
+        heme._id = 'Z'
+        atomf = modelcif.AtomFeature((1, 2, 3), details='atom f')
+        resf = modelcif.PolyResidueFeature((asym.residue(1), asym.residue(2)),
+                                           details='prf')
+        instf = modelcif.EntityInstanceFeature((asym,))
+        inst2f = modelcif.EntityInstanceFeature((heme,))
+        atoms = TestScore(atomf, 20.)
+        ress = TestScore(resf, 30.)
+        insts = TestScore(instf, 40.)
+        inst2s = TestScore(inst2f, 40.)
+
+        model = MockObject()
+        model._id = 18
+        model.qa_metrics = [atoms, ress, insts, inst2s]
+        mg = modelcif.model.ModelGroup((model,))
+        system.model_groups.append(mg)
+
+        dumper = modelcif.dumper._FeatureDumper()
+        dumper.finalize(system)
+        out = _get_dumper_output(dumper, system)
+        self.assertEqual(out, """#
+loop_
+_ma_feature_list.feature_id
+_ma_feature_list.feature_type
+_ma_feature_list.entity_type
+_ma_feature_list.details
+1 atom other 'atom f'
+2 residue polymer prf
+3 'entity instance' polymer .
+4 'entity instance' non-polymer .
+#
+#
+loop_
+_ma_atom_feature.ordinal_id
+_ma_atom_feature.feature_id
+_ma_atom_feature.atom_id
+1 1 1
+2 1 2
+3 1 3
+#
+#
+loop_
+_ma_poly_residue_feature.ordinal_id
+_ma_poly_residue_feature.feature_id
+_ma_poly_residue_feature.label_asym_id
+_ma_poly_residue_feature.label_seq_id
+_ma_poly_residue_feature.label_comp_id
+1 2 Y 1 ALA
+2 2 Y 2 CYS
+#
+#
+loop_
+_ma_entity_instance_feature.ordinal_id
+_ma_entity_instance_feature.feature_id
+_ma_entity_instance_feature.label_asym_id
+1 3 Y
+2 4 Z
+#
+""")
+        # Test empty feature
+        emptyf = modelcif.EntityInstanceFeature(())
+        emptys = TestScore(emptyf, 20.)
+        model.qa_metrics = [emptys]
+        dumper = modelcif.dumper._FeatureDumper()
+        dumper.finalize(system)
+        self.assertRaises(ValueError, _get_dumper_output, dumper, system)
+        # Should work with checks disabled
+        _ = _get_dumper_output(dumper, system, check=False)
+
+        # Test feature that selects multiple entity types
+        multf = modelcif.EntityInstanceFeature((asym, heme))
+        mults = TestScore(multf, 20.)
+        model.qa_metrics = [mults]
+        dumper = modelcif.dumper._FeatureDumper()
+        dumper.finalize(system)
+        self.assertRaises(ValueError, _get_dumper_output, dumper, system)
+        # Should work with checks disabled
+        _ = _get_dumper_output(dumper, system, check=False)
+
     def test_protocol_dumper(self):
         """Test ProtocolDumper"""
         class MockObject(object):

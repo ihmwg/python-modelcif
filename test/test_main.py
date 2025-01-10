@@ -220,6 +220,11 @@ class Tests(unittest.TestCase):
         self.assertWarns(UserWarning,
                          modelcif.SoftwareGroup, [s], parameters=[p])
 
+    def test_feature(self):
+        """Test Feature base class"""
+        f = modelcif.Feature()
+        self.assertIs(f._get_entity_type(), ihm.unknown)
+
 
 if __name__ == '__main__':
     unittest.main()

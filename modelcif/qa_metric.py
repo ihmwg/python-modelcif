@@ -95,6 +95,50 @@ class LocalPairwise(MetricMode):
                    self.value))
 
 
+class Feature(MetricMode):
+    """A score that is calculated on a single feature.
+
+       :param feature: The feature that is scored.
+       :type feature: :class:`modelcif.Feature`
+       :param float value: The score value (see :class:`MetricType`).
+    """
+
+    mode = "per-feature"
+
+    def __init__(self, feature, value):
+        self.feature = feature
+        self.value = value
+
+    def __repr__(self):
+        return "<%s(feature=%r, value=%r)>" % (type(self).__name__,
+                                               self.feature, self.value)
+    _all_features = property(lambda self: (self.feature,))
+
+
+class FeaturePairwise(MetricMode):
+    """A score that is calculated between two features.
+
+       :param feature1: The first feature that is scored.
+       :type feature1: :class:`modelcif.Feature`
+       :param feature2: The second feature that is scored.
+       :type feature2: :class:`modelcif.Feature`
+       :param float value: The score value (see :class:`MetricType`).
+    """
+
+    mode = "per-feature-pair"
+
+    def __init__(self, feature1, feature2, value):
+        self.feature1 = feature1
+        self.feature2 = feature2
+        self.value = value
+
+    def __repr__(self):
+        return ("<%s(feature1=%r, feature2=%r, value=%r)>"
+                % (type(self).__name__, self.feature1, self.feature2,
+                   self.value))
+    _all_features = property(lambda self: (self.feature1, self.feature2))
+
+
 class MetricType(object):
     """Base class for the type of a quality metric.
        Generally a derived class such as :class:`ZScore` or :class:`Distance`
