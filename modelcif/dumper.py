@@ -789,6 +789,8 @@ class _QAMetricDumper(Dumper):
         self.dump_metric_global(system, writer)
         self.dump_metric_local(system, writer)
         self.dump_metric_pairwise(system, writer)
+        self.dump_metric_feature(system, writer)
+        self.dump_metric_feature_pairwise(system, writer)
 
     def dump_metric_types(self, system, writer):
         with writer.loop(
@@ -851,6 +853,35 @@ class _QAMetricDumper(Dumper):
                              label_asym_id_2=m.residue2.asym._id,
                              label_seq_id_2=m.residue2.seq_id,
                              label_comp_id_2=seq2[m.residue2.seq_id - 1].id,
+                             metric_id=m._id, metric_value=m.value)
+
+    def dump_metric_feature(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_feature",
+                ["ordinal_id", "model_id", "feature_id", "metric_id",
+                 "metric_value"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, modelcif.qa_metric.Feature):
+                        continue
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             feature_id=m.feature._id,
+                             metric_id=m._id, metric_value=m.value)
+
+    def dump_metric_feature_pairwise(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_feature_pairwise",
+                ["ordinal_id", "model_id", "feature_id_1", "feature_id_2",
+                 "metric_id", "metric_value"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, modelcif.qa_metric.FeaturePairwise):
+                        continue
+                    lp.write(ordinal_id=next(ordinal), model_id=model._id,
+                             feature_id_1=m.feature1._id,
+                             feature_id_2=m.feature2._id,
                              metric_id=m._id, metric_value=m.value)
 
 

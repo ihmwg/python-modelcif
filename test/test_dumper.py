@@ -297,6 +297,18 @@ _ma_data_ref_db.release_date
             name = "custom pair score"
             software = None
 
+        class FeatureScore(modelcif.qa_metric.Feature,
+                           modelcif.qa_metric.ZScore):
+            """feature score"""
+            name = "feature score"
+            software = None
+
+        class FeaturePairwiseScore(modelcif.qa_metric.FeaturePairwise,
+                                   modelcif.qa_metric.ZScore):
+            """feature pairwise score"""
+            name = "feature pairwise score"
+            software = None
+
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
         m3 = DistanceScore(60.)
@@ -305,11 +317,18 @@ _ma_data_ref_db.release_date
         asym._id = 'Z'
         m4 = LocalScore(asym.residue(2), 20.)
         m5 = PairScore(asym.residue(1), asym.residue(3), 30.)
+        resf = modelcif.PolyResidueFeature((asym.residue(1), asym.residue(2)))
+        instf = modelcif.EntityInstanceFeature((asym,))
+        m6 = FeatureScore(resf, 40.)
+        m7 = FeaturePairwiseScore(resf, instf, 50.)
         model = MockObject()
         model._id = 18
-        model.qa_metrics = [m1, m2, m3, m4, m5]
+        model.qa_metrics = [m1, m2, m3, m4, m5, m6, m7]
         mg = modelcif.model.ModelGroup((model,))
         system.model_groups.append(mg)
+        # Assign feature IDs
+        dumper = modelcif.dumper._FeatureDumper()
+        dumper.finalize(system)
         dumper = modelcif.dumper._QAMetricDumper()
         dumper.finalize(system)
         out = _get_dumper_output(dumper, system)
@@ -326,6 +345,8 @@ _ma_qa_metric.software_group_id
 2 CustomScore 'custom description' other global 'my custom type' .
 3 'custom local score' 'custom local description' zscore local . .
 4 'custom pair score' 'custom pair description' energy local-pairwise . .
+5 'feature score' 'feature score' zscore per-feature . .
+6 'feature pairwise score' 'feature pairwise score' zscore per-feature-pair . .
 #
 #
 loop_
@@ -361,6 +382,25 @@ _ma_qa_metric_local_pairwise.label_comp_id_2
 _ma_qa_metric_local_pairwise.metric_id
 _ma_qa_metric_local_pairwise.metric_value
 1 18 Z 1 ALA Z 3 GLY 4 30.000
+#
+#
+loop_
+_ma_qa_metric_feature.ordinal_id
+_ma_qa_metric_feature.model_id
+_ma_qa_metric_feature.feature_id
+_ma_qa_metric_feature.metric_id
+_ma_qa_metric_feature.metric_value
+1 18 1 5 40.000
+#
+#
+loop_
+_ma_qa_metric_feature_pairwise.ordinal_id
+_ma_qa_metric_feature_pairwise.model_id
+_ma_qa_metric_feature_pairwise.feature_id_1
+_ma_qa_metric_feature_pairwise.feature_id_2
+_ma_qa_metric_feature_pairwise.metric_id
+_ma_qa_metric_feature_pairwise.metric_value
+1 18 1 2 6 50.000
 #
 """)
 
