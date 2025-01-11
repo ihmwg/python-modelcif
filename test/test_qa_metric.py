@@ -75,6 +75,27 @@ class Tests(unittest.TestCase):
         q = MyScore(asym.residue(2), asym.residue(3), 42)
         _ = repr(q)
 
+    def test_feature_metric(self):
+        """Test Feature MetricMode"""
+        class MyScore(modelcif.qa_metric.Feature, modelcif.qa_metric.Energy):
+            pass
+
+        e1 = modelcif.Entity('ACGT')
+        asym = modelcif.AsymUnit(e1, 'foo')
+        q = MyScore(asym.residue(2), 42)
+        _ = repr(q)
+
+    def test_feature_pairwise_metric(self):
+        """Test FeaturePairwise MetricMode"""
+        class MyScore(modelcif.qa_metric.FeaturePairwise,
+                      modelcif.qa_metric.Energy):
+            pass
+
+        e1 = modelcif.Entity('ACGT')
+        asym = modelcif.AsymUnit(e1, 'foo')
+        q = MyScore(asym.residue(2), asym.residue(3), 42)
+        _ = repr(q)
+
 
 if __name__ == '__main__':
     unittest.main()
