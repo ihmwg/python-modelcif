@@ -701,6 +701,9 @@ class Feature(object):
        :class:`modelcif.qa_metric.Feature` or
        :class:`modelcif.qa_metric.FeaturePairwise` objects.
     """
+    details = None
+    type = ihm.unknown
+
     def _get_entity_type(self, check=False):
         return ihm.unknown
 

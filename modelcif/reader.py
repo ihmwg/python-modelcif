@@ -70,6 +70,30 @@ class _TemplateIDMapper(IDMapper):
             obj.atoms = []
 
 
+class _FeatureIDMapper(IDMapper):
+    """Add extra handling to IDMapper for QA metric features"""
+
+    def _make_new_object(self, newcls=None):
+        if newcls is None:
+            # Make Feature base class (takes no args)
+            return self._cls()
+        else:
+            # Make subclass (takes one atoms/residues/asyms argument)
+            return newcls([])
+
+    def _update_old_object(self, obj, newcls=None):
+        super(_FeatureIDMapper, self)._update_old_object(obj, newcls)
+        # Add missing members if the base class was originally instantianted
+        if (newcls is modelcif.PolyResidueFeature
+                and not hasattr(obj, 'residues')):
+            obj.residues = []
+        elif newcls is modelcif.AtomFeature and not hasattr(obj, 'atoms'):
+            obj.atoms = []
+        elif (newcls is modelcif.EntityInstanceFeature
+              and not hasattr(obj, 'asym_units')):
+            obj.asym_units = []
+
+
 class _SystemReader(object):
     def __init__(self, model_class, starting_model_class, system=None):
         self.system = system or modelcif.System()
@@ -135,6 +159,7 @@ class _SystemReader(object):
 
         self.references = _ReferenceIDMapper(None, ihm.reference.Sequence)
         self.alignments = IDMapper(None, ihm.reference.Alignment)
+        self.features = _FeatureIDMapper(None, modelcif.Feature)
 
         self.assoc_by_id = {}
 
@@ -927,6 +952,44 @@ class _AssociatedArchiveHandler(Handler):
                 archive.files = files
 
 
+class _FeatureListHandler(Handler):
+    category = '_ma_feature_list'
+
+    def __call__(self, feature_id, details):
+        if details:
+            f = self.sysr.features.get_by_id(feature_id)
+            f.details = details
+
+
+class _AtomFeatureHandler(Handler):
+    category = '_ma_atom_feature'
+
+    def __call__(self, feature_id, atom_id):
+        f = self.sysr.features.get_by_id(feature_id, modelcif.AtomFeature)
+        f.atoms.append(atom_id)
+
+
+class _PolyResidueFeatureHandler(Handler):
+    category = '_ma_poly_residue_feature'
+
+    def __call__(self, feature_id, label_seq_id, label_asym_id):
+        f = self.sysr.features.get_by_id(
+            feature_id, modelcif.PolyResidueFeature)
+        asym = self.sysr.asym_units.get_by_id(label_asym_id)
+        seq_id = self.get_int(label_seq_id)
+        f.residues.append(asym.residue(seq_id))
+
+
+class _EntityInstanceFeatureHandler(Handler):
+    category = '_ma_entity_instance_feature'
+
+    def __call__(self, feature_id, label_asym_id):
+        f = self.sysr.features.get_by_id(
+            feature_id, modelcif.EntityInstanceFeature)
+        asym = self.sysr.asym_units.get_by_id(label_asym_id)
+        f.asym_units.append(asym)
+
+
 def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
     """Create and return a new class to represent a QA metric"""
     class QA(type_class, mode_class):
@@ -1004,6 +1067,30 @@ class _QAMetricPairwiseHandler(Handler):
                                              self.get_float(metric_value)))
 
 
+class _QAMetricFeatureHandler(Handler):
+    category = '_ma_qa_metric_feature'
+
+    def __call__(self, model_id, feature_id, metric_id, metric_value):
+        model = self.sysr.models.get_by_id(model_id)
+        feature = self.sysr.features.get_by_id(feature_id)
+        metric_class = self.sysr.qa_by_id[metric_id]
+        model.qa_metrics.append(metric_class(feature,
+                                             self.get_float(metric_value)))
+
+
+class _QAMetricFeaturePairwiseHandler(Handler):
+    category = '_ma_qa_metric_feature_pairwise'
+
+    def __call__(self, model_id, feature_id_1, feature_id_2, metric_id,
+                 metric_value):
+        model = self.sysr.models.get_by_id(model_id)
+        feature1 = self.sysr.features.get_by_id(feature_id_1)
+        feature2 = self.sysr.features.get_by_id(feature_id_2)
+        metric_class = self.sysr.qa_by_id[metric_id]
+        model.qa_metrics.append(metric_class(feature1, feature2,
+                                             self.get_float(metric_value)))
+
+
 class ModelCIFVariant(Variant):
     """Used to select typical PDBx/ModelCIF file input.
        See :func:`read` and :class:`ihm.reader.Variant`."""
@@ -1031,10 +1118,12 @@ class ModelCIFVariant(Variant):
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
         _ModelListHandler, _ModelGroupHandler, _ModelGroupLinkHandler,
-        _ProtocolHandler,
-        _AssociatedHandler, _AssociatedArchiveHandler, _QAMetricHandler,
-        _QAMetricGlobalHandler, _QAMetricLocalHandler,
-        _QAMetricPairwiseHandler]
+        _ProtocolHandler, _AssociatedHandler, _AssociatedArchiveHandler,
+        _FeatureListHandler, _AtomFeatureHandler,
+        _PolyResidueFeatureHandler, _EntityInstanceFeatureHandler,
+        _QAMetricHandler, _QAMetricGlobalHandler, _QAMetricLocalHandler,
+        _QAMetricPairwiseHandler, _QAMetricFeatureHandler,
+        _QAMetricFeaturePairwiseHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

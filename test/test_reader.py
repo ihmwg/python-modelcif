@@ -1129,6 +1129,156 @@ _ma_qa_metric_local_pairwise.metric_value
         self.assertEqual(q1.residue2.seq_id, 4)
         self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
 
+    def test_qa_metric_feature_handler(self):
+        """Test _QAMetricFeatureHandler"""
+        feat = """
+loop_
+_ma_atom_feature.ordinal_id
+_ma_atom_feature.feature_id
+_ma_atom_feature.atom_id
+1 1 1
+#
+loop_
+_ma_poly_residue_feature.ordinal_id
+_ma_poly_residue_feature.feature_id
+_ma_poly_residue_feature.label_asym_id
+_ma_poly_residue_feature.label_seq_id
+_ma_poly_residue_feature.label_comp_id
+1 2 Y 1 ALA
+#
+loop_
+_ma_entity_instance_feature.ordinal_id
+_ma_entity_instance_feature.feature_id
+_ma_entity_instance_feature.label_asym_id
+1 3 Y
+"""
+        qa = """
+loop_
+_ma_feature_list.feature_id
+_ma_feature_list.feature_type
+_ma_feature_list.entity_type
+_ma_feature_list.details
+1 atom other 'atom f'
+2 residue polymer prf
+3 'entity instance' polymer .
+#
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test local' 'some local score' 'normalized score' per-feature . .
+#
+loop_
+_ma_qa_metric_feature.ordinal_id
+_ma_qa_metric_feature.model_id
+_ma_qa_metric_feature.feature_id
+_ma_qa_metric_feature.metric_id
+_ma_qa_metric_feature.metric_value
+1 1 1 1 1.0
+2 1 2 1 2.0
+3 1 3 1 3.0
+"""
+        # Test both ways to make sure features still work if they are
+        # referenced by ID before their type is known
+        for cif in (feat + qa, qa + feat):
+            s, = modelcif.reader.read(StringIO(cif))
+            mg, = s.model_groups
+            m, = mg
+            q1, q2, q3 = m.qa_metrics
+            self.assertIsInstance(q1, modelcif.qa_metric.Feature)
+            self.assertIsInstance(q1, modelcif.qa_metric.NormalizedScore)
+            self.assertIsInstance(q1.feature, modelcif.AtomFeature)
+            self.assertEqual(q1.feature.details, 'atom f')
+            self.assertAlmostEqual(q1.value, 1.0, delta=1e-6)
+            self.assertIsInstance(q2.feature, modelcif.PolyResidueFeature)
+            self.assertEqual(len(q2.feature.residues), 1)
+            self.assertEqual(q2.feature.residues[0].seq_id, 1)
+            self.assertAlmostEqual(q2.value, 2.0, delta=1e-6)
+            self.assertIsInstance(q3.feature, modelcif.EntityInstanceFeature)
+            self.assertEqual(len(q3.feature.asym_units), 1)
+            self.assertAlmostEqual(q3.value, 3.0, delta=1e-6)
+
+    def test_qa_metric_feature_pairwise_handler(self):
+        """Test _QAMetricFeaturePairwiseHandler"""
+        feat = """
+loop_
+_ma_poly_residue_feature.ordinal_id
+_ma_poly_residue_feature.feature_id
+_ma_poly_residue_feature.label_asym_id
+_ma_poly_residue_feature.label_seq_id
+_ma_poly_residue_feature.label_comp_id
+1 1 Y 1 ALA
+2 2 Y 2 CYS
+"""
+        qa = """
+loop_
+_ma_feature_list.feature_id
+_ma_feature_list.feature_type
+_ma_feature_list.entity_type
+_ma_feature_list.details
+1 residue polymer .
+2 residue polymer .
+#
+loop_
+_ma_model_list.ordinal_id
+_ma_model_list.model_id
+_ma_model_list.model_group_id
+_ma_model_list.model_name
+_ma_model_list.model_group_name
+_ma_model_list.assembly_id
+_ma_model_list.data_id
+_ma_model_list.model_type
+_ma_model_list.model_type_other_details
+1 1 1 'Best scoring model' 'All models' 1 4 'Homology model' .
+#
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test local' 'some local score' 'normalized score' per-feature-pair . .
+#
+loop_
+_ma_qa_metric_feature_pairwise.ordinal_id
+_ma_qa_metric_feature_pairwise.model_id
+_ma_qa_metric_feature_pairwise.feature_id_1
+_ma_qa_metric_feature_pairwise.feature_id_2
+_ma_qa_metric_feature_pairwise.metric_id
+_ma_qa_metric_feature_pairwise.metric_value
+1 1 1 2 1 50.000
+"""
+        # Test both ways to make sure features still work if they are
+        # referenced by ID before their type is known
+        for cif in (feat + qa, qa + feat):
+            s, = modelcif.reader.read(StringIO(cif))
+            mg, = s.model_groups
+            m, = mg
+            q1, = m.qa_metrics
+            self.assertIsInstance(q1, modelcif.qa_metric.FeaturePairwise)
+            self.assertIsInstance(q1, modelcif.qa_metric.NormalizedScore)
+            self.assertIsInstance(q1.feature1, modelcif.PolyResidueFeature)
+            self.assertIsInstance(q1.feature2, modelcif.PolyResidueFeature)
+            self.assertAlmostEqual(q1.value, 50.0, delta=1e-6)
+
     def test_alignment_info_details_handler(self):
         """Test _AlignmentInfoHandler and _AlignmentDetailsHandler"""
         cif = """
