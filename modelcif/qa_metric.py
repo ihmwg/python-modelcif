@@ -25,7 +25,8 @@
 class MetricMode(object):
     """Base class for the mode of a quality metric.
        Use a derived class such as :class:`Global`, :class:`Local`,
-       or :class:`LocalPairwise` for declaring a new score.
+       :class:`LocalPairwise`, :class:`Feature`, or :class:`FeaturePairwise`
+       for declaring a new score.
     """
     name = property(lambda x: type(x).__name__,
                     doc="Short name of this score. By default it is just the "

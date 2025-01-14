@@ -747,7 +747,7 @@ class PolyResidueFeature(Feature):
     """Selection of one or more polymer residues from the system.
        See :class:`Feature` for more information.
 
-       :param sequence residues: A list of :class:`ihm.Residue` objects.
+       :param sequence residues: A list of :class:`Residue` objects.
        :param str details: Additional text describing this feature.
     """
     type = 'residue'
@@ -767,7 +767,7 @@ class EntityInstanceFeature(Feature):
     """Selection of one or more asyms from the system.
        See :class:`Feature` for more information.
 
-       :param sequence asym_units: A list of :class:`ihm.AsymUnit` objects.
+       :param sequence asym_units: A list of :class:`AsymUnit` objects.
        :param str details: Additional text describing this feature.
     """
     type = 'entity instance'
