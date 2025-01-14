@@ -695,7 +695,8 @@ A 9 4 THR 4 4 THR THR A .
                 organism_scientific='testorg',
                 sequence_version_date=date(1979, 11, 22),
                 sequence_crc64="A123B456C789D1E2",
-                sequence='ACGT')
+                sequence='ACGT',
+                is_primary=True)
         # Default alignment (entire sequence)
         ref2 = modelcif.reference.UniProt(code='c2', accession='a2',
                                           sequence='ACGT')
@@ -709,7 +710,8 @@ A 9 4 THR 4 4 THR THR A .
 
         # Explicit alignment with explicit db_end
         ref5 = modelcif.reference.UniProt(code='c5', accession='a5',
-                                          sequence='XXXACXXGTXXX')
+                                          sequence='XXXACXXGTXXX',
+                                          is_primary=False)
         ref5.alignments.append(modelcif.reference.Alignment(
             db_begin=4, db_end=5))
         ref5.alignments.append(modelcif.reference.Alignment(
@@ -736,11 +738,13 @@ _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
 _ma_target_ref_db_details.seq_db_sequence_version_date
 _ma_target_ref_db_details.seq_db_sequence_checksum
+_ma_target_ref_db_details.is_primary
 1 UNP . testcode testacc testiso 4 8 1234 testorg 1979-11-22 A123B456C789D1E2
-1 UNP . c2 a2 . 1 4 . . . .
-1 Other 'my custom ref' c3 a3 ? 1 4 . . . .
-1 UNP . c4 a4 . 3 6 . . . .
-1 UNP . c5 a5 . 4 9 . . . .
+YES
+1 UNP . c2 a2 . 1 4 . . . . .
+1 Other 'my custom ref' c3 a3 ? 1 4 . . . . .
+1 UNP . c4 a4 . 3 6 . . . . .
+1 UNP . c5 a5 . 4 9 . . . . NO
 #
 """)
 

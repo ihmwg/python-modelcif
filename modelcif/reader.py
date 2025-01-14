@@ -451,7 +451,8 @@ class _TargetRefDBHandler(Handler):
     def __call__(self, target_entity_id, db_name, db_name_other_details,
                  db_code, db_accession, seq_db_isoform, seq_db_align_begin,
                  seq_db_align_end, ncbi_taxonomy_id, organism_scientific,
-                 seq_db_sequence_version_date, seq_db_sequence_checksum):
+                 seq_db_sequence_version_date, seq_db_sequence_checksum,
+                 is_primary):
         e = self.sysr.entities.get_by_id(target_entity_id)
         typ = self.type_map.get(db_name, db_name_other_details)
         with warnings.catch_warnings():
@@ -464,7 +465,8 @@ class _TargetRefDBHandler(Handler):
                       organism_scientific=organism_scientific,
                       sequence_version_date=_get_date(
                           seq_db_sequence_version_date),
-                      sequence_crc64=seq_db_sequence_checksum)
+                      sequence_crc64=seq_db_sequence_checksum,
+                      is_primary=self.get_bool(is_primary))
         e.references.append(ref)
 
     def finalize(self):

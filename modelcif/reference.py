@@ -41,6 +41,8 @@ class TargetReference(ihm.reference.Sequence):
               one-letter codes. If omitted, will default to the canonical
               sequence of the associated :class:`~modelcif.Entity`.
        :param str details: Longer text describing the sequence.
+       :param bool is_primary: True iff this is the main input used in the
+              modeling.
     """
 
     name = 'Other'
@@ -48,7 +50,8 @@ class TargetReference(ihm.reference.Sequence):
     def __init__(self, code, accession, align_begin=None, align_end=None,
                  isoform=None, ncbi_taxonomy_id=None,
                  organism_scientific=None, sequence_version_date=None,
-                 sequence_crc64=None, sequence=None, details=None):
+                 sequence_crc64=None, sequence=None, details=None,
+                 is_primary=None):
         super(TargetReference, self).__init__(
             db_name=self.name, db_code=code, accession=accession,
             sequence=sequence, details=details)
@@ -72,6 +75,7 @@ class TargetReference(ihm.reference.Sequence):
         #: :class:`Alignment` objects. If none are provided, a simple 1:1
         #: alignment is assumed.
         self.alignments = []
+        self.is_primary = is_primary
 
     code = property(lambda self: self.db_code)
 

@@ -168,11 +168,12 @@ _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
 _ma_target_ref_db_details.seq_db_sequence_version_date
 _ma_target_ref_db_details.seq_db_sequence_checksum
+_ma_target_ref_db_details.is_primary
 1 UNP . MED1_YEAST Q12321 test_iso 1 10 test_tax test_org 1996-11-01
-637FEA3E78D915BC
-1 Other foo . . ? 1 10 . . . .
-1 other bar . . ? 1 10 . . . .
-1 MIS baz . . ? 1 10 . . . .
+637FEA3E78D915BC YES
+1 Other foo . . ? 1 10 . . . . NO
+1 other bar . . ? 1 10 . . . . .
+1 MIS baz . . ? 1 10 . . . . .
 """
         s, = modelcif.reader.read(StringIO(cif))
         e, = s.entities
@@ -188,11 +189,14 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         self.assertEqual(r1.sequence_version_date, date(1996, 11, 1))
         self.assertIsNone(r1.sequence)
         self.assertIsNone(r1.details)
+        self.assertTrue(r1.is_primary)
         self.assertEqual(r1.alignments, [])
         self.assertEqual(r2.name, 'Other')
+        self.assertFalse(r2.is_primary)
         self.assertEqual(r2.other_details, 'foo')
         self.assertEqual(r3.name, 'Other')
         self.assertEqual(r3.other_details, 'bar')
+        self.assertIsNone(r3.is_primary)
         self.assertEqual(r4.name, 'MIS')
         self.assertIsNone(r4.other_details)  # should be ignored
 

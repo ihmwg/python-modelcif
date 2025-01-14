@@ -112,7 +112,8 @@ class _TargetRefDBDumper(Dumper):
                  "seq_db_align_begin", "seq_db_align_end",
                  "ncbi_taxonomy_id", "organism_scientific",
                  "seq_db_sequence_version_date",
-                 "seq_db_sequence_checksum"]) as lp:
+                 "seq_db_sequence_checksum",
+                 "is_primary"]) as lp:
             for e in system.entities:
                 for r in e.references:
                     if r.align_begin is None:
@@ -139,7 +140,8 @@ class _TargetRefDBDumper(Dumper):
                              seq_db_sequence_version_date=date.isoformat(
                                  r.sequence_version_date)
                              if r.sequence_version_date else None,
-                             seq_db_sequence_checksum=r.sequence_crc64)
+                             seq_db_sequence_checksum=r.sequence_crc64,
+                             is_primary=r.is_primary)
 
 
 class _EntityNonPolyDumper(Dumper):
