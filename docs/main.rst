@@ -55,6 +55,9 @@ The :mod:`modelcif` Python module
 .. autoclass:: CustomTemplate
    :members:
 
+.. autoclass:: TemplateAtom
+   :members:
+
 .. autoclass:: ReferenceDatabase
    :members:
 
