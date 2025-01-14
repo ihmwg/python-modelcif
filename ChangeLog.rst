@@ -1,5 +1,5 @@
-HEAD
-====
+1.3 - 2025-01-14
+================
   - The new :class:`modelcif.CustomTemplate` class allows for custom templates
     (that have not been deposited in a database such as PDB) to be referenced,
     together with their atomic coordinates (#1).
