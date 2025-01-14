@@ -1,3 +1,27 @@
+HEAD
+====
+  - The new :class:`modelcif.CustomTemplate` class allows for custom templates
+    (that have not been deposited in a database such as PDB) to be referenced,
+    together with their atomic coordinates (#1).
+  - Model quality scores can now be defined that act on single features or
+    pairs of features using the :class:`modelcif.qa_metric.Feature` and
+    :class:`modelcif.qa_metric.FeaturePairwise` classes, respectively.
+    Features can be defined as groups of atoms, residues, or asyms (#38).
+  - The :class:`modelcif.associated.QAMetricsFile` class should now be used
+    to reference files that contain model quality scores. The old name
+    (LocalPairwiseQAScoresFile) is deprecated. This allows for all types of
+    QA scores, not just local pairwise scores, to be stored in a separate file.
+  - Sanity checks when writing out a file can now be disabled if desired,
+    using the new ``check`` argument to :func:`modelcif.dumper.write`.
+  - :class:`modelcif.reference.TargetReference` now takes an ``is_primary``
+    argument which can be used to denote the most pertinent sequence
+    database reference.
+  - Information on model groups (:class:`modelcif.model.ModelGroup`) is now
+    written to the new ``ma_model_group`` and ``ma_model_group_link`` mmCIF
+    tables, instead of ``ma_model_list``, to match the latest ModelCIF
+    dictionary. Old-style information in ``ma_model_list`` will still be
+    used when reading a file if these new tables are missing.
+
 1.2 - 2024-10-23
 ================
   - Data that have been split over multiple mmCIF or BinaryCIF files can now
