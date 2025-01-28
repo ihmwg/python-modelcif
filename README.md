@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/ihmwg/python-modelcif/branch/main/graph/badge.svg)](https://codecov.io/gh/ihmwg/python-modelcif)
 
 This is a Python package to assist in handling [mmCIF](http://mmcif.wwpdb.org/)
-and [BinaryCIF](https://github.com/dsehnal/BinaryCIF) files compliant with the
+and [BinaryCIF](https://github.com/molstar/BinaryCIF) files compliant with the
 [ModelCIF](https://mmcif.wwpdb.org/dictionaries/mmcif_ma.dic/Index/)
 extension. It works with Python 2.7 or Python 3.
 
@@ -46,7 +46,7 @@ python setup.py build
 python setup.py install
 ```
 
-If you want to read or write [BinaryCIF](https://github.com/dsehnal/BinaryCIF)
+If you want to read or write [BinaryCIF](https://github.com/molstar/BinaryCIF)
 files, you will also need the
 Python [msgpack](https://github.com/msgpack/msgpack-python) package.
 
