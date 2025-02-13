@@ -22,7 +22,7 @@
 """
 
 
-class MetricMode(object):
+class MetricMode:
     """Base class for the mode of a quality metric.
        Use a derived class such as :class:`Global`, :class:`Local`,
        :class:`LocalPairwise`, :class:`Feature`, or :class:`FeaturePairwise`
@@ -140,7 +140,7 @@ class FeaturePairwise(MetricMode):
     _all_features = property(lambda self: (self.feature1, self.feature2))
 
 
-class MetricType(object):
+class MetricType:
     """Base class for the type of a quality metric.
        Generally a derived class such as :class:`ZScore` or :class:`Distance`
        is used to declare a new score, but a custom type can also be declared

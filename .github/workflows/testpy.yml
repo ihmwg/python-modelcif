@@ -11,12 +11,8 @@ jobs:
         os: [ubuntu-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         include:
-        - os: ubuntu-20.04
-          python-version: '3.6'
         - os: macos-latest
           python-version: '3.10'
-    env:
-      PY2: ${{ startsWith(matrix.python-version, 2) && 'on' || 'off' }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -33,11 +29,7 @@ jobs:
     - name: Test
       run: |
         pytest --cov=modelcif --cov-branch --cov-report=xml --cov-append -v .
-        if [ "${{ env.PY2 }}" == "on" ]; then
-          flake8 --ignore E402,W503,W504 --exclude util/make-mmcif.py,examples/validate_mmcif.py
-        else
-          flake8 --ignore E402,W503,W504
-        fi
+        flake8 --ignore E402,W503,W504
     - uses: codecov/codecov-action@v4
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -2,7 +2,7 @@
 """
 
 
-class Step(object):
+class Step:
     """A single step in a :class:`Protocol`.
 
        This class describes a generic step in a modeling protocol. In most
@@ -53,7 +53,7 @@ class ModelSelectionStep(Step):
     method_type = "model selection"
 
 
-class Protocol(object):
+class Protocol:
     """A modeling protocol.
        Each protocol consists of a number of protocol steps."""
     def __init__(self):

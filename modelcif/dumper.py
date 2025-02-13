@@ -887,7 +887,7 @@ class _QAMetricDumper(Dumper):
                              metric_id=m._id, metric_value=m.value)
 
 
-class _CopyWriter(object):
+class _CopyWriter:
     """Context manager to write loop or category to two mmCIF/BinaryCIF
        files"""
     def __init__(self, w1, w2):
@@ -906,7 +906,7 @@ class _CopyWriter(object):
         self.w2.__exit__(exc_type, exc_value, traceback)
 
 
-class _SystemWriter(object):
+class _SystemWriter:
     """Utility class which normally just passes through to the default
        ``base_writer``, but outputs selected categories to associated files."""
     def __init__(self, base_writer, category_map, copy_category_map):

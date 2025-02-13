@@ -94,7 +94,7 @@ class _FeatureIDMapper(IDMapper):
             obj.asym_units = []
 
 
-class _SystemReader(object):
+class _SystemReader:
     def __init__(self, model_class, starting_model_class, system=None):
         self.system = system or modelcif.System()
 
@@ -393,7 +393,7 @@ class _DataRefDBHandler(Handler):
         d._data_id = data_id
 
 
-class _EnumerationMapper(object):
+class _EnumerationMapper:
     """Map an mmCIF enumerated value to the corresponding Python class"""
     def __init__(self, module, base_class, attr="name"):
         self._base_class = base_class

@@ -13,7 +13,7 @@
 import modelcif.data
 
 
-class Identity(object):
+class Identity:
     """Percent sequence identity between the template sequence and the target
        sequence being modeled.
        Use the correct subclass that corresponds to the denominator used
@@ -59,7 +59,7 @@ class AlignedPositionsIdentity(Identity):
     denominator = "Number of aligned positions (including gaps)"
 
 
-class Pair(object):
+class Pair:
     """A single pairwise alignment between a single target and template chain.
        See :class:`AlignmentMode`. An alignment consists of one or more of
        these pairs.
@@ -106,7 +106,7 @@ class Global(AlignmentMode):
     mode = "global"
 
 
-class AlignmentType(object):
+class AlignmentType:
     """Base class for all alignment types. Actual alignments should derive
        from both a subclass of this class (e.g. :class:`Pairwise`) and a
        subclass of :class:`AlignmentMode`.
@@ -121,7 +121,7 @@ class Pairwise(AlignmentType):
     other_details = None
 
 
-class Score(object):
+class Score:
     """Base class for a quality score for a given target-template alignment.
        Usually a derived class such as :class:`BLASTEValue` is used, and
        passed to :class:`Pair` objects.

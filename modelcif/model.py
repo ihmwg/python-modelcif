@@ -1,4 +1,3 @@
-import sys
 import ihm.representation
 from ihm.model import Atom, ModelGroup  # noqa: F401
 import modelcif.data
@@ -6,8 +5,7 @@ from ihm.util import _check_residue_range
 
 
 # Provide ma-specific docs for Atom
-if sys.version_info[0] >= 3:
-    Atom.__doc__ = """Coordinates of part of the model represented by an atom.
+Atom.__doc__ = """Coordinates of part of the model represented by an atom.
 
 See :meth:`Model.get_atoms` for more details.
 
@@ -27,8 +25,7 @@ See :meth:`Model.get_atoms` for more details.
 """
 
 # Provide ma-specific docs for ModelGroup
-if sys.version_info[0] >= 3:
-    ModelGroup.__doc__ = """A set of related models. See :class:`Model`.
+ModelGroup.__doc__ = """A set of related models. See :class:`Model`.
 It is implemented as a simple list of the models.
 
 These objects are typically stored directly in the system; see
@@ -121,7 +118,7 @@ class AbInitioModel(Model):
     other_details = None
 
 
-class NotModeledResidueRange(object):
+class NotModeledResidueRange:
     """A range of residues that were explicitly not modeled.
        See :attr:`Model.not_modeled_residue_ranges`.
        These ranges are not explicitly stored in the mmCIF file,

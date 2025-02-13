@@ -7,7 +7,7 @@ import posixpath
 import warnings
 
 
-class Repository(object):
+class Repository:
     """An online location where associated files can be found.
        These objects are typically added to
        :attr:`modelcif.System.repositories`.
@@ -28,7 +28,7 @@ class Repository(object):
         return posixpath.join(self.url_root or '', f.path)
 
 
-class File(object):
+class File:
     """A single associated file. These objects can be added to a
        :class:`Repository` or a :class:`ZipFile`.
 

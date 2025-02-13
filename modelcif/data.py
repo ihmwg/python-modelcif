@@ -4,7 +4,7 @@
 """
 
 
-class Data(object):
+class Data:
     """Some part of the system that is input or output by part of
        the modeling protocol, and/or stored in a file.
 

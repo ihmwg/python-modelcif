@@ -13,7 +13,7 @@ BuildArch:     noarch
 
 %description
 This is a Python package to assist in handling mmCIF and BinaryCIF files
-compliant with the ModelCIF extension. It works with Python 2.7 or Python 3.
+compliant with the ModelCIF extension. It works with Python 3.6 or later.
 
 %prep
 %setup -n modelcif-%{version}

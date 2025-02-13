@@ -1,7 +1,6 @@
 # This example demonstrates the use of the Python IHM library's validator
 # to validate a user-provided input mmCIF file.
-# This example requires Python 3. See validate_modbase.py for a more
-# detailed example that also works with Python 2.
+# See also validate_modbase.py for a more detailed example.
 
 import sys
 import ihm.dictionary

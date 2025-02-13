@@ -9,7 +9,7 @@
 This is a Python package to assist in handling [mmCIF](http://mmcif.wwpdb.org/)
 and [BinaryCIF](https://github.com/molstar/BinaryCIF) files compliant with the
 [ModelCIF](https://mmcif.wwpdb.org/dictionaries/mmcif_ma.dic/Index/)
-extension. It works with Python 2.7 or Python 3.
+extension. It works with Python 3.6 or later.
 
 Please [see the documentation](https://python-modelcif.readthedocs.org/) or some
 [worked examples](https://github.com/ihmwg/python-modelcif/tree/main/examples)

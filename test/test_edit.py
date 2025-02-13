@@ -1,11 +1,7 @@
 import utils
 import os
 import unittest
-import sys
-if sys.version_info[0] >= 3:
-    from io import StringIO
-else:
-    from io import BytesIO as StringIO
+import io
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
@@ -16,7 +12,7 @@ import modelcif.dumper
 class Tests(unittest.TestCase):
     def test_model_with_assembly(self):
         """Test read of Model with Assembly followed by write"""
-        sin = StringIO("""
+        sin = io.StringIO("""
 loop_
 _entity.id
 _entity.type
@@ -83,12 +79,12 @@ _atom_site.pdbx_PDB_model_num
 ATOM 1 C CA . ALA 1 1 ? A 1.000 2.000 3.000 . 1 A . 1
 """)
         s, = modelcif.reader.read(sin)
-        sout = StringIO()
+        sout = io.StringIO()
         modelcif.dumper.write(sout, [s])
 
     def test_model_without_assembly(self):
         """Test read of Model without Assembly followed by write"""
-        sin = StringIO("""
+        sin = io.StringIO("""
 loop_
 _entity.id
 _entity.type
@@ -146,7 +142,7 @@ _atom_site.pdbx_PDB_model_num
 ATOM 1 C CA . ALA 1 1 ? A 1.000 2.000 3.000 . 1 A . 1
 """)
         s, = modelcif.reader.read(sin)
-        sout = StringIO()
+        sout = io.StringIO()
         modelcif.dumper.write(sout, [s])
 
 

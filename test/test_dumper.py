@@ -3,17 +3,11 @@ import warnings
 import utils
 import os
 import unittest
-import sys
-if sys.version_info[0] >= 3:
-    from io import StringIO
-else:
-    from io import BytesIO as StringIO
-msgpack = None
-if sys.version_info[0] >= 3:
-    try:
-        import msgpack
-    except ImportError:
-        pass
+from io import StringIO
+try:
+    import msgpack
+except ImportError:
+    msgpack = None
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
@@ -79,7 +73,7 @@ class Tests(unittest.TestCase):
 
     def test_software_group_dumper(self):
         """Test SoftwareGroupDumper"""
-        class MockObject(object):
+        class MockObject:
             pass
         p1 = modelcif.SoftwareParameter(name='foo', value=42)
         p2 = modelcif.SoftwareParameter(name='bar', value=True)
@@ -268,7 +262,7 @@ _ma_data_ref_db.release_date
             version=1, location='http://test.org')
         s1._group_id = 1
 
-        class MockObject(object):
+        class MockObject:
             pass
 
         class CustomMetricType(modelcif.qa_metric.MetricType):
@@ -408,7 +402,7 @@ _ma_qa_metric_feature_pairwise.metric_value
         """Test FeatureDumper"""
         system = modelcif.System()
 
-        class MockObject(object):
+        class MockObject:
             pass
 
         class TestScore(modelcif.qa_metric.Feature, modelcif.qa_metric.ZScore):
@@ -503,7 +497,7 @@ _ma_entity_instance_feature.label_asym_id
 
     def test_protocol_dumper(self):
         """Test ProtocolDumper"""
-        class MockObject(object):
+        class MockObject:
             pass
         indat = MockObject()
         indat._data_group_id = 1
@@ -1337,7 +1331,7 @@ _ma_associated_archive_file_details.data_id
 
     def test_system_writer(self):
         """Test _SystemWriter utility class"""
-        class BaseWriter(object):
+        class BaseWriter:
             def flush(self):
                 return 'flush called'
 
@@ -1447,7 +1441,7 @@ THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120 'CCD Core'
 
     def test_chem_comp_descriptor_dumper(self):
         """Test ChemCompDescriptorDumper"""
-        class MockObject(object):
+        class MockObject:
             pass
 
         system = modelcif.System()

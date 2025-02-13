@@ -103,7 +103,7 @@ class UniProt(TargetReference):
     other_details = None
 
 
-class TemplateReference(object):
+class TemplateReference:
     """Point to the structure of a :class:`modelcif.Template` in a structure
        database.
 

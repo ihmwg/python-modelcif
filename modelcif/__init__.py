@@ -4,12 +4,11 @@ import ihm
 from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
-import sys
 
 __version__ = '1.3'
 
 
-class System(object):
+class System:
     """Top-level class representing a complete modeled system.
 
        :param str title: Longer text description of the system.
@@ -279,8 +278,7 @@ class System(object):
 
 
 # Provide ma-specific docs for Entity
-if sys.version_info[0] >= 3:
-    Entity.__doc__ = """Represent a unique molecular sequence.
+Entity.__doc__ = """Represent a unique molecular sequence.
 
 This can be used both for template sequences (in which case the Entity is
 then used in a :class:`Template` object) or for target (model) sequences
@@ -311,8 +309,7 @@ See `ihm.Entity <https://python-ihm.readthedocs.io/en/latest/main.html#ihm.Entit
 
 
 # Provide ma-specific docs for Software
-if sys.version_info[0] >= 3:
-    Software.__doc__ = """Software used as part of the modeling protocol.
+Software.__doc__ = """Software used as part of the modeling protocol.
 
 :param str name: The name of the software.
 :param str classification: The major function of the software, for
@@ -334,8 +331,7 @@ See also :attr:`System.software`.
 """
 
 # Provide ma-specific docs for Assembly
-if sys.version_info[0] >= 3:
-    Assembly.__doc__ = """A collection of parts of the system that were modeled
+Assembly.__doc__ = """A collection of parts of the system that were modeled
 together.
 
 :param sequence elements: Initial set of parts of the system.
@@ -354,7 +350,7 @@ all models have the same composition.
 """
 
 
-class Database(object):
+class Database:
     """Information about a System that is part of an official database.
 
        If a :class:`System` is part of an official database (e.g. SwissModel,
@@ -396,7 +392,7 @@ class SoftwareGroup(list):
         self.parameters = [] if parameters is None else parameters
 
 
-class SoftwareWithParameters(object):
+class SoftwareWithParameters:
     """A piece of software and the parameters with which it was used.
 
        See :class:`SoftwareGroup`.
@@ -420,7 +416,7 @@ class SoftwareWithParameters(object):
     citation = property(lambda self: self.software.citation)
 
 
-class SoftwareParameter(object):
+class SoftwareParameter:
     """A single parameter given to software used in modeling.
 
        See :class:`SoftwareWithParameters`, :class:`SoftwareGroup`.
@@ -440,7 +436,7 @@ class SoftwareParameter(object):
                 % (self.name, self.value))
 
 
-class Transformation(object):
+class Transformation:
     """Rotation and translation applied to an object.
 
        These objects are generally used to record the transformation that
@@ -468,7 +464,7 @@ class Transformation(object):
         return cls._identity_obj
 
 
-class TemplateSegment(object):
+class TemplateSegment:
     """An aligned part of a template (see :class:`modelcif.alignment.Pair`).
 
        Usually these objects are created from
@@ -588,7 +584,7 @@ class CustomTemplate(_TemplateBase):
         self.atoms = []
 
 
-class TemplateAtom(object):
+class TemplateAtom:
     """Coordinates of a single atom in a custom template.
 
        This provides the coordinates for a template that has not been
@@ -687,7 +683,7 @@ class ReferenceDatabase(modelcif.data.Data):
         self.url, self.version, self.release_date = url, version, release_date
 
 
-class Feature(object):
+class Feature:
     """Base class for selecting parts of the system.
        This class should not be used itself; instead,
        see :class:`AtomFeature`, :class:`PolyResidueFeature`,

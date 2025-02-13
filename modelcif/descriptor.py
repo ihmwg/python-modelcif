@@ -8,7 +8,7 @@
 """
 
 
-class Descriptor(object):
+class Descriptor:
     """Base class for all descriptors.
        This class is generally not used directly; instead, a subclass
        such as :class:`IUPACName` or :class:`InChI` is employed.
