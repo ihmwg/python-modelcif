@@ -449,24 +449,25 @@ class _TargetRefDBHandler(Handler):
                                            modelcif.reference.TargetReference)
 
     def __call__(self, target_entity_id, db_name, db_name_other_details,
-                 db_code, db_accession, seq_db_isoform, seq_db_align_begin,
-                 seq_db_align_end, ncbi_taxonomy_id, organism_scientific,
+                 db_code, db_accession, seq_db_isoform,
+                 seq_db_align_begin: int, seq_db_align_end: int,
+                 ncbi_taxonomy_id, organism_scientific,
                  seq_db_sequence_version_date, seq_db_sequence_checksum,
-                 is_primary):
+                 is_primary: bool):
         e = self.sysr.entities.get_by_id(target_entity_id)
         typ = self.type_map.get(db_name, db_name_other_details)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             ref = typ(code=db_code, accession=db_accession,
-                      align_begin=self.get_int(seq_db_align_begin),
-                      align_end=self.get_int(seq_db_align_end),
+                      align_begin=seq_db_align_begin,
+                      align_end=seq_db_align_end,
                       isoform=seq_db_isoform,
                       ncbi_taxonomy_id=ncbi_taxonomy_id,
                       organism_scientific=organism_scientific,
                       sequence_version_date=_get_date(
                           seq_db_sequence_version_date),
                       sequence_crc64=seq_db_sequence_checksum,
-                      is_primary=self.get_bool(is_primary))
+                      is_primary=is_primary)
         e.references.append(ref)
 
     def finalize(self):
@@ -520,7 +521,7 @@ class _TemplateDetailsHandler(Handler):
 
     def __call__(self, template_id, template_trans_matrix_id,
                  template_data_id, target_asym_id, template_label_asym_id,
-                 template_label_entity_id, template_model_num,
+                 template_label_entity_id, template_model_num: int,
                  template_auth_asym_id, template_origin):
         newcls = None
         if template_origin and template_origin.lower() == 'customized':
@@ -533,7 +534,7 @@ class _TemplateDetailsHandler(Handler):
         template.entity = ihm.Entity([])
         template.entity_id = template_label_entity_id
         template.asym_id = template_label_asym_id
-        template.model_num = self.get_int(template_model_num)
+        template.model_num = template_model_num
         template._strand_id = template_auth_asym_id
         self.sysr.data_by_id[template_data_id] = template
         template._data_id = template_data_id
@@ -582,22 +583,19 @@ class _TemplateCoordHandler(Handler):
     category = '_ma_template_coord'
 
     def __call__(self, template_id, group_pdb, type_symbol, label_atom_id,
-                 label_seq_id, auth_seq_id, auth_atom_id, auth_comp_id,
-                 cartn_x, cartn_y, cartn_z, occupancy, b_iso_or_equiv,
-                 formal_charge):
+                 label_seq_id: int, auth_seq_id: int, auth_atom_id,
+                 auth_comp_id, cartn_x: float, cartn_y: float, cartn_z: float,
+                 occupancy: float, b_iso_or_equiv: float,
+                 formal_charge: float):
         template = self.sysr.templates.get_by_id(template_id,
                                                  modelcif.CustomTemplate)
         atom = modelcif.TemplateAtom(
             het=group_pdb is not None and group_pdb != 'ATOM',
             type_symbol=type_symbol, atom_id=label_atom_id,
-            seq_id=self.get_int(label_seq_id),
-            auth_seq_id=self.get_int(auth_seq_id),
-            auth_atom_id=auth_atom_id,
-            auth_comp_id=auth_comp_id,
-            x=float(cartn_x), y=float(cartn_y), z=float(cartn_z),
-            occupancy=self.get_float(occupancy),
-            biso=self.get_float(b_iso_or_equiv),
-            charge=self.get_float(formal_charge))
+            seq_id=label_seq_id, auth_seq_id=auth_seq_id,
+            auth_atom_id=auth_atom_id, auth_comp_id=auth_comp_id,
+            x=cartn_x, y=cartn_y, z=cartn_z, occupancy=occupancy,
+            biso=b_iso_or_equiv, charge=formal_charge)
         template.atoms.append(atom)
 
 
@@ -694,15 +692,16 @@ class _AlignmentDetailsHandler(Handler):
             modelcif.alignment, modelcif.alignment.Score, attr='type')
 
     def __call__(self, alignment_id, template_segment_id, target_asym_id,
-                 score_type, score_type_other_details, score_value,
-                 percent_sequence_identity, sequence_identity_denominator,
+                 score_type, score_type_other_details, score_value: float,
+                 percent_sequence_identity: float,
+                 sequence_identity_denominator,
                  sequence_identity_denominator_other_details):
         score_class = self._score_map.get(score_type, score_type_other_details)
-        score = score_class(self.get_float(score_value))
+        score = score_class(score_value)
         ident_class = self._ident_map.get(
             sequence_identity_denominator,
             sequence_identity_denominator_other_details)
-        ident = ident_class(self.get_float(percent_sequence_identity))
+        ident = ident_class(percent_sequence_identity)
         template = self.sysr.template_segments.get_by_id(template_segment_id)
         asym = self.sysr.asym_units.get_by_id(target_asym_id)
         # We don't know the target segment yet (will be filled in at finalize
@@ -721,10 +720,9 @@ class _TargetTemplatePolyMappingHandler(Handler):
     category = '_ma_target_template_poly_mapping'
 
     def __call__(self, template_segment_id, target_asym_id,
-                 target_seq_id_begin, target_seq_id_end):
+                 target_seq_id_begin: int, target_seq_id_end: int):
         k = (template_segment_id, target_asym_id)
-        rng = (self.get_int(target_seq_id_begin),
-               self.get_int(target_seq_id_end))
+        rng = (target_seq_id_begin, target_seq_id_end)
         # Remember for now and we'll add in finalize() of AlignmentInfoHandler
         self.sysr.target_template_poly_mapping[k] = rng
 
@@ -974,12 +972,11 @@ class _AtomFeatureHandler(Handler):
 class _PolyResidueFeatureHandler(Handler):
     category = '_ma_poly_residue_feature'
 
-    def __call__(self, feature_id, label_seq_id, label_asym_id):
+    def __call__(self, feature_id, label_seq_id: int, label_asym_id):
         f = self.sysr.features.get_by_id(
             feature_id, modelcif.PolyResidueFeature)
         asym = self.sysr.asym_units.get_by_id(label_asym_id)
-        seq_id = self.get_int(label_seq_id)
-        f.residues.append(asym.residue(seq_id))
+        f.residues.append(asym.residue(label_seq_id))
 
 
 class _EntityInstanceFeatureHandler(Handler):
@@ -1032,65 +1029,59 @@ class _QAMetricHandler(Handler):
 class _QAMetricGlobalHandler(Handler):
     category = '_ma_qa_metric_global'
 
-    def __call__(self, model_id, metric_id, metric_value):
+    def __call__(self, model_id, metric_id, metric_value: float):
         model = self.sysr.models.get_by_id(model_id)
         metric_class = self.sysr.qa_by_id[metric_id]
-        model.qa_metrics.append(metric_class(self.get_float(metric_value)))
+        model.qa_metrics.append(metric_class(metric_value))
 
 
 class _QAMetricLocalHandler(Handler):
     category = '_ma_qa_metric_local'
 
-    def __call__(self, model_id, label_asym_id, label_seq_id, metric_id,
-                 metric_value):
+    def __call__(self, model_id, label_asym_id, label_seq_id: int, metric_id,
+                 metric_value: float):
         model = self.sysr.models.get_by_id(model_id)
         asym = self.sysr.asym_units.get_by_id(label_asym_id)
-        seq_id = self.get_int(label_seq_id)
-        residue = asym.residue(seq_id)
+        residue = asym.residue(label_seq_id)
         metric_class = self.sysr.qa_by_id[metric_id]
-        model.qa_metrics.append(metric_class(residue,
-                                             self.get_float(metric_value)))
+        model.qa_metrics.append(metric_class(residue, metric_value))
 
 
 class _QAMetricPairwiseHandler(Handler):
     category = '_ma_qa_metric_local_pairwise'
 
-    def __call__(self, model_id, label_asym_id_1, label_seq_id_1,
-                 label_asym_id_2, label_seq_id_2, metric_id, metric_value):
+    def __call__(self, model_id, label_asym_id_1, label_seq_id_1: int,
+                 label_asym_id_2, label_seq_id_2: int, metric_id,
+                 metric_value: float):
         model = self.sysr.models.get_by_id(model_id)
         asym1 = self.sysr.asym_units.get_by_id(label_asym_id_1)
-        seq_id1 = self.get_int(label_seq_id_1)
-        residue1 = asym1.residue(seq_id1)
+        residue1 = asym1.residue(label_seq_id_1)
         asym2 = self.sysr.asym_units.get_by_id(label_asym_id_2)
-        seq_id2 = self.get_int(label_seq_id_2)
-        residue2 = asym2.residue(seq_id2)
+        residue2 = asym2.residue(label_seq_id_2)
         metric_class = self.sysr.qa_by_id[metric_id]
-        model.qa_metrics.append(metric_class(residue1, residue2,
-                                             self.get_float(metric_value)))
+        model.qa_metrics.append(metric_class(residue1, residue2, metric_value))
 
 
 class _QAMetricFeatureHandler(Handler):
     category = '_ma_qa_metric_feature'
 
-    def __call__(self, model_id, feature_id, metric_id, metric_value):
+    def __call__(self, model_id, feature_id, metric_id, metric_value: float):
         model = self.sysr.models.get_by_id(model_id)
         feature = self.sysr.features.get_by_id(feature_id)
         metric_class = self.sysr.qa_by_id[metric_id]
-        model.qa_metrics.append(metric_class(feature,
-                                             self.get_float(metric_value)))
+        model.qa_metrics.append(metric_class(feature, metric_value))
 
 
 class _QAMetricFeaturePairwiseHandler(Handler):
     category = '_ma_qa_metric_feature_pairwise'
 
     def __call__(self, model_id, feature_id_1, feature_id_2, metric_id,
-                 metric_value):
+                 metric_value: float):
         model = self.sysr.models.get_by_id(model_id)
         feature1 = self.sysr.features.get_by_id(feature_id_1)
         feature2 = self.sysr.features.get_by_id(feature_id_2)
         metric_class = self.sysr.qa_by_id[metric_id]
-        model.qa_metrics.append(metric_class(feature1, feature2,
-                                             self.get_float(metric_value)))
+        model.qa_metrics.append(metric_class(feature1, feature2, metric_value))
 
 
 class ModelCIFVariant(Variant):
