@@ -10,6 +10,9 @@ Source:        modelcif-%{version}.tar.gz
 BuildRequires: python3-devel, python3-setuptools, python3-ihm >= 2.2
 Requires:      python3-ihm >= 2.2
 BuildArch:     noarch
+%if 0%{?fedora} >= 42
+BuildRequires: python3-pytest
+%endif
 
 %description
 This is a Python package to assist in handling mmCIF and BinaryCIF files
@@ -22,7 +25,11 @@ compliant with the ModelCIF extension. It works with Python 3.6 or later.
 %{__python3} setup.py install --root=${RPM_BUILD_ROOT} --record=INSTALLED_FILES
 
 %check
+%if 0%{?fedora} >= 42
+%pytest modelcif/test.py
+%else
 %{__python3} setup.py test
+%endif
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
