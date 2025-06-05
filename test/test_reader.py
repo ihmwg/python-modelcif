@@ -930,24 +930,31 @@ _ma_protocol_step.software_group_id
 _ma_protocol_step.input_data_group_id
 _ma_protocol_step.output_data_group_id
 1 1 1 'template search' 'ModPipe Seq-Prf (0001)' . 1 1 2
-2 1 2 modeling . . 2 2 1
-3 1 3 'model selection' . . 1 1 1
-4 1 4 other testname testdetails 42 99 66
+2 1 2 'template selection' . . . . .
+3 1 3 'target-template alignment' . . . . .
+4 1 4 modeling . . 2 2 1
+5 1 5 'model selection' . . 1 1 1
+6 1 6 'model refinement' . . . . .
+7 1 7 other testname testdetails 42 99 66
 """
         s, = modelcif.reader.read(StringIO(cif))
         p, = s.protocols
-        self.assertEqual(len(p.steps), 4)
-        s1, s2, s3, s4 = p.steps
+        self.assertEqual(len(p.steps), 7)
+        s1, s2, s3, s4, s5, s6, s7 = p.steps
         self.assertIsInstance(s1, modelcif.protocol.TemplateSearchStep)
-        self.assertIsInstance(s2, modelcif.protocol.ModelingStep)
-        self.assertIsInstance(s3, modelcif.protocol.ModelSelectionStep)
-        self.assertIsInstance(s4, modelcif.protocol.Step)
-        self.assertEqual(s4.method_type, "other")
-        self.assertEqual(s4.name, "testname")
-        self.assertEqual(s4.details, "testdetails")
-        self.assertEqual(s4.input_data._id, '99')
-        self.assertEqual(s4.output_data._id, '66')
-        self.assertEqual(s4.software._id, '42')
+        self.assertIsInstance(s2, modelcif.protocol.TemplateSelectionStep)
+        self.assertIsInstance(s3,
+                              modelcif.protocol.TargetTemplateAlignmentStep)
+        self.assertIsInstance(s4, modelcif.protocol.ModelingStep)
+        self.assertIsInstance(s5, modelcif.protocol.ModelSelectionStep)
+        self.assertIsInstance(s6, modelcif.protocol.ModelRefinementStep)
+        self.assertIsInstance(s7, modelcif.protocol.Step)
+        self.assertEqual(s7.method_type, "other")
+        self.assertEqual(s7.name, "testname")
+        self.assertEqual(s7.details, "testdetails")
+        self.assertEqual(s7.input_data._id, '99')
+        self.assertEqual(s7.output_data._id, '66')
+        self.assertEqual(s7.software._id, '42')
 
     def test_target_entity_handler(self):
         """Test _TargetEntityHandler"""

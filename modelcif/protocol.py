@@ -41,6 +41,30 @@ class TemplateSearchStep(Step):
     method_type = "template search"
 
 
+class TemplateSelectionStep(Step):
+    """A modeling protocol step that selects one or more templates.
+       See :class:`Step` for more details."""
+    method_type = "template selection"
+
+
+class TargetTemplateAlignmentStep(Step):
+    """A modeling protocol step that creates a target-template alignment.
+       See :class:`Step` for more details."""
+    method_type = "target-template alignment"
+
+
+class CoevolutionMSAStep(Step):
+    """A modeling protocol step that creates a coevolution multiple sequence
+       alignment. See :class:`Step` for more details."""
+    method_type = "coevolution MSA"
+
+
+class ContactPredictionStep(Step):
+    """A modeling protocol step that predicts contacts.
+       See :class:`Step` for more details."""
+    method_type = "contact prediction"
+
+
 class ModelingStep(Step):
     """A modeling protocol step that generates model coordinates.
        See :class:`Step` for more details."""
@@ -51,6 +75,12 @@ class ModelSelectionStep(Step):
     """A modeling protocol step that filters candidates to select models.
        See :class:`Step` for more details."""
     method_type = "model selection"
+
+
+class ModelRefinementStep(Step):
+    """A modeling protocol step that refines models.
+       See :class:`Step` for more details."""
+    method_type = "model refinement"
 
 
 class Protocol:
