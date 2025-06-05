@@ -996,8 +996,7 @@ _ma_qa_metric.software_group_id
 'composite score, values >1.1 are considered reliable' 1
 2 zDOPE 'Normalized DOPE' zscore global . 2
 3 'TSVMod RMSD' 'TSVMod predicted RMSD (MSALL)' distance global . .
-4 'TSVMod NO35' 'TSVMod predicted native overlap (MSALL)' 'normalized score'
-global . .
+4 'TSVMod NO35' . 'normalized score' global . .
 #
 loop_
 _ma_qa_metric_global.ordinal_id
@@ -1032,6 +1031,8 @@ _ma_qa_metric_global.metric_value
 
         self.assertIsInstance(q4, modelcif.qa_metric.Global)
         self.assertIsInstance(q4, modelcif.qa_metric.NormalizedScore)
+        self.assertIsNone(q4.description)
+        self.assertIsNone(q4.__doc__)
 
     def test_qa_metric_local_handler(self):
         """Test _QAMetricLocalHandler"""

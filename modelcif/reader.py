@@ -993,7 +993,7 @@ def _make_qa_class(type_class, mode_class, p_name, p_description, p_software):
     """Create and return a new class to represent a QA metric"""
     class QA(type_class, mode_class):
         name = p_name
-        __doc__ = p_description
+        __doc__ = description = p_description
         software = p_software
     QA.__name__ = p_name
     return QA
