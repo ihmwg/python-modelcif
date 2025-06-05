@@ -1291,7 +1291,7 @@ _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
 1 3 1 . 'target-template pairwise alignment' global
 2 4 1 . 'target-template pairwise alignment' global
-3 5 1 . 'target-template pairwise alignment' global
+3 5 1 . 'target-template MSA' local
 #
 #
 loop_
@@ -1346,6 +1346,8 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertEqual(p.target.asym._id, 'A')
         self.assertEqual(p.target.gapped_sequence, 'DSYV-ETLD')
         self.assertEqual(p.target.seq_id_range, (1, 8))
+        self.assertIsInstance(a3, modelcif.alignment.Local)
+        self.assertIsInstance(a3, modelcif.alignment.Multiple)
         p, = a3.pairs
         self.assertIsInstance(p.score, modelcif.alignment.HHblitsEValue)
         self.assertAlmostEqual(p.score.value, 2.0, delta=1e-6)

@@ -752,6 +752,10 @@ YES
                         modelcif.alignment.Pairwise):
             pass
 
+        class LocalAlignment(modelcif.alignment.Local,
+                             modelcif.alignment.Multiple):
+            pass
+
         system = modelcif.System()
         tmp_e = modelcif.Entity('ACG')
         tgt_e = modelcif.Entity('ACE')
@@ -790,8 +794,8 @@ YES
         aln = Alignment(name='testaln', pairs=[p])
         aln._data_id = 101
         system.alignments.append(aln)
-        # Alignment with no pairs
-        aln2 = Alignment(name='testaln2', pairs=[])
+        # Local alignment with no pairs
+        aln2 = LocalAlignment(name='testaln2', pairs=[])
         aln2._data_id = 102
         system.alignments.append(aln2)
         system._before_write()  # populate system.templates
@@ -862,7 +866,7 @@ _ma_alignment_info.alignment_type
 _ma_alignment_info.alignment_mode
 1 100 . 4 'target-template pairwise alignment' global
 2 101 . 4 'target-template pairwise alignment' global
-3 102 . . 'target-template pairwise alignment' global
+3 102 . . 'target-template MSA' local
 #
 #
 loop_

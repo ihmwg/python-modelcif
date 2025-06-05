@@ -106,6 +106,12 @@ class Global(AlignmentMode):
     mode = "global"
 
 
+class Local(AlignmentMode):
+    """Base class for local alignments. See :class:`AlignmentMode` for
+       more details."""
+    mode = "local"
+
+
 class AlignmentType:
     """Base class for all alignment types. Actual alignments should derive
        from both a subclass of this class (e.g. :class:`Pairwise`) and a
@@ -118,6 +124,13 @@ class Pairwise(AlignmentType):
     """An alignment between a single target and template.
        See :class:`AlignmentType` for more details."""
     type = "target-template pairwise alignment"
+    other_details = None
+
+
+class Multiple(AlignmentType):
+    """A multiple sequence alignment between target and template.
+       See :class:`AlignmentType` for more details."""
+    type = "target-template MSA"
     other_details = None
 
 

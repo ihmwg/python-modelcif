@@ -23,10 +23,16 @@ The :mod:`modelcif.alignment` Python module
 .. autoclass:: Global
    :members:
 
+.. autoclass:: Local
+   :members:
+
 .. autoclass:: AlignmentType
    :members:
 
 .. autoclass:: Pairwise
+   :members:
+
+.. autoclass:: Multiple
    :members:
 
 .. autoclass:: Score
