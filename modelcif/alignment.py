@@ -59,6 +59,22 @@ class AlignedPositionsIdentity(Identity):
     denominator = "Number of aligned positions (including gaps)"
 
 
+class AlignedResiduePairsIdentity(Identity):
+    """Sequence identity calculated using the number of aligned residue pairs
+       (not including gaps) as the denominator.
+       See :class:`Identity` for more information."""
+    other_details = None
+    denominator = "Number of aligned residue pairs (not including the gaps)"
+
+
+class MeanSequenceIdentity(Identity):
+    """Sequence identity calculated using the arithmetic mean of the sequence
+       lengths as the denominator.
+       See :class:`Identity` for more information."""
+    other_details = None
+    denominator = "Arithmetic mean sequence length"
+
+
 class Pair:
     """A single pairwise alignment between a single target and template chain.
        See :class:`AlignmentMode`. An alignment consists of one or more of

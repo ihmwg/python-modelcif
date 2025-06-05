@@ -1314,7 +1314,7 @@ _ma_alignment_details.percent_sequence_identity
 _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1.0 45.000 'Length of the shorter sequence' .
-2 3 1 A 'HHblits e-value' . 2.0 45.000 'Length of the shorter sequence' .
+2 3 1 A 'HHblits e-value' . 2.0 45.000 'Arithmetic mean sequence length' .
 #
 loop_
 _ma_alignment.ordinal_id
@@ -1359,6 +1359,8 @@ _ma_target_template_poly_mapping.target_seq_id_end
         p, = a3.pairs
         self.assertIsInstance(p.score, modelcif.alignment.HHblitsEValue)
         self.assertAlmostEqual(p.score.value, 2.0, delta=1e-6)
+        self.assertIsInstance(p.identity,
+                              modelcif.alignment.MeanSequenceIdentity)
 
     def test_associated_files(self):
         """Test _AssociatedHandler and _AssociatedArchiveHandler"""

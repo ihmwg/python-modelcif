@@ -14,6 +14,10 @@ The :mod:`modelcif.alignment` Python module
 
 .. autoclass:: AlignedPositionsIdentity
 
+.. autoclass:: AlignedResiduePairsIdentity
+
+.. autoclass:: MeanSequenceIdentity
+
 .. autoclass:: Pair
    :members:
 

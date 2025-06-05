@@ -15,6 +15,8 @@ class Tests(unittest.TestCase):
         self.assertIsNone(ident.other_details)
         self.assertAlmostEqual(ident.value, 42.0, delta=1e-4)
         ident = modelcif.alignment.AlignedPositionsIdentity(42.0)
+        ident = modelcif.alignment.AlignedResiduePairsIdentity(42.0)
+        ident = modelcif.alignment.MeanSequenceIdentity(42.0)
 
         # generic "other" identity
         ident = modelcif.alignment.Identity(42.0)
