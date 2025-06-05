@@ -218,6 +218,35 @@ class PLDDT(MetricType):
     other_details = None
 
 
+class PLDDT01(MetricType):
+    """Predicted lDDT-CA score in [0,1] (higher score, means better
+       accuracy). See :class:`MetricType` for more information."""
+    type = "pLDDT in [0,1]"
+    other_details = None
+
+
+class PLDDTAllAtom(MetricType):
+    """Predicted lDDT all atom score in [0,100] (higher score, means better
+       accuracy). See :class:`MetricType` for more information."""
+    type = "pLDDT all-atom"
+    other_details = None
+
+
+class PLDDTAllAtom01(MetricType):
+    """Predicted lDDT all atom score in [0,1] (higher score, means better
+       accuracy). See :class:`MetricType` for more information."""
+    type = "pLDDT all-atom in [0,1]"
+    other_details = None
+
+
+class PLDDTToPolymer(MetricType):
+    """Predicted lDDT with distances from each atom to CA or C1' of nearby
+       polymer residues [0,100] (higher score, means better accuracy).
+       See :class:`MetricType` for more information."""
+    type = "pLDDT to polymer"
+    other_details = None
+
+
 class PTM(MetricType):
     """Predicted TM-score in [0,1] (higher value means higher confidence).
     See :class:`MetricType` for more information."""
@@ -229,4 +258,11 @@ class IpTM(MetricType):
     """Protein-protein interface score, based on TM-score in [0,1].
     See :class:`MetricType` for more information."""
     type = "ipTM"
+    other_details = None
+
+
+class Boolean(MetricType):
+    """0 or 1 depending on whether a check passed.
+    See :class:`MetricType` for more information."""
+    type = "boolean"
     other_details = None

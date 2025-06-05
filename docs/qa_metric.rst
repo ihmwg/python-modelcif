@@ -42,6 +42,16 @@ The :mod:`modelcif.qa_metric` Python module
 
 .. autoclass:: PLDDT
 
+.. autoclass:: PLDDT01
+
+.. autoclass:: PLDDTAllAtom
+
+.. autoclass:: PLDDTAllAtom01
+
+.. autoclass:: PLDDTToPolymer
+
 .. autoclass:: PTM
 
 .. autoclass:: IpTM
+
+.. autoclass:: Boolean
