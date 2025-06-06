@@ -387,7 +387,7 @@ loop_
 _ma_template_non_poly.template_id
 _ma_template_non_poly.comp_id
 _ma_template_non_poly.details
-1 HEM Heme
+1 HEM "Template Heme"
 """
         s, = modelcif.reader.read(StringIO(cif))
         t, = s.templates
@@ -396,6 +396,7 @@ _ma_template_non_poly.details
         self.assertEqual(t.asym_id, 'B')
         self.assertEqual(t.strand_id, 'Z')
         self.assertEqual(len(s.alignments), 0)
+        self.assertEqual(t.entity.description, 'Template Heme')
         a, = s.asym_units
         self.assertIsInstance(a, modelcif.NonPolymerFromTemplate)
         self.assertIs(a.template, t)

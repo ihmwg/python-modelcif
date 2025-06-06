@@ -270,7 +270,11 @@ class _TemplatePolyHandler(Handler):
 
     def __init__(self, sysr):
         super(_TemplatePolyHandler, self).__init__(sysr)
-        # Use python-ihm's _EntityPolyHandler to do most of the work here
+        # Use python-ihm's _EntityPolyHandler to do most of the work here.
+        # Note that we use Entity objects to store the sequence of the
+        # templates, but template Entities are *not* stored in the mmCIF
+        # file, so the 'entity ID' here is actually template_id and we
+        # don't look the Entity object up with sysr.entities.get_by_id().
         self._eph = ihm.reader._EntityPolyHandler(sysr)
 
     def __call__(self, template_id, seq_one_letter_code,
@@ -306,10 +310,10 @@ class _TemplatePolyHandler(Handler):
 class _TemplateNonPolyHandler(Handler):
     category = '_ma_template_non_poly'
 
-    def __call__(self, template_id, comp_id):
+    def __call__(self, template_id, comp_id, details):
         template = self.sysr.templates.get_by_id(template_id)
         seq = (self.sysr.chem_comps.get_by_id(comp_id),)
-        template.entity = ihm.Entity(sequence=seq)
+        template.entity = ihm.Entity(sequence=seq, description=details)
 
 
 class _SoftwareGroupHandler(Handler):
