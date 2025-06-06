@@ -1129,6 +1129,9 @@ class ModelCIFVariant(Variant):
         _QAMetricPairwiseHandler, _QAMetricFeatureHandler,
         _QAMetricFeaturePairwiseHandler]
 
+    if hasattr(ihm.reader, '_DataUsageHandler'):
+        _handlers.append(ihm.reader._DataUsageHandler)
+
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
 

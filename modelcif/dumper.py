@@ -984,6 +984,9 @@ class ModelCIFVariant(Variant):
         _ProtocolDumper, _ModelDumper, _AssociatedDumper, _FeatureDumper,
         _QAMetricDumper]
 
+    if hasattr(ihm.dumper, '_DataUsageDumper'):
+        _dumpers.insert(10, ihm.dumper._DataUsageDumper)
+
     def get_dumpers(self):
         return [d() for d in self._dumpers]
 

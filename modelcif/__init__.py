@@ -59,6 +59,9 @@ class System:
         #: the system itself. See :class:`ihm.Citation`.
         self.citations = []
 
+        #: Information on usage of the data. See :class:`ihm.DataUsage`.
+        self.data_usage = []
+
         #: All groups of models. See :class:`~modelcif.model.ModelGroup`.
         self.model_groups = []
 
