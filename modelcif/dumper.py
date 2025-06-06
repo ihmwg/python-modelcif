@@ -563,15 +563,25 @@ class _AlignmentDumper(Dumper):
                  "sequence_identity_denominator_other_details"]) as lp:
             for a in system.alignments:
                 for s in a.pairs:
-                    denom = s.identity.denominator
-                    od = s.identity.other_details
+                    if s.identity is None:
+                        denom = od = identity = None
+                    else:
+                        denom = s.identity.denominator
+                        od = s.identity.other_details
+                        identity = s.identity.value
+                    if s.score is None:
+                        score_type = score_other_details = score_value = None
+                    else:
+                        score_type = s.score.type
+                        score_other_details = s.score.other_details
+                        score_value = s.score.value
                     lp.write(ordinal_id=next(ordinal), alignment_id=a._id,
                              template_segment_id=s.template._segment_id,
                              target_asym_id=s.target.asym._id,
-                             score_type=s.score.type,
-                             score_type_other_details=s.score.other_details,
-                             score_value=s.score.value,
-                             percent_sequence_identity=s.identity.value,
+                             score_type=score_type,
+                             score_type_other_details=score_other_details,
+                             score_value=score_value,
+                             percent_sequence_identity=identity,
                              sequence_identity_denominator=denom,
                              sequence_identity_denominator_other_details=od)
 

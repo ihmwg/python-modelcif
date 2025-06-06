@@ -700,12 +700,19 @@ class _AlignmentDetailsHandler(Handler):
                  percent_sequence_identity: float,
                  sequence_identity_denominator,
                  sequence_identity_denominator_other_details):
-        score_class = self._score_map.get(score_type, score_type_other_details)
-        score = score_class(score_value)
-        ident_class = self._ident_map.get(
-            sequence_identity_denominator,
-            sequence_identity_denominator_other_details)
-        ident = ident_class(percent_sequence_identity)
+        if score_type:
+            score_class = self._score_map.get(score_type,
+                                              score_type_other_details)
+            score = score_class(score_value)
+        else:
+            score = None
+        if sequence_identity_denominator:
+            ident_class = self._ident_map.get(
+                sequence_identity_denominator,
+                sequence_identity_denominator_other_details)
+            ident = ident_class(percent_sequence_identity)
+        else:
+            ident = None
         template = self.sysr.template_segments.get_by_id(template_segment_id)
         asym = self.sysr.asym_units.get_by_id(target_asym_id)
         # We don't know the target segment yet (will be filled in at finalize

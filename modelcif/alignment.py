@@ -86,12 +86,13 @@ class Pair:
        :type template: :class:`modelcif.TemplateSegment`
        :param target: The target segment that is aligned.
        :type target: output from :meth:`ihm.AsymUnit.segment`
-       :param identity: The sequence identity between target and template.
+       :param identity: The sequence identity between target and template,
+              if known.
        :type identity: :class:`Identity`
-       :param score: A measure of the quality of the alignment.
+       :param score: A measure of the quality of the alignment, if known.
        :type score: :class:`Score`
     """
-    def __init__(self, template, target, identity, score):
+    def __init__(self, template, target, identity=None, score=None):
         self.template, self.target, self.score = template, target, score
         self.identity = identity
 

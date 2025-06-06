@@ -1315,7 +1315,8 @@ _ma_alignment_details.percent_sequence_identity
 _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1.0 45.000 'Length of the shorter sequence' .
-2 3 1 A 'HHblits e-value' . 2.0 45.000 'Arithmetic mean sequence length' .
+2 2 1 A . . . . . .
+3 3 1 A 'HHblits e-value' . 2.0 45.000 'Arithmetic mean sequence length' .
 #
 loop_
 _ma_alignment.ordinal_id
@@ -1341,7 +1342,6 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertIs(a1.__class__, a2.__class__)
         self.assertIsInstance(a1, modelcif.alignment.Global)
         self.assertIsInstance(a1, modelcif.alignment.Pairwise)
-        self.assertEqual(len(a2.pairs), 0)
         p, = a1.pairs
         self.assertIsInstance(p.score, modelcif.alignment.BLASTEValue)
         self.assertAlmostEqual(p.score.value, 1.0, delta=1e-6)
@@ -1357,6 +1357,9 @@ _ma_target_template_poly_mapping.target_seq_id_end
         self.assertEqual(p.target.seq_id_range, (1, 8))
         self.assertIsInstance(a3, modelcif.alignment.Local)
         self.assertIsInstance(a3, modelcif.alignment.Multiple)
+        p, = a2.pairs
+        self.assertIsNone(p.score)
+        self.assertIsNone(p.identity)
         p, = a3.pairs
         self.assertIsInstance(p.score, modelcif.alignment.HHblitsEValue)
         self.assertAlmostEqual(p.score.value, 2.0, delta=1e-6)

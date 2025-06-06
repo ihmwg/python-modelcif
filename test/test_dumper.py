@@ -786,12 +786,16 @@ YES
         aln._data_id = 100
         system.alignments.append(aln)
         # The same alignment using HHblits e-value
-        p = modelcif.alignment.Pair(
+        p1 = modelcif.alignment.Pair(
             template=p.template,
             target=p.target,
             score=modelcif.alignment.HHblitsEValue("1e-14"),
             identity=p.identity)
-        aln = Alignment(name='testaln', pairs=[p])
+        # The same alignment with missing score and identity
+        p2 = modelcif.alignment.Pair(
+            template=p.template,
+            target=p.target)
+        aln = Alignment(name='testaln', pairs=[p1, p2])
         aln._data_id = 101
         system.alignments.append(aln)
         # Local alignment with no pairs
@@ -818,6 +822,7 @@ _ma_template_details.template_model_num
 _ma_template_details.template_auth_asym_id
 1 1 'reference database' polymer 42 99 A H . 1 Z
 2 1 'reference database' polymer 42 99 A H . 1 Z
+3 1 'reference database' polymer 42 99 A H . 1 Z
 #
 #
 loop_
@@ -855,6 +860,7 @@ _ma_target_template_poly_mapping.target_seq_id_begin
 _ma_target_template_poly_mapping.target_seq_id_end
 1 1 A 1 3
 2 1 A 1 3
+3 1 A 1 3
 #
 #
 loop_
@@ -882,6 +888,7 @@ _ma_alignment_details.sequence_identity_denominator
 _ma_alignment_details.sequence_identity_denominator_other_details
 1 1 1 A 'BLAST e-value' . 1e-15 42.000 'Length of the shorter sequence' .
 2 2 1 A 'HHblits e-value' . 1e-14 42.000 'Length of the shorter sequence' .
+3 2 1 A . . . . . .
 #
 #
 loop_
@@ -893,6 +900,8 @@ _ma_alignment.sequence
 2 1 2 AC-G
 3 2 1 ACE-
 4 2 2 AC-G
+5 2 1 ACE-
+6 2 2 AC-G
 #
 """)
 
