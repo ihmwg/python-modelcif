@@ -59,6 +59,9 @@ class System:
         #: the system itself. See :class:`ihm.Citation`.
         self.citations = []
 
+        #: Revision/update history. See :class:`ihm.Revision`.
+        self.revisions = []
+
         #: Information on usage of the data. See :class:`ihm.DataUsage`.
         self.data_usage = []
 

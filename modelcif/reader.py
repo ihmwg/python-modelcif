@@ -106,6 +106,11 @@ class _SystemReader:
         self.citations = IDMapper(self.system.citations, ihm.Citation,
                                   *(None,) * 8)
 
+        if hasattr(ihm, 'Revision'):
+            #: Mapping from ID to :class:`ihm.Revision` objects
+            self.revisions = IDMapper(self.system.revisions, ihm.Revision,
+                                      *(None,) * 4)
+
         #: Mapping from ID to :class:`ihm.Entity` objects
         self.entities = IDMapper(self.system.entities, _make_new_entity)
 
@@ -1131,6 +1136,14 @@ class ModelCIFVariant(Variant):
 
     if hasattr(ihm.reader, '_DataUsageHandler'):
         _handlers.append(ihm.reader._DataUsageHandler)
+
+    if hasattr(ihm.reader, '_AuditRevisionHistoryHandler'):
+        _handlers.extend([
+            ihm.reader._AuditRevisionHistoryHandler,
+            ihm.reader._AuditRevisionDetailsHandler,
+            ihm.reader._AuditRevisionGroupHandler,
+            ihm.reader._AuditRevisionCategoryHandler,
+            ihm.reader._AuditRevisionItemHandler])
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]

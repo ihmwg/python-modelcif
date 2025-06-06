@@ -987,6 +987,9 @@ class ModelCIFVariant(Variant):
     if hasattr(ihm.dumper, '_DataUsageDumper'):
         _dumpers.insert(10, ihm.dumper._DataUsageDumper)
 
+    if hasattr(ihm.dumper, '_AuditRevisionDumper'):
+        _dumpers.insert(10, ihm.dumper._AuditRevisionDumper)
+
     def get_dumpers(self):
         return [d() for d in self._dumpers]
 
