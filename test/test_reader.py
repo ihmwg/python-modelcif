@@ -2,6 +2,7 @@ from datetime import date
 import unittest
 import utils
 import os
+import datetime
 from io import StringIO
 
 TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -1616,6 +1617,44 @@ B 99 bar
         # asym A should point to existing entity
         self.assertEqual(s.asym_units[0].id, 'A')
         self.assertIs(s.asym_units[0].entity, e)
+
+    @unittest.skipUnless(hasattr(ihm, 'Revision'), "No python-ihm support")
+    def test_audit_revision_handler(self):
+        """Test AuditRevisionHistoryHandler"""
+        # We leverage the support in python-ihm, so only a basic test here
+        cif = """
+loop_
+_pdbx_audit_revision_history.ordinal
+_pdbx_audit_revision_history.data_content_type
+_pdbx_audit_revision_history.major_revision
+_pdbx_audit_revision_history.minor_revision
+_pdbx_audit_revision_history.revision_date
+40 'Structure model' 1 0 ?
+41 'Structure model' 1 0 .
+42 'Structure model' 2 0 1979-05-03
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        r1, r2, r3 = s.revisions
+        self.assertEqual(r3.major, 2)
+        self.assertEqual(r3.minor, 0)
+        self.assertEqual(r3.date, datetime.date(1979, 5, 3))
+
+    @unittest.skipUnless(hasattr(ihm, 'DataUsage'), "No python-ihm support")
+    def test_data_usage_handler(self):
+        """Test DataUsageHandler"""
+        # We leverage the support in python-ihm, so only a basic test here
+        cif = """
+loop_
+_pdbx_data_usage.id
+_pdbx_data_usage.type
+_pdbx_data_usage.details
+_pdbx_data_usage.url
+_pdbx_data_usage.name
+1 license 'some license' someurl somename
+"""
+        s, = modelcif.reader.read(StringIO(cif))
+        d1, = s.data_usage
+        self.assertEqual(d1.details, "some license")
 
 
 if __name__ == '__main__':
