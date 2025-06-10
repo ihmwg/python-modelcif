@@ -6,6 +6,8 @@
 # - Update AuditConformDumper to match latest MA dictionary if necessary
 # - Run util/validate-outputs.py to make sure all example outputs validate
 #   (cd util; PYTHONPATH=.. python3 ./validate-outputs.py)
+# - Run util/check-db-entries.py to check against some real archive structures
+#   (cd util; PYTHONPATH=.. python3 check-db-entries.py)
 # - If we need a newer python-ihm, update the version requirement in
 #   requirements.txt, setup.py, util/python-modelcif.spec, and README.md.
 # - Update ChangeLog.rst and util/python-modelcif.spec with the release number
