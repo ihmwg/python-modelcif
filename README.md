@@ -38,7 +38,7 @@ pip install modelcif
 # Installation from source code
 
 To build and install from a clone of the GitHub repository,
-first build and install version 2.2 or later of the
+first build and install version 2.6 or later of the
 [python-ihm](https://github.com/ihmwg/python-ihm) module. Then run:
 
 ```

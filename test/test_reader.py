@@ -1618,7 +1618,6 @@ B 99 bar
         self.assertEqual(s.asym_units[0].id, 'A')
         self.assertIs(s.asym_units[0].entity, e)
 
-    @unittest.skipUnless(hasattr(ihm, 'Revision'), "No python-ihm support")
     def test_audit_revision_handler(self):
         """Test AuditRevisionHistoryHandler"""
         # We leverage the support in python-ihm, so only a basic test here
@@ -1639,7 +1638,6 @@ _pdbx_audit_revision_history.revision_date
         self.assertEqual(r3.minor, 0)
         self.assertEqual(r3.date, datetime.date(1979, 5, 3))
 
-    @unittest.skipUnless(hasattr(ihm, 'DataUsage'), "No python-ihm support")
     def test_data_usage_handler(self):
         """Test DataUsageHandler"""
         # We leverage the support in python-ihm, so only a basic test here

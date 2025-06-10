@@ -970,8 +970,9 @@ class ModelCIFVariant(Variant):
         ihm.dumper._StructDumper, ihm.dumper._CommentDumper,
         _AuditConformDumper, _DatabaseDumper, ihm.dumper._CitationDumper,
         ihm.dumper._SoftwareDumper, _SoftwareGroupDumper,
-        ihm.dumper._AuditAuthorDumper,
-        ihm.dumper._GrantDumper, _ChemCompDumper, _ChemCompDescriptorDumper,
+        ihm.dumper._AuditAuthorDumper, ihm.dumper._AuditRevisionDumper,
+        ihm.dumper._DataUsageDumper, ihm.dumper._GrantDumper,
+        _ChemCompDumper, _ChemCompDescriptorDumper,
         ihm.dumper._EntityDumper,
         ihm.dumper._EntitySrcGenDumper, ihm.dumper._EntitySrcNatDumper,
         ihm.dumper._EntitySrcSynDumper, ihm.dumper._StructRefDumper,
@@ -983,12 +984,6 @@ class ModelCIFVariant(Variant):
         _TargetEntityDumper, _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _AssociatedDumper, _FeatureDumper,
         _QAMetricDumper]
-
-    if hasattr(ihm.dumper, '_DataUsageDumper'):
-        _dumpers.insert(10, ihm.dumper._DataUsageDumper)
-
-    if hasattr(ihm.dumper, '_AuditRevisionDumper'):
-        _dumpers.insert(10, ihm.dumper._AuditRevisionDumper)
 
     def get_dumpers(self):
         return [d() for d in self._dumpers]
