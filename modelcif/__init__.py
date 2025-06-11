@@ -5,7 +5,7 @@ from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 class System:

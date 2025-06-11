@@ -1,3 +1,24 @@
+1.4 - 2025-06-11
+================
+  - Revision information and information on how the data in the file can
+    be used are now read from or written to mmCIF or BinaryCIF files.
+    See :attr:`System.revisions` and :attr:`System.data_usage` respectively.
+  - New classes have been added to :mod:`modelcif.alignment`,
+    :mod:`modelcif.qa_metric`, and :mod:`modelcif.protocol` to support
+    all sequence identity denominators (#47), QA metric types (#45),
+    and protocol step types (#44) respectively, as defined in the ModelCIF
+    dictionary.
+  - The new class:`modelcif.alignment.Local` and
+    :class:`modelcif.alignment.Multiple` classes allow for both local
+    alignments and multiple sequence alignments to be described (#43)
+  - Bugfix: sequence identity and alignment score (``identity`` and ``score``
+    arguments to :class:`modelcif.alignment.Pair`) are now optional, to
+    match the mmCIF dictionary (#49).
+  - Bugfix: information in ``_ma_template_non_poly.details`` is now read
+    from mmCIF or BinaryCIF files (#48).
+  - Bugfix: files containing empty or missing ``_ma_qa_metric.description``
+    can now be read (#46).
+
 1.3 - 2025-01-14
 ================
   - The new :class:`modelcif.CustomTemplate` class allows for custom templates
