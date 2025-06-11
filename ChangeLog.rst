@@ -8,7 +8,7 @@
     all sequence identity denominators (#47), QA metric types (#45),
     and protocol step types (#44) respectively, as defined in the ModelCIF
     dictionary.
-  - The new class:`modelcif.alignment.Local` and
+  - The new :class:`modelcif.alignment.Local` and
     :class:`modelcif.alignment.Multiple` classes allow for both local
     alignments and multiple sequence alignments to be described (#43)
   - Bugfix: sequence identity and alignment score (``identity`` and ``score``
