@@ -10,7 +10,7 @@
     dictionary.
   - The new :class:`modelcif.alignment.Local` and
     :class:`modelcif.alignment.Multiple` classes allow for both local
-    alignments and multiple sequence alignments to be described (#43)
+    alignments and multiple sequence alignments to be described (#43).
   - Bugfix: sequence identity and alignment score (``identity`` and ``score``
     arguments to :class:`modelcif.alignment.Pair`) are now optional, to
     match the mmCIF dictionary (#49).
