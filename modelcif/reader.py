@@ -505,7 +505,7 @@ class _TargetRefDBHandler(Handler):
                     ir.isoform = ir.ncbi_taxonomy_id = None
                     ir.organism_scientific = ir.sequence_version_date = None
                     ir.sequence_crc64 = None
-                    ir.align_begin = ir.align_end = None
+                    ir.align_begin = ir.align_end = ir.is_primary = None
                 else:
                     # Add struct_ref info to corresponding modelcif object
                     mr.sequence = ir.sequence

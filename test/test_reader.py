@@ -236,9 +236,10 @@ _ma_target_ref_db_details.ncbi_taxonomy_id
 _ma_target_ref_db_details.organism_scientific
 _ma_target_ref_db_details.seq_db_sequence_version_date
 _ma_target_ref_db_details.seq_db_sequence_checksum
+_ma_target_ref_db_details.is_primary
 1 UNP . MED1_YEAST Q12321 test_iso 1 10 test_tax test_org 1996-11-01
-637FEA3E78D915BC
-1 UNP . rd_only_code rd_only_acc rd_only_iso . . . . . .
+637FEA3E78D915BC YES
+1 UNP . rd_only_code rd_only_acc rd_only_iso . . . . . . NO
 """
         s, = modelcif.reader.read(StringIO(cif))
         e, = s.entities
@@ -255,6 +256,7 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         self.assertEqual(r1.sequence_version_date, date(1996, 11, 1))
         self.assertEqual(r1.sequence, 'DSYVETLDCC')
         self.assertEqual(r1.details, "test details")
+        self.assertTrue(r1.is_primary)
         a, = r1.alignments
         self.assertEqual(a.db_begin, 1)
         self.assertEqual(a.db_end, 10)
@@ -266,6 +268,7 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         self.assertEqual(r2.accession, 'rd_only_acc')
         self.assertEqual(r2.isoform, 'rd_only_iso')
         self.assertIsNone(r2.sequence)
+        self.assertFalse(r2.is_primary)
         # r3 should contain only struct_ref info
         self.assertIsInstance(r3, modelcif.reference.UniProt)
         self.assertEqual(r3.code, 'sr_only_code')
@@ -273,6 +276,7 @@ _ma_target_ref_db_details.seq_db_sequence_checksum
         self.assertIsNone(r3.isoform)
         self.assertIsNone(r3.ncbi_taxonomy_id)
         self.assertEqual(r3.sequence, 'DSYVETLDPP')
+        self.assertIsNone(r3.is_primary)
         a, = r3.alignments
         self.assertEqual(a.db_begin, 1)
         self.assertEqual(a.db_end, 10)
