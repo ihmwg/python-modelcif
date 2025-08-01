@@ -9,9 +9,10 @@
 # - Run util/check-db-entries.py to check against some real archive structures
 #   (cd util; PYTHONPATH=.. python3 check-db-entries.py)
 # - If we need a newer python-ihm, update the version requirement in
-#   requirements.txt, setup.py, util/python-modelcif.spec, and README.md.
+#   requirements.txt, setup.py, pyproject.toml, util/python-modelcif.spec,
+#   and README.md.
 # - Update ChangeLog.rst and util/python-modelcif.spec with the release number
-# - Update release number in modelcif/__init__.py and setup.py
+# - Update release number in modelcif/__init__.py, setup.py and pyproject.toml
 # - Commit, tag, and push
 # - Make release on GitHub
 # - Upload the release tarball from
