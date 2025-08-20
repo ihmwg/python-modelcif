@@ -13,6 +13,25 @@ import ihm
 import ihm.reader
 
 
+ASYM_ENTITY = """
+loop_
+_entity_poly_seq.entity_id
+_entity_poly_seq.num
+_entity_poly_seq.mon_id
+_entity_poly_seq.hetero
+1 1 MET .
+1 2 CYS .
+1 3 MET .
+1 4 SER .
+#
+loop_
+_struct_asym.id
+_struct_asym.entity_id
+_struct_asym.details
+A 1 foo
+"""
+
+
 class Tests(unittest.TestCase):
 
     def test_old_file_read_default(self):
@@ -1806,6 +1825,178 @@ C 3 HOH 5 7 7 . .
                                               3: (5, None), 4: (1, None),
                                               5: (7, None)})
         self.assertEqual(a3.orig_auth_seq_id_map, {3: 10, 4: 20})
+
+    def test_poly_seq_scheme_handler_offset(self):
+        """Test PolySeqSchemeHandler with constant offset"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.pdb_strand_id
+A 1 1 6 A
+A 1 2 7 A
+A 1 3 8 A
+A 1 4 9 A
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym.auth_seq_id_map, 5)
+        self.assertIsNone(asym._strand_id)
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [6, 7, 8, 9])
+        self.assertIsNone(asym.orig_auth_seq_id_map)
+
+    def test_poly_seq_scheme_handler_offset_ins_code(self):
+        """Test PolySeqSchemeHandler with constant offset but inscodes"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.pdb_strand_id
+_pdbx_poly_seq_scheme.pdb_ins_code
+A 1 1 6 A .
+A 1 2 7 A .
+A 1 3 8 A .
+A 1 4 9 A A
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym.auth_seq_id_map,
+                         {1: (6, None), 2: (7, None), 3: (8, None),
+                          4: (9, 'A')})
+        self.assertIsNone(asym._strand_id)
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [6, 7, 8, 9])
+        self.assertIsNone(asym.residue(1).ins_code)
+        self.assertEqual(asym.residue(4).ins_code, 'A')
+        self.assertIsNone(asym.orig_auth_seq_id_map)
+
+    def test_poly_seq_scheme_handler_empty(self):
+        """Test PolySeqSchemeHandler with no poly_seq_scheme"""
+        fh = StringIO(ASYM_ENTITY)
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym.auth_seq_id_map, 0)
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [1, 2, 3, 4])
+        self.assertIsNone(asym.orig_auth_seq_id_map)
+
+    def test_poly_seq_scheme_handler_nop(self):
+        """Test PolySeqSchemeHandler with a do-nothing poly_seq_scheme"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+A 1 1 1
+A 1 2 2
+A 1 3 3
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym.auth_seq_id_map, 0)
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [1, 2, 3, 4])
+        self.assertIsNone(asym.orig_auth_seq_id_map)
+
+    def test_poly_seq_scheme_handler_partial(self):
+        """Test PolySeqSchemeHandler with partial information"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.auth_seq_num
+A 1 1 6 .
+A 1 2 7 9
+A 1 3 8 .
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        # No mapping for residue 4 (and no insertion codes at all)
+        self.assertEqual(asym.auth_seq_id_map, {1: (6, None), 2: (7, None),
+                                                3: (8, None)})
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [6, 7, 8, 4])
+        self.assertIsNone(asym.residue(1).ins_code)
+        self.assertEqual(asym.orig_auth_seq_id_map, {2: 9})
+
+    def test_poly_seq_scheme_handler_incon_off(self):
+        """Test PolySeqSchemeHandler with inconsistent offset"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.pdb_strand_id
+A 1 1 6 X
+A 1 2 7 X
+A 1 3 8 X
+A 1 4 10 X
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym._strand_id, 'X')
+        self.assertEqual(asym.auth_seq_id_map, {1: (6, None), 2: (7, None),
+                                                3: (8, None), 4: (10, None)})
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [6, 7, 8, 10])
+        self.assertIsNone(asym.residue(1).ins_code)
+        self.assertIsNone(asym.orig_auth_seq_id_map)
+
+    def test_poly_seq_scheme_handler_unknown_auth_seq(self):
+        """Test PolySeqSchemeHandler with explicit unknown auth_seq_num"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.auth_seq_num
+_pdbx_poly_seq_scheme.pdb_strand_id
+A 1 1 1 1 A
+A 1 2 2 2 A
+A 1 3 3 ? A
+A 1 4 4 4 A
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertEqual(asym.auth_seq_id_map, 0)
+        self.assertEqual(asym.orig_auth_seq_id_map, {3: ihm.unknown})
+
+    def test_poly_seq_scheme_handler_str_seq_id(self):
+        """Test PolySeqSchemeHandler with a non-integer pdb_seq_num"""
+        fh = StringIO(ASYM_ENTITY + """
+loop_
+_pdbx_poly_seq_scheme.asym_id
+_pdbx_poly_seq_scheme.entity_id
+_pdbx_poly_seq_scheme.seq_id
+_pdbx_poly_seq_scheme.pdb_seq_num
+_pdbx_poly_seq_scheme.auth_seq_num
+_pdbx_poly_seq_scheme.pdb_strand_id
+_pdbx_poly_seq_scheme.pdb_ins_code
+A 1 1 6 6 ? .
+A 1 2 7 12 ? .
+A 1 3 8 24 ? .
+A 1 4 9A 48A ? .
+""")
+        s, = modelcif.reader.read(fh)
+        asym, = s.asym_units
+        self.assertIsNone(asym._strand_id)
+        self.assertEqual(asym.auth_seq_id_map, {1: (6, None), 2: (7, None),
+                                                3: (8, None), 4: ('9A', None)})
+        self.assertEqual([asym.residue(i).auth_seq_id for i in range(1, 5)],
+                         [6, 7, 8, '9A'])
+        self.assertIsNone(asym.residue(1).ins_code)
+        self.assertIsNone(asym.residue(3).ins_code)
+        self.assertEqual(asym.orig_auth_seq_id_map, {2: 12, 3: 24, 4: '48A'})
 
 
 if __name__ == '__main__':
