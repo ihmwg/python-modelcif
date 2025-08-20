@@ -1658,6 +1658,155 @@ _pdbx_data_usage.name
         d1, = s.data_usage
         self.assertEqual(d1.details, "some license")
 
+    def test_atom_site_handler_water(self):
+        """Test AtomSiteHandler reading water molecules"""
+        fh = StringIO("""
+loop_
+_entity.id
+_entity.type
+1 water
+loop_
+_struct_asym.id
+_struct_asym.entity_id
+_struct_asym.details
+A 1 Water
+B 1 Water
+#
+loop_
+_pdbx_nonpoly_scheme.asym_id
+_pdbx_nonpoly_scheme.entity_id
+_pdbx_nonpoly_scheme.mon_id
+_pdbx_nonpoly_scheme.ndb_seq_num
+_pdbx_nonpoly_scheme.pdb_seq_num
+_pdbx_nonpoly_scheme.auth_seq_num
+_pdbx_nonpoly_scheme.auth_mon_id
+_pdbx_nonpoly_scheme.pdb_strand_id
+_pdbx_nonpoly_scheme.pdb_ins_code
+A 1 HOH 1 50 500 HOH A .
+#
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_seq_id
+_atom_site.auth_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.label_asym_id
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.label_entity_id
+_atom_site.auth_asym_id
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_PDB_model_num
+_atom_site.ihm_model_id
+HETATM 1 O O . HOH . 40 ? A 10.000 10.000 10.000 . 1 A . 1 1
+HETATM 2 O O . HOH . 50 ? A 10.000 10.000 10.000 . 1 A . 1 1
+HETATM 3 O O . HOH . 60 . A 20.000 20.000 20.000 . 1 A . 1 1
+HETATM 4 O O . HOH . 70 . B 20.000 20.000 20.000 . 1 B . 1 1
+""")
+        s, = modelcif.reader.read(fh)
+        m = s.model_groups[0][0]
+        a1, a2, a3, b1 = m._atoms
+        # Should include info from both atom_site and scheme table
+        self.assertEqual(a1.asym_unit.auth_seq_id_map,
+                         {1: (40, None), 2: (50, None), 3: (60, None)})
+        self.assertEqual(a1.asym_unit.orig_auth_seq_id_map,
+                         {2: 500})
+        self.assertEqual(b1.asym_unit.auth_seq_id_map, {1: (70, None)})
+        self.assertIsNone(b1.asym_unit.orig_auth_seq_id_map)
+        # Should get a WaterAsymUnit, not regular AsymUnit
+        self.assertIsInstance(a1.asym_unit, modelcif.WaterAsymUnit)
+        self.assertIsInstance(b1.asym_unit, modelcif.WaterAsymUnit)
+        # seq_id should be assigned based on atom_site
+        self.assertEqual(a1.seq_id, 1)
+        self.assertEqual(a2.seq_id, 2)
+        self.assertEqual(a3.seq_id, 3)
+        self.assertEqual(b1.seq_id, 1)
+
+    def test_nonpoly_scheme_handler(self):
+        """Test NonPolySchemeHandler"""
+        fh = StringIO("""
+loop_
+_chem_comp.id
+_chem_comp.type
+_chem_comp.name
+CA non-polymer 'CALCIUM ION'
+#
+loop_
+_entity.id
+_entity.type
+_entity.pdbx_description
+1 non-polymer 'CALCIUM ION entity'
+2 non-polymer 'no-chem-comp entity'
+3 water       'no-chem-comp water'
+#
+loop_
+_pdbx_entity_nonpoly.entity_id
+_pdbx_entity_nonpoly.name
+_pdbx_entity_nonpoly.comp_id
+1 'CALCIUM ION'             CA
+#
+loop_
+_struct_asym.id
+_struct_asym.entity_id
+_struct_asym.details
+A 1 foo
+B 2 bar
+C 3 baz
+#
+loop_
+_pdbx_nonpoly_scheme.asym_id
+_pdbx_nonpoly_scheme.entity_id
+_pdbx_nonpoly_scheme.mon_id
+_pdbx_nonpoly_scheme.ndb_seq_num
+_pdbx_nonpoly_scheme.pdb_seq_num
+_pdbx_nonpoly_scheme.auth_seq_num
+_pdbx_nonpoly_scheme.pdb_strand_id
+_pdbx_nonpoly_scheme.pdb_ins_code
+A 1 BAR 1 101 202 . .
+B 2 BAR 1 1 1 Q X
+C 3 HOH . 1 1 . .
+C 3 HOH 2 2 2 . .
+C 3 HOH 3 5 10 . .
+C 3 HOH 4 1 20 . .
+C 3 HOH 5 7 7 . .
+""")
+        s, = modelcif.reader.read(fh)
+        e1, e2, e3 = s.entities
+        # e1 should have sequence filled in by pdbx_entity_nonpoly
+        self.assertEqual([cc.name for cc in e1.sequence], ['CALCIUM ION'])
+        # e2,e3 should have sequence filled in by pdbx_nonpoly_scheme
+        self.assertEqual([(cc.id, cc.name) for cc in e2.sequence],
+                         [('BAR', 'no-chem-comp entity')])
+        self.assertEqual([(cc.id, cc.name) for cc in e3.sequence],
+                         [('HOH', 'WATER')])
+        asym, a2, a3 = s.asym_units
+        # non-polymers have no seq_id_range
+        self.assertEqual(asym.seq_id_range, (None, None))
+        self.assertEqual(asym.auth_seq_id_map, {1: (101, None)})
+        self.assertEqual(asym.residue(1).auth_seq_id, 101)
+        self.assertIsNone(asym.residue(1).ins_code)
+        self.assertEqual(asym.strand_id, asym._id)
+        self.assertIsNone(asym._strand_id)
+        self.assertEqual(asym.orig_auth_seq_id_map, {1: 202})
+
+        self.assertEqual(a2.auth_seq_id_map, {1: (1, 'X')})
+        self.assertEqual(a2.residue(1).auth_seq_id, 1)
+        self.assertEqual(a2.residue(1).ins_code, 'X')
+        self.assertEqual(a2.strand_id, 'Q')
+        self.assertEqual(a2._strand_id, 'Q')
+        self.assertIsNone(a2.orig_auth_seq_id_map)
+
+        self.assertEqual(a3.auth_seq_id_map, {1: (1, None), 2: (2, None),
+                                              3: (5, None), 4: (1, None),
+                                              5: (7, None)})
+        self.assertEqual(a3.orig_auth_seq_id_map, {3: 10, 4: 20})
+
 
 if __name__ == '__main__':
     unittest.main()

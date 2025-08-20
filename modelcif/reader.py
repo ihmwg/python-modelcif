@@ -1130,6 +1130,7 @@ class ModelCIFVariant(Variant):
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
+        ihm.reader._NonPolySchemeHandler,
         _ModelListHandler, _ModelGroupHandler, _ModelGroupLinkHandler,
         _ProtocolHandler, _AssociatedHandler, _AssociatedArchiveHandler,
         _FeatureListHandler, _AtomFeatureHandler,

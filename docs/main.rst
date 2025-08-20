@@ -31,6 +31,9 @@ The :mod:`modelcif` Python module
 .. autoclass:: AsymUnit
    :members:
 
+.. autoclass:: WaterAsymUnit
+   :members:
+
 .. autoclass:: NonPolymerFromTemplate
    :members:
 
