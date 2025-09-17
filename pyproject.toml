@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "modelcif"
-version = "1.4"
+version = "1.5"
 requires-python = ">=3.6"
 authors = [
     {name="Ben Webb", email="ben@salilab.org"}

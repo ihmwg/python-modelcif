@@ -5,7 +5,7 @@ from ihm import Entity, AsymUnit, Software, Assembly, Residue  # noqa: F401
 from ihm import WaterAsymUnit, AsymUnitRange, _remove_identical  # noqa: F401
 import modelcif.data
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 
 class System:

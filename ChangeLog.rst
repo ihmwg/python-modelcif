@@ -1,3 +1,16 @@
+1.5 - 2025-09-17
+================
+  - The ``pdbx_nonpoly_scheme`` and ``pdbx_poly_seq_scheme``
+    tables are now read from and written to mmCIF or BinaryCIF
+    files. This allows for files containing waters to be
+    correctly processed (#52).
+  - A ``pyproject.toml`` file is now provided for compatibility
+    with modern versions of pip (#50).
+  - Bugfix: the ``is_primary`` attribute of
+    :class:`modelcif.reference.TargetReference` is now correctly
+    set when reading files containing a ``_struct_ref`` table
+    but no ``_ma_target_ref_db_details`` table (#51).
+
 1.4 - 2025-06-11
 ================
   - Revision information and information on how the data in the file can
