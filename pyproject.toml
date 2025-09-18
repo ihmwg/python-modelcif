@@ -11,8 +11,7 @@ authors = [
 ]
 readme = "README.md"
 description = 'Package for handling ModelCIF mmCIF and BinaryCIF files'
-license = "MIT"
-license-files = ["LICEN[CS]E*"]
+license = {text="MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
