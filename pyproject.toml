@@ -7,7 +7,7 @@ name = "modelcif"
 version = "1.5"
 requires-python = ">=3.6"
 authors = [
-    {name="Ben Webb", email="ben@salilab.org"}
+    {name="Ben Webb", email="benmwebb@gmail.com"}
 ]
 readme = "README.md"
 description = 'Package for handling ModelCIF mmCIF and BinaryCIF files'
