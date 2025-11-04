@@ -35,44 +35,44 @@ compliant with the ModelCIF extension. It works with Python 3.6 or later.
 %defattr(-,root,root)
 
 %changelog
-* Wed Sep 17 2025 Ben Webb <ben@salilab.org>   1.5-1
+* Wed Sep 17 2025 Ben Webb <benmwebb@gmail.com>   1.5-1
 - Update to latest upstream.
 
-* Wed Jun 11 2025 Ben Webb <ben@salilab.org>   1.4-1
+* Wed Jun 11 2025 Ben Webb <benmwebb@gmail.com>   1.4-1
 - Update to latest upstream.
 
-* Tue Jan 14 2025 Ben Webb <ben@salilab.org>   1.3-1
+* Tue Jan 14 2025 Ben Webb <benmwebb@gmail.com>   1.3-1
 - Update to latest upstream.
 
-* Wed Oct 23 2024 Ben Webb <ben@salilab.org>   1.2-1
+* Wed Oct 23 2024 Ben Webb <benmwebb@gmail.com>   1.2-1
 - Update to latest upstream.
 
-* Fri Sep 27 2024 Ben Webb <ben@salilab.org>   1.1-1
+* Fri Sep 27 2024 Ben Webb <benmwebb@gmail.com>   1.1-1
 - Update to latest upstream.
 
-* Thu Jun 20 2024 Ben Webb <ben@salilab.org>   1.0-1
+* Thu Jun 20 2024 Ben Webb <benmwebb@gmail.com>   1.0-1
 - Update to latest upstream.
 
-* Mon Oct 02 2023 Ben Webb <ben@salilab.org>   0.9-1
+* Mon Oct 02 2023 Ben Webb <benmwebb@gmail.com>   0.9-1
 - Update to latest upstream.
 
-* Fri Aug 04 2023 Ben Webb <ben@salilab.org>   0.8-1
+* Fri Aug 04 2023 Ben Webb <benmwebb@gmail.com>   0.8-1
 - Update to latest upstream.
 
-* Mon Jul 31 2023 Ben Webb <ben@salilab.org>   0.7-1
+* Mon Jul 31 2023 Ben Webb <benmwebb@gmail.com>   0.7-1
 - Update to latest upstream.
 
-* Tue May 10 2022 Ben Webb <ben@salilab.org>   0.5-1
+* Tue May 10 2022 Ben Webb <benmwebb@gmail.com>   0.5-1
 - Update to latest upstream.
 
-* Thu Apr 14 2022 Ben Webb <ben@salilab.org>   0.4-1
+* Thu Apr 14 2022 Ben Webb <benmwebb@gmail.com>   0.4-1
 - Update to latest upstream.
 
-* Mon Mar 21 2022 Ben Webb <ben@salilab.org>   0.3-1
+* Mon Mar 21 2022 Ben Webb <benmwebb@gmail.com>   0.3-1
 - Update to latest upstream.
 
-* Thu Jan 27 2022 Ben Webb <ben@salilab.org>   0.2-1
+* Thu Jan 27 2022 Ben Webb <benmwebb@gmail.com>   0.2-1
 - Update to latest upstream.
 
-* Thu Jan 27 2022 Ben Webb <ben@salilab.org>   0.1-1
+* Thu Jan 27 2022 Ben Webb <benmwebb@gmail.com>   0.1-1
 - Initial package.
