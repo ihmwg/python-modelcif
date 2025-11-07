@@ -34,5 +34,23 @@ The :mod:`modelcif.protocol` Python module
 .. autoclass:: ModelRefinementStep
    :members:
 
+.. autoclass:: ModelAssessmentStep
+   :members:
+
+.. autoclass:: BackboneGenerationStep
+   :members:
+
+.. autoclass:: SequenceDesignStep
+   :members:
+
+.. autoclass:: StructureValidationStep
+   :members:
+
+.. autoclass:: EnergyEstimateStep
+   :members:
+
+.. autoclass:: ExperimentalValidationStep
+   :members:
+
 .. autoclass:: Protocol
    :members:

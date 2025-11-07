@@ -961,25 +961,45 @@ _ma_protocol_step.output_data_group_id
 5 1 5 'model selection' . . 1 1 1
 6 1 6 'model refinement' . . . . .
 7 1 7 other testname testdetails 42 99 66
+8 1 8 'model quality assessment' . . . . .
+9 1 9 'backbone generation' . . . . .
+10 1 10 'sequence design' . . . . .
+11 1 11 'structure validation' . . . . .
+12 1 12 'energy estimate' . . . . .
+13 1 13 'experimental validation' . . . . .
 """
         s, = modelcif.reader.read(StringIO(cif))
         p, = s.protocols
-        self.assertEqual(len(p.steps), 7)
-        s1, s2, s3, s4, s5, s6, s7 = p.steps
-        self.assertIsInstance(s1, modelcif.protocol.TemplateSearchStep)
-        self.assertIsInstance(s2, modelcif.protocol.TemplateSelectionStep)
-        self.assertIsInstance(s3,
+        self.assertEqual(len(p.steps), 13)
+        self.assertIsInstance(p.steps[0], modelcif.protocol.TemplateSearchStep)
+        self.assertIsInstance(p.steps[1],
+                              modelcif.protocol.TemplateSelectionStep)
+        self.assertIsInstance(p.steps[2],
                               modelcif.protocol.TargetTemplateAlignmentStep)
-        self.assertIsInstance(s4, modelcif.protocol.ModelingStep)
-        self.assertIsInstance(s5, modelcif.protocol.ModelSelectionStep)
-        self.assertIsInstance(s6, modelcif.protocol.ModelRefinementStep)
-        self.assertIsInstance(s7, modelcif.protocol.Step)
+        self.assertIsInstance(p.steps[3], modelcif.protocol.ModelingStep)
+        self.assertIsInstance(p.steps[4], modelcif.protocol.ModelSelectionStep)
+        self.assertIsInstance(p.steps[5],
+                              modelcif.protocol.ModelRefinementStep)
+        self.assertIsInstance(p.steps[6], modelcif.protocol.Step)
+        s7 = p.steps[6]
         self.assertEqual(s7.method_type, "other")
         self.assertEqual(s7.name, "testname")
         self.assertEqual(s7.details, "testdetails")
         self.assertEqual(s7.input_data._id, '99')
         self.assertEqual(s7.output_data._id, '66')
         self.assertEqual(s7.software._id, '42')
+        self.assertIsInstance(p.steps[7],
+                              modelcif.protocol.ModelAssessmentStep)
+        self.assertIsInstance(p.steps[8],
+                              modelcif.protocol.BackboneGenerationStep)
+        self.assertIsInstance(p.steps[9],
+                              modelcif.protocol.SequenceDesignStep)
+        self.assertIsInstance(p.steps[10],
+                              modelcif.protocol.StructureValidationStep)
+        self.assertIsInstance(p.steps[11],
+                              modelcif.protocol.EnergyEstimateStep)
+        self.assertIsInstance(p.steps[12],
+                              modelcif.protocol.ExperimentalValidationStep)
 
     def test_target_entity_handler(self):
         """Test _TargetEntityHandler"""

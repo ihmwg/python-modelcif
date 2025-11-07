@@ -83,6 +83,45 @@ class ModelRefinementStep(Step):
     method_type = "model refinement"
 
 
+class ModelAssessmentStep(Step):
+    """A modeling protocol step that performs model quality assessment.
+       See :class:`Step` for more details."""
+    method_type = "model quality assessment"
+
+
+class BackboneGenerationStep(Step):
+    """A modeling protocol step that generates backbone coordinates for
+       protein design.
+       See :class:`Step` for more details."""
+    method_type = "backbone generation"
+
+
+class SequenceDesignStep(Step):
+    """A modeling protocol step that generates sequences for protein design.
+       This includes inverse folding.
+       See :class:`Step` for more details."""
+    method_type = "sequence design"
+
+
+class StructureValidationStep(Step):
+    """A modeling protocol step that assesses designed sequences with
+       their modeled structures.
+       See :class:`Step` for more details."""
+    method_type = "structure validation"
+
+
+class EnergyEstimateStep(Step):
+    """A modeling protocol step that performs an energy estimate.
+       See :class:`Step` for more details."""
+    method_type = "energy estimate"
+
+
+class ExperimentalValidationStep(Step):
+    """A modeling protocol step that conducts experimental validation.
+       See :class:`Step` for more details."""
+    method_type = "experimental validation"
+
+
 class Protocol:
     """A modeling protocol.
        Each protocol consists of a number of protocol steps."""
