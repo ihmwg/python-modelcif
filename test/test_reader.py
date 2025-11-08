@@ -127,6 +127,19 @@ _ma_software_group.parameter_group_id
         self.assertAlmostEqual(f1, 1.5, delta=1e-1)
         self.assertAlmostEqual(f2, 3.8, delta=1e-1)
 
+    def test_atom_id_map(self):
+        """Test _AtomIDMap class"""
+        m = modelcif.reader._AtomIDMap()
+        # Should be a noop
+        m.add(atom_id='non-numeric', model_num='1')
+        m.add(atom_id='42', model_num='1')
+        m.add(atom_id='48', model_num='1')
+        m.add(atom_id='24', model_num='1')
+        self.assertEqual(m._model_to_id_range['1'], [24, 48])
+        self.assertEqual(m.get(24), '1')
+        self.assertEqual(m.get(34), '1')
+        self.assertRaises(ValueError, m.get, 99)
+
     def test_enumeration_mapper(self):
         """Test EnumerationMapper class"""
         m = modelcif.reader._EnumerationMapper(
@@ -1331,6 +1344,75 @@ _ma_qa_metric_feature_pairwise.metric_value
             self.assertIsInstance(q1.feature1, modelcif.PolyResidueFeature)
             self.assertIsInstance(q1.feature2, modelcif.PolyResidueFeature)
             self.assertAlmostEqual(q1.value, 50.0, delta=1e-6)
+
+    def test_qa_metric_dihedral_handler(self):
+        """Test _QAMetricDihedralHandler"""
+        atoms = """
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_seq_id
+_atom_site.auth_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.label_asym_id
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.label_entity_id
+_atom_site.auth_asym_id
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_PDB_model_num
+ATOM 1000 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 1
+ATOM 1900 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 1
+ATOM 2000 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 2
+ATOM 2900 C CA . ASP 1 1 ? A 1.000 2.000 3.000 . 1 A . 2
+"""
+        qa = """
+loop_
+_ma_qa_metric.id
+_ma_qa_metric.name
+_ma_qa_metric.description
+_ma_qa_metric.type
+_ma_qa_metric.mode
+_ma_qa_metric.type_other_details
+_ma_qa_metric.software_group_id
+1 'test dihedral' 'some dihedral score' 'energy' dihedral . .
+#
+loop_
+_ma_qa_metric_dihedral.ordinal_id
+_ma_qa_metric_dihedral.atom_id_1
+_ma_qa_metric_dihedral.atom_id_2
+_ma_qa_metric_dihedral.atom_id_3
+_ma_qa_metric_dihedral.atom_id_4
+_ma_qa_metric_dihedral.metric_id
+_ma_qa_metric_dihedral.metric_value
+_ma_qa_metric_dihedral.quality
+_ma_qa_metric_dihedral.smarts_pattern
+1 1407 1410 1403 1404 1 10.0 TOLERABLE .
+2 2407 2410 2403 2404 1 20.0 invalid-quality some-smarts
+"""
+        # Test both ways to make sure dihedrals still work if they reference
+        # atoms by ID before we read the atom_site table
+        for cif in (atoms + qa, qa + atoms):
+            s, = modelcif.reader.read(StringIO(cif))
+            mg, = s.model_groups
+            m1, m2 = mg
+            q1, = m1.qa_metrics
+            q2, = m2.qa_metrics
+            self.assertIsInstance(q1, modelcif.qa_metric.Dihedral)
+            self.assertIsInstance(q1, modelcif.qa_metric.Energy)
+            self.assertAlmostEqual(q1.value, 10.0, delta=1e-6)
+            self.assertEqual(q1.quality, "tolerable")
+            self.assertIsNone(q1.smarts_pattern)
+
+            self.assertAlmostEqual(q2.value, 20.0, delta=1e-6)
+            self.assertIsNone(q2.quality)
+            self.assertEqual(q2.smarts_pattern, "some-smarts")
 
     def test_alignment_info_details_handler(self):
         """Test _AlignmentInfoHandler and _AlignmentDetailsHandler"""

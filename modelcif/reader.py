@@ -94,6 +94,43 @@ class _FeatureIDMapper(IDMapper):
             obj.asym_units = []
 
 
+class _AtomIDMap:
+    """Mapping from atom ID (atom_site.id) to model number.
+       This is used, e.g, to determine the model for a dihedral QA metric.
+       We assume that atom IDs are numeric and are at least roughly
+       sequential (perhaps with gaps). Each model ID then maps to a simple
+       numeric range of atom IDs."""
+
+    def __init__(self):
+        self._model_to_id_range = {}
+
+    def add(self, atom_id, model_num):
+        """Add a mapping between a single atom ID and model number"""
+        try:
+            atom_id = int(atom_id)
+        except ValueError:
+            return
+        if model_num not in self._model_to_id_range:
+            self._model_to_id_range[model_num] = [atom_id, atom_id]
+        else:
+            r = self._model_to_id_range[model_num]
+            if atom_id < r[0]:
+                r[0] = atom_id
+            elif atom_id > r[1]:
+                r[1] = atom_id
+
+    def get(self, atom_id):
+        """Look up an atom ID and return the corresponding model number"""
+        # Do a dumb search through all models. If we have many models,
+        # this could be made more efficient by sorting the ranges first
+        # and doing a binary search.
+        for model_id, rng in self._model_to_id_range.items():
+            if atom_id >= rng[0] and atom_id <= rng[1]:
+                return model_id
+        raise ValueError("Atom ID %d could not be found in any model"
+                         % atom_id)
+
+
 class _SystemReader:
     def __init__(self, model_class, starting_model_class, system=None):
         self.system = system or modelcif.System()
@@ -183,6 +220,9 @@ class _SystemReader:
 
         # Mapping from Entity to bool ma_model_mode flag
         self.ma_model_mode_map = {}
+
+        # Mapping from atom_site.id to model number
+        self.atom_id_to_model_num = _AtomIDMap()
 
     def finalize(self):
         # make sequence immutable (see also _make_new_entity)
@@ -776,6 +816,22 @@ class _AssemblyDetailsHandler(Handler):
         a.description = assembly_description
 
 
+class _AtomSiteHandler(ihm.reader._AtomSiteHandler):
+    def __call__(self, pdbx_pdb_model_num, label_asym_id,
+                 b_iso_or_equiv: float, label_seq_id: int, label_atom_id,
+                 type_symbol, cartn_x: float, cartn_y: float, cartn_z: float,
+                 occupancy: float, group_pdb, auth_seq_id, pdbx_pdb_ins_code,
+                 auth_asym_id, label_comp_id, label_alt_id, id):
+        # Update mapping from atom ID to model number
+        self.sysr.atom_id_to_model_num.add(id, pdbx_pdb_model_num)
+
+        super().__call__(
+            pdbx_pdb_model_num, label_asym_id, b_iso_or_equiv,
+            label_seq_id, label_atom_id, type_symbol, cartn_x, cartn_y,
+            cartn_z, occupancy, group_pdb, auth_seq_id, pdbx_pdb_ins_code,
+            auth_asym_id, label_comp_id, label_alt_id)
+
+
 class _ModelListHandler(Handler):
     category = '_ma_model_list'
 
@@ -1099,6 +1155,37 @@ class _QAMetricFeaturePairwiseHandler(Handler):
         model.qa_metrics.append(metric_class(feature1, feature2, metric_value))
 
 
+class _QAMetricDihedralHandler(Handler):
+    category = '_ma_qa_metric_dihedral'
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._metrics = []
+
+    def __call__(self, atom_id_1: int, atom_id_2: int, atom_id_3: int,
+                 atom_id_4: int, metric_id, metric_value: float,
+                 quality, smarts_pattern):
+        metric_class = self.sysr.qa_by_id[metric_id]
+        qa = metric_class(atom_id_1, atom_id_2, atom_id_3, atom_id_4,
+                          metric_value, None, smarts_pattern)
+        if isinstance(quality, str):
+            quality = quality.lower()
+        # Default quality to None if invalid type read
+        try:
+            qa.quality = quality
+        except ValueError:
+            pass
+        # We don't know which model the metric applies to yet; we'll
+        # figure this out at finalize time using atom_site.id
+        self._metrics.append(qa)
+
+    def finalize(self):
+        for m in self._metrics:
+            model_id = self.sysr.atom_id_to_model_num.get(m.atom_id_1)
+            model = self.sysr.models.get_by_id(model_id)
+            model.qa_metrics.append(m)
+
+
 class ModelCIFVariant(Variant):
     """Used to select typical PDBx/ModelCIF file input.
        See :func:`read` and :class:`ihm.reader.Variant`."""
@@ -1129,7 +1216,7 @@ class ModelCIFVariant(Variant):
         _TemplatePolyHandler, _TemplateNonPolyHandler,
         _AlignmentHandler, _AlignmentInfoHandler, _AlignmentDetailsHandler,
         _TargetTemplatePolyMappingHandler,
-        _AssemblyHandler, _AssemblyDetailsHandler, ihm.reader._AtomSiteHandler,
+        _AssemblyHandler, _AssemblyDetailsHandler, _AtomSiteHandler,
         ihm.reader._PolySeqSchemeHandler, ihm.reader._NonPolySchemeHandler,
         _ModelListHandler, _ModelGroupHandler, _ModelGroupLinkHandler,
         _ProtocolHandler, _AssociatedHandler, _AssociatedArchiveHandler,
@@ -1137,7 +1224,7 @@ class ModelCIFVariant(Variant):
         _PolyResidueFeatureHandler, _EntityInstanceFeatureHandler,
         _QAMetricHandler, _QAMetricGlobalHandler, _QAMetricLocalHandler,
         _QAMetricPairwiseHandler, _QAMetricFeatureHandler,
-        _QAMetricFeaturePairwiseHandler]
+        _QAMetricFeaturePairwiseHandler, _QAMetricDihedralHandler]
 
     def get_handlers(self, sysr):
         return [h(sysr) for h in self._handlers]
