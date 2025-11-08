@@ -21,12 +21,14 @@
    :attr:`modelcif.model.Model.qa_metrics`.
 """
 
+from ihm.util import _text_choice_property
+
 
 class MetricMode:
     """Base class for the mode of a quality metric.
        Use a derived class such as :class:`Global`, :class:`Local`,
-       :class:`LocalPairwise`, :class:`Feature`, or :class:`FeaturePairwise`
-       for declaring a new score.
+       :class:`LocalPairwise`, :class:`Feature`, :class:`FeaturePairwise`,
+       or :class:`Dihedral` for declaring a new score.
     """
     name = property(lambda x: type(x).__name__,
                     doc="Short name of this score. By default it is just the "
@@ -138,6 +140,40 @@ class FeaturePairwise(MetricMode):
                 % (type(self).__name__, self.feature1, self.feature2,
                    self.value))
     _all_features = property(lambda self: (self.feature1, self.feature2))
+
+
+class Dihedral(MetricMode):
+    """A score that is calculated on a dihedral.
+
+       :param int atom_id_1: The first atom ID in the dihedral.
+       :param int atom_id_2: The second atom ID in the dihedral.
+       :param int atom_id_3: The third atom ID in the dihedral.
+       :param int atom_id_4: The fourth atom ID in the dihedral.
+       :param float value: The score value (see :class:`MetricType`).
+       :param str quality: Outcome or result of the analysis.
+       :param str smarts_pattern: Optional SMARTS pattern that specifies the
+              dihedral angle in its chemical environment; or that defines the
+              fragment used for dihedral scanning.
+    """
+
+    mode = "dihedral"
+
+    def __init__(self, atom_id_1, atom_id_2, atom_id_3, atom_id_4, value,
+                 quality, smarts_pattern=None):
+        self.atom_id_1, self.atom_id_2 = atom_id_1, atom_id_2
+        self.atom_id_3, self.atom_id_4 = atom_id_3, atom_id_4
+        self.value = value
+        self.quality, self.smarts_pattern = quality, smarts_pattern
+
+    quality = _text_choice_property(
+        "quality", ["relaxed", "tolerable", "strained"],
+        doc="Outcome or result of the analysis.")
+
+    def __repr__(self):
+        return ("<%s(atom_id_1=%r, atom_id_2=%r, atom_id_3=%r, atom_id_4=%r, "
+                "value=%r)>" % (type(self).__name__, self.atom_id_1,
+                                self.atom_id_2, self.atom_id_3, self.atom_id_4,
+                                self.value))
 
 
 class MetricType:

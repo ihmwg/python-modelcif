@@ -803,6 +803,7 @@ class _QAMetricDumper(Dumper):
         self.dump_metric_pairwise(system, writer)
         self.dump_metric_feature(system, writer)
         self.dump_metric_feature_pairwise(system, writer)
+        self.dump_metric_dihedral(system, writer)
 
     def dump_metric_types(self, system, writer):
         with writer.loop(
@@ -895,6 +896,23 @@ class _QAMetricDumper(Dumper):
                              feature_id_1=m.feature1._id,
                              feature_id_2=m.feature2._id,
                              metric_id=m._id, metric_value=m.value)
+
+    def dump_metric_dihedral(self, system, writer):
+        ordinal = itertools.count(1)
+        with writer.loop(
+                "_ma_qa_metric_dihedral",
+                ["ordinal_id", "atom_id_1", "atom_id_2", "atom_id_3",
+                 "atom_id_4", "metric_id", "metric_value", "quality",
+                 "smarts_pattern"]) as lp:
+            for group, model in system._all_models():
+                for m in model.qa_metrics:
+                    if not isinstance(m, modelcif.qa_metric.Dihedral):
+                        continue
+                    lp.write(ordinal_id=next(ordinal), atom_id_1=m.atom_id_1,
+                             atom_id_2=m.atom_id_2, atom_id_3=m.atom_id_3,
+                             atom_id_4=m.atom_id_4, metric_id=m._id,
+                             metric_value=m.value, quality=m.quality,
+                             smarts_pattern=m.smarts_pattern)
 
 
 class _CopyWriter:

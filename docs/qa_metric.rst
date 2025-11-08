@@ -25,6 +25,9 @@ The :mod:`modelcif.qa_metric` Python module
 .. autoclass:: FeaturePairwise
    :members:
 
+.. autoclass:: Dihedral
+   :members:
+
 .. autoclass:: MetricType
    :members:
 

@@ -303,6 +303,12 @@ _ma_data_ref_db.release_date
             name = "feature pairwise score"
             software = None
 
+        class DihedralScore(modelcif.qa_metric.Dihedral,
+                            modelcif.qa_metric.Energy):
+            """dihedral score"""
+            name = "dihedral score"
+            software = None
+
         m1 = DistanceScore(42.)
         m2 = CustomScore(99.)
         m3 = DistanceScore(60.)
@@ -315,9 +321,10 @@ _ma_data_ref_db.release_date
         instf = modelcif.EntityInstanceFeature((asym,))
         m6 = FeatureScore(resf, 40.)
         m7 = FeaturePairwiseScore(resf, instf, 50.)
+        m8 = DihedralScore(1, 2, 3, 4, 60., "tolerable", "some-smarts")
         model = MockObject()
         model._id = 18
-        model.qa_metrics = [m1, m2, m3, m4, m5, m6, m7]
+        model.qa_metrics = [m1, m2, m3, m4, m5, m6, m7, m8]
         mg = modelcif.model.ModelGroup((model,))
         system.model_groups.append(mg)
         # Assign feature IDs
@@ -341,6 +348,7 @@ _ma_qa_metric.software_group_id
 4 'custom pair score' 'custom pair description' energy local-pairwise . .
 5 'feature score' 'feature score' zscore per-feature . .
 6 'feature pairwise score' 'feature pairwise score' zscore per-feature-pair . .
+7 'dihedral score' 'dihedral score' energy dihedral . .
 #
 #
 loop_
@@ -395,6 +403,19 @@ _ma_qa_metric_feature_pairwise.feature_id_2
 _ma_qa_metric_feature_pairwise.metric_id
 _ma_qa_metric_feature_pairwise.metric_value
 1 18 1 2 6 50.000
+#
+#
+loop_
+_ma_qa_metric_dihedral.ordinal_id
+_ma_qa_metric_dihedral.atom_id_1
+_ma_qa_metric_dihedral.atom_id_2
+_ma_qa_metric_dihedral.atom_id_3
+_ma_qa_metric_dihedral.atom_id_4
+_ma_qa_metric_dihedral.metric_id
+_ma_qa_metric_dihedral.metric_value
+_ma_qa_metric_dihedral.quality
+_ma_qa_metric_dihedral.smarts_pattern
+1 1 2 3 4 7 60.000 tolerable some-smarts
 #
 """)
 
