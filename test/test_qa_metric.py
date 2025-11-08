@@ -96,6 +96,15 @@ class Tests(unittest.TestCase):
         q = MyScore(asym.residue(2), asym.residue(3), 42)
         _ = repr(q)
 
+    def test_dihedral_metric(self):
+        """Test Dihedral MetricMode"""
+        class MyScore(modelcif.qa_metric.Dihedral,
+                      modelcif.qa_metric.Energy):
+            pass
+
+        q = MyScore(1, 2, 3, 4, 42, 'relaxed')
+        _ = repr(q)
+
 
 if __name__ == '__main__':
     unittest.main()
