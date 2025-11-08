@@ -63,7 +63,7 @@ class _TemplateIDMapper(IDMapper):
     """Add extra handling to IDMapper for modelcif.Template objects"""
 
     def _update_old_object(self, obj, newcls=None):
-        super(_TemplateIDMapper, self)._update_old_object(obj, newcls)
+        super()._update_old_object(obj, newcls)
         # Add missing members if the wrong class was originally instantianted
         if newcls is modelcif.CustomTemplate and not hasattr(obj, 'atoms'):
             obj.details = None
@@ -82,7 +82,7 @@ class _FeatureIDMapper(IDMapper):
             return newcls([])
 
     def _update_old_object(self, obj, newcls=None):
-        super(_FeatureIDMapper, self)._update_old_object(obj, newcls)
+        super()._update_old_object(obj, newcls)
         # Add missing members if the base class was originally instantianted
         if (newcls is modelcif.PolyResidueFeature
                 and not hasattr(obj, 'residues')):
@@ -216,7 +216,7 @@ class _ChemCompHandler(Handler):
     _prov_map = {'ccd core': 'core', 'ccd ma': 'ma', 'ccd local': 'local'}
 
     def __init__(self, *args):
-        super(_ChemCompHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map _chem_comp.type to corresponding subclass of ihm.ChemComp
         self.type_map = dict((x[1].type.lower(), x[1])
                              for x in inspect.getmembers(ihm, inspect.isclass)
@@ -235,7 +235,7 @@ class _ChemCompDescriptorHandler(Handler):
     category = '_ma_chem_comp_descriptor'
 
     def __init__(self, *args):
-        super(_ChemCompDescriptorHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map _chem_comp_descriptor.type to corresponding subclass of
         # modelcif.descriptor.Descriptor
         self._type_map = dict(
@@ -273,7 +273,7 @@ class _TemplatePolyHandler(Handler):
     category = '_ma_template_poly'
 
     def __init__(self, sysr):
-        super(_TemplatePolyHandler, self).__init__(sysr)
+        super().__init__(sysr)
         # Use python-ihm's _EntityPolyHandler to do most of the work here.
         # Note that we use Entity objects to store the sequence of the
         # templates, but template Entities are *not* stored in the mmCIF
@@ -451,7 +451,7 @@ class _TargetRefDBHandler(Handler):
     category = '_ma_target_ref_db_details'
 
     def __init__(self, *args):
-        super(_TargetRefDBHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map db_name to subclass of modelcif.reference.TargetReference
         self.type_map = _EnumerationMapper(modelcif.reference,
                                            modelcif.reference.TargetReference)
@@ -553,7 +553,7 @@ class _TemplateRefDBHandler(Handler):
     category = '_ma_template_ref_db_details'
 
     def __init__(self, *args):
-        super(_TemplateRefDBHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map db_name to subclass of modelcif.reference.TemplateReference
         self.type_map = _EnumerationMapper(
             modelcif.reference, modelcif.reference.TemplateReference)
@@ -621,7 +621,7 @@ class _AlignmentInfoHandler(Handler):
     category = '_ma_alignment_info'
 
     def __init__(self, *args):
-        super(_AlignmentInfoHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map type to subclass of modelcif.alignment.AlignmentType
         self._type_map = dict(
             (x[1].type.upper(), x[1])
@@ -690,7 +690,7 @@ class _AlignmentDetailsHandler(Handler):
     category = '_ma_alignment_details'
 
     def __init__(self, *args):
-        super(_AlignmentDetailsHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map denom to subclass of modelcif.alignment.Identity
         self._ident_map = _EnumerationMapper(
             modelcif.alignment, modelcif.alignment.Identity,
@@ -780,7 +780,7 @@ class _ModelListHandler(Handler):
     category = '_ma_model_list'
 
     def __init__(self, *args):
-        super(_ModelListHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map model_type to subclass of modelcif.model.Model
         self._type_map = _EnumerationMapper(
             modelcif.model, modelcif.model.Model,
@@ -849,7 +849,7 @@ class _ProtocolHandler(Handler):
     category = '_ma_protocol_step'
 
     def __init__(self, *args):
-        super(_ProtocolHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map method_type to subclass of modelcif.protocol.Step
         self._method_map = dict(
             (x[1].method_type.upper(), x[1])
@@ -913,7 +913,7 @@ class _AssociatedHandler(Handler):
     category = '_ma_entry_associated_files'
 
     def __init__(self, *args):
-        super(_AssociatedHandler, self).__init__(*args)
+        super().__init__(*args)
         self._repos_by_root = {}
         self._type_map, self._binary_type_map = _get_assoc_type_maps()
 
@@ -944,7 +944,7 @@ class _AssociatedArchiveHandler(Handler):
     category = '_ma_associated_archive_file_details'
 
     def __init__(self, *args):
-        super(_AssociatedArchiveHandler, self).__init__(*args)
+        super().__init__(*args)
         self._type_map, self._binary_type_map = _get_assoc_type_maps()
         self._archive_files = collections.defaultdict(list)
 
@@ -1018,7 +1018,7 @@ class _QAMetricHandler(Handler):
     category = '_ma_qa_metric'
 
     def __init__(self, *args):
-        super(_QAMetricHandler, self).__init__(*args)
+        super().__init__(*args)
         # Map mode to subclass of modelcif.qa_metric.MetricMode
         self._mode_map = dict(
             (x[1].mode.upper(), x[1])

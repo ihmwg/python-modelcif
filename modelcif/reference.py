@@ -52,7 +52,7 @@ class TargetReference(ihm.reference.Sequence):
                  organism_scientific=None, sequence_version_date=None,
                  sequence_crc64=None, sequence=None, details=None,
                  is_primary=None):
-        super(TargetReference, self).__init__(
+        super().__init__(
             db_name=self.name, db_code=code, accession=accession,
             sequence=sequence, details=details)
         self.align_begin, self.align_end = align_begin, align_end

@@ -83,7 +83,7 @@ class CIFFile(File):
     def __init__(self, path, details=None, categories=[], copy_categories=[],
                  entry_id='model', entry_details=None, local_path=None,
                  binary=False, data=None):
-        super(CIFFile, self).__init__(path, details, data)
+        super().__init__(path, details, data)
         self.categories = categories
         self.copy_categories = copy_categories
         self.id = entry_id
@@ -104,7 +104,7 @@ class LocalPairwiseQAScoresFile(QAMetricsFile):
     def __init__(self, *args, **keys):
         warnings.warn("LocalPairwiseQAScoresFile is deprecated. "
                       "Use QAMetricsFile instead.", stacklevel=2)
-        super(LocalPairwiseQAScoresFile, self).__init__(*args, **keys)
+        super().__init__(*args, **keys)
 
 
 class ZipFile(File):
@@ -120,5 +120,5 @@ class ZipFile(File):
     file_format = 'zip'
 
     def __init__(self, path, details=None, files=[], data=None):
-        super(ZipFile, self).__init__(path, details, data)
+        super().__init__(path, details, data)
         self.files = files

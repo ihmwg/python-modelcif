@@ -389,7 +389,7 @@ class SoftwareGroup(list):
     """
 
     def __init__(self, elements=(), parameters=None):
-        super(SoftwareGroup, self).__init__(elements)
+        super().__init__(elements)
         if parameters:
             warnings.warn(
                 "Parameters for SofwareGroup are ignored. To specify "
@@ -493,7 +493,7 @@ class _TemplateBase(modelcif.data.Data):
 
     def __init__(self, entity, asym_id, model_num, transformation,
                  name=None, strand_id=None, entity_id=None):
-        super(_TemplateBase, self).__init__(name)
+        super().__init__(name)
         self.entity = entity
         self.asym_id, self.model_num = asym_id, model_num
         self.transformation = transformation
@@ -557,7 +557,7 @@ class Template(_TemplateBase):
 
     def __init__(self, entity, asym_id, model_num, transformation,
                  name=None, references=[], strand_id=None, entity_id=None):
-        super(Template, self).__init__(
+        super().__init__(
             entity=entity, asym_id=asym_id, model_num=model_num,
             transformation=transformation, name=name, strand_id=strand_id,
             entity_id=entity_id)
@@ -580,7 +580,7 @@ class CustomTemplate(_TemplateBase):
     """
     def __init__(self, entity, asym_id, model_num, transformation,
                  name=None, strand_id=None, entity_id=None, details=None):
-        super(CustomTemplate, self).__init__(
+        super().__init__(
             entity=entity, asym_id=asym_id, model_num=model_num,
             transformation=transformation, name=name, strand_id=strand_id,
             entity_id=entity_id)
@@ -659,7 +659,7 @@ class NonPolymerFromTemplate(AsymUnit):
 
     def __init__(self, template, explicit, details=None, auth_seq_id_map=0,
                  id=None, strand_id=None):
-        super(NonPolymerFromTemplate, self).__init__(
+        super().__init__(
             template.entity, details=details, auth_seq_id_map=auth_seq_id_map,
             id=id, strand_id=strand_id)
         self.template, self.explicit = template, explicit
@@ -685,7 +685,7 @@ class ReferenceDatabase(modelcif.data.Data):
     data_content_type = "reference database"
 
     def __init__(self, name, url, version=None, release_date=None):
-        super(ReferenceDatabase, self).__init__(name)
+        super().__init__(name)
         self.url, self.version, self.release_date = url, version, release_date
 
 
