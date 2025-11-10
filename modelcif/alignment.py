@@ -112,7 +112,7 @@ class AlignmentMode(modelcif.data.Data):
     data_content_type = 'target-template alignment'
 
     def __init__(self, name, pairs, software=None):
-        modelcif.data.Data.__init__(self, name)
+        super().__init__(name)
         self.pairs = pairs
         self.software = software
 

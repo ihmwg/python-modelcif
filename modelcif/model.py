@@ -54,7 +54,7 @@ class Model(modelcif.data.Data):
     model_type = "Other"
 
     def __init__(self, assembly, name=None):
-        modelcif.data.Data.__init__(self, name)
+        super().__init__(name)
         self.assembly = assembly
         # Assume everything is atomic for ModelCIF models
         self.representation = ihm.representation.Representation(
