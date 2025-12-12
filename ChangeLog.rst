@@ -1,3 +1,10 @@
+1.6 - 2025-12-12
+================
+  - New classes have been added to :mod:`modelcif.protocol` to describe
+    protocol steps for model quality assessment, validation, and protein design.
+  - The new :class:`modelcif.qa_metric.Dihedral` class can be used to
+    describe quality scores that are calculated on a dihedral.
+
 1.5 - 2025-09-17
 ================
   - The ``pdbx_nonpoly_scheme`` and ``pdbx_poly_seq_scheme``
