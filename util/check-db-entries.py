@@ -33,7 +33,7 @@ class Tests(unittest.TestCase):
 
     def test_alpha_fold(self):
         """Test AlphaFold structure without errors"""
-        model_id = 'AF-B4GKE9-F1-model_v4'
+        model_id = 'AF-B4GKE9-F1-model_v6'
         url = 'https://alphafold.ebi.ac.uk/files/%s.cif' % model_id
         s = self._read_cif(url)
         self._write_cif(s)
