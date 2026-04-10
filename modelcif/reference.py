@@ -3,6 +3,10 @@
 import warnings
 import ihm.reference
 from ihm.reference import Alignment, SeqDif  # noqa: F401
+try:
+    from ihm.reference import InsertionSeqDif, DeletionSeqDif  # noqa: F401
+except ImportError:
+    pass
 
 
 class TargetReference(ihm.reference.Sequence):
