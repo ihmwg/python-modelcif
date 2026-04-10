@@ -42,8 +42,8 @@ first build and install version 2.10 or later of the
 [python-ihm](https://github.com/ihmwg/python-ihm) module. Then run:
 
 ```
-python setup.py build
-python setup.py install
+python3 setup.py build
+python3 setup.py install
 ```
 
 If you want to read or write [BinaryCIF](https://github.com/molstar/BinaryCIF)
