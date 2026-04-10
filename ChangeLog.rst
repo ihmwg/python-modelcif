@@ -1,3 +1,10 @@
+1.7 - 2026-04-10
+================
+  - The new classes :class:`modelcif.reference.InsertionSeqDif`
+    and :class:`modelcif.reference.DeletionSeqDif` allow for
+    annotating insertions or deletions in the entity sequence
+    relative to the reference database.
+
 1.6 - 2025-12-12
 ================
   - New classes have been added to :mod:`modelcif.protocol` to describe
