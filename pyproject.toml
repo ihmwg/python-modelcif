@@ -18,7 +18,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = ['ihm>=2.6']
+dependencies = ['ihm>=2.10']
 
 [project.urls]
 homepage = 'https://github.com/ihmwg/python-modelcif'
