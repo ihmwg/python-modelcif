@@ -13,6 +13,7 @@ TOPDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 utils.set_search_paths(TOPDIR)
 
 import modelcif.reader
+import ihm
 
 
 def get_example_dir():
@@ -62,7 +63,13 @@ class Tests(unittest.TestCase):
             # can read it
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 contents = fh.readlines()
-            self.assertEqual(len(contents), 451)
+            # python-2.11 introduced both _struct_pdbx_details and
+            # three new journal codes, the latter of which adds 3 lines
+            # to the output
+            if hasattr(ihm.System, '_struct_pdbx_details'):
+                self.assertEqual(len(contents), 454)
+            else:
+                self.assertEqual(len(contents), 451)
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 s, = modelcif.reader.read(fh)
 

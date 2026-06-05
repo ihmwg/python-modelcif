@@ -1061,7 +1061,13 @@ _ma_template_non_poly.details
         system.templates.append(t1)
         dumper = modelcif.dumper._AlignmentDumper()
         out = _get_dumper_output(dumper, system)
-        self.assertEqual(out, """#
+        # python-2.11 introduced _struct_pdbx_details and changed
+        # the way exact zero was output
+        if hasattr(ihm.System, '_struct_pdbx_details'):
+            zero = '0.000'
+        else:
+            zero = '0'
+        self.assertEqual(out, f"""#
 loop_
 _ma_template_details.ordinal_id
 _ma_template_details.template_id
@@ -1110,7 +1116,7 @@ _ma_template_coord.occupancy
 _ma_template_coord.label_entity_id
 _ma_template_coord.B_iso_or_equiv
 _ma_template_coord.formal_charge
-1 ATOM 1 C CA ALA 1 A 42 A X XXX 0 1.000 2.000 0.500 9 2.000 1.000
+1 ATOM 1 C CA ALA 1 A 42 A X XXX {zero} 1.000 2.000 0.500 9 2.000 1.000
 1 ATOM 2 O OXT CYS 2 A . A . . 1.000 2.000 3.000 . 9 . .
 #
 """)
@@ -1438,8 +1444,18 @@ _pdbx_entity_nonpoly.ma_model_mode
 
         dumper = modelcif.dumper._ChemCompDumper()
         out = _get_dumper_output(dumper, system)
+        # python-2.11 introduced _struct_pdbx_details and changed
+        # the masses of standard amino acids to match CCD
+        if hasattr(ihm.System, '_struct_pdbx_details'):
+            ala_mass = '89.093'
+            cys_mass = '121.158'
+            thr_mass = '119.119'
+        else:
+            ala_mass = '89.094'
+            cys_mass = '121.154'
+            thr_mass = '119.120'
         # chem_comp should include both system.entities and system.templates
-        self.assertEqual(out, """#
+        self.assertEqual(out, f"""#
 loop_
 _chem_comp.id
 _chem_comp.type
@@ -1447,14 +1463,14 @@ _chem_comp.name
 _chem_comp.formula
 _chem_comp.formula_weight
 _chem_comp.ma_provenance
-ALA 'L-peptide linking' ALANINE 'C3 H7 N O2' 89.094 'CCD Core'
+ALA 'L-peptide linking' ALANINE 'C3 H7 N O2' {ala_mass} 'CCD Core'
 C1 non-polymer C1 . . 'CCD Core'
 C2 non-polymer C2 . . 'CCD Core'
 C3 non-polymer C3 . . 'CCD MA'
 C4 non-polymer C4 . . 'CCD local'
-CYS 'L-peptide linking' CYSTEINE 'C3 H7 N O2 S' 121.154 'CCD Core'
+CYS 'L-peptide linking' CYSTEINE 'C3 H7 N O2 S' {cys_mass} 'CCD Core'
 GLY 'peptide linking' GLYCINE 'C2 H5 N O2' 75.067 'CCD Core'
-THR 'L-peptide linking' THREONINE 'C4 H9 N O3' 119.120 'CCD Core'
+THR 'L-peptide linking' THREONINE 'C4 H9 N O3' {thr_mass} 'CCD Core'
 #
 """)
 
