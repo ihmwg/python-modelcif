@@ -63,7 +63,7 @@ class Tests(unittest.TestCase):
             # can read it
             with open(os.path.join(tmpdir, 'output.cif')) as fh:
                 contents = fh.readlines()
-            # python-2.11 introduced both _struct_pdbx_details and
+            # python-ihm 2.11 introduced both _struct_pdbx_details and
             # three new journal codes, the latter of which adds 3 lines
             # to the output
             if hasattr(ihm.System, '_struct_pdbx_details'):

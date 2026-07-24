@@ -1061,7 +1061,7 @@ _ma_template_non_poly.details
         system.templates.append(t1)
         dumper = modelcif.dumper._AlignmentDumper()
         out = _get_dumper_output(dumper, system)
-        # python-2.11 introduced _struct_pdbx_details and changed
+        # python-ihm 2.11 introduced _struct_pdbx_details and changed
         # the way exact zero was output
         if hasattr(ihm.System, '_struct_pdbx_details'):
             zero = '0.000'
@@ -1444,7 +1444,7 @@ _pdbx_entity_nonpoly.ma_model_mode
 
         dumper = modelcif.dumper._ChemCompDumper()
         out = _get_dumper_output(dumper, system)
-        # python-2.11 introduced _struct_pdbx_details and changed
+        # python-ihm 2.11 introduced _struct_pdbx_details and changed
         # the masses of standard amino acids to match CCD
         if hasattr(ihm.System, '_struct_pdbx_details'):
             ala_mass = '89.093'
