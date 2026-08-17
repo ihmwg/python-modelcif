@@ -1218,6 +1218,8 @@ class ModelCIFVariant(Variant):
         _TargetTemplatePolyMappingHandler,
         _AssemblyHandler, _AssemblyDetailsHandler, _AtomSiteHandler,
         ihm.reader._PolySeqSchemeHandler, ihm.reader._NonPolySchemeHandler,
+        ihm.reader._BranchSchemeHandler, ihm.reader._EntityBranchListHandler,
+        ihm.reader._BranchDescriptorHandler, ihm.reader._BranchLinkHandler,
         _ModelListHandler, _ModelGroupHandler, _ModelGroupLinkHandler,
         _ProtocolHandler, _AssociatedHandler, _AssociatedArchiveHandler,
         _FeatureListHandler, _AtomFeatureHandler,

@@ -1394,7 +1394,10 @@ _ma_associated_archive_file_details.data_id
         e2._id = 2
         e3 = ihm.Entity([ihm.NonPolymerChemComp('ZN')], description='zinc')
         e3._id = 3
-        system.entities.extend((e1, e2, e3))
+        # Branched entity (ignored)
+        e4 = modelcif.Entity(
+            [ihm.SaccharideChemComp('NAG'), ihm.SaccharideChemComp('FUC')])
+        system.entities.extend((e1, e2, e3, e4))
 
         t2 = modelcif.Template(e2, 'A', model_num=1, transformation=None)
         a1 = modelcif.AsymUnit(e1, 'foo')
@@ -1606,6 +1609,33 @@ _struct_ref_seq_dif.details
 1 1 TRP ? SER 2 'Test mutation'
 #
 """)
+
+    def test_write_branched(self):
+        """Test write() output of branched entity information"""
+        # Tests for individual dumpers are already present in python-ihm;
+        # here we just test to make sure they are being called by write()
+        s = modelcif.System()
+        e = modelcif.Entity(
+            [ihm.SaccharideChemComp('NAG'),
+             ihm.SaccharideChemComp('BMC'),
+             ihm.SaccharideChemComp('FUC')])
+        e.branch_descriptors.append(
+            ihm.BranchDescriptor('bar', type='typ2'))
+        e.branch_links.append(
+            ihm.BranchLink(num1=2, atom_id1='CA', leaving_atom_id1='H1',
+                           num2=3, atom_id2='N', leaving_atom_id2='H2'))
+        s.entities.append(e)
+        asym = modelcif.AsymUnit(e, 'foo')
+        s.asym_units.append(asym)
+
+        fh = StringIO()
+        modelcif.dumper.write(fh, [s])
+        output = fh.getvalue()
+        self.assertIn('_pdbx_entity_branch_list.hetero', output)
+        self.assertIn('_pdbx_entity_branch.type', output)
+        self.assertIn('_pdbx_branch_scheme.entity_id', output)
+        self.assertIn('_pdbx_entity_branch_descriptor.ordinal', output)
+        self.assertIn('_pdbx_entity_branch_link.comp_id_1', output)
 
 
 if __name__ == '__main__':

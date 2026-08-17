@@ -158,7 +158,7 @@ class _EntityNonPolyDumper(Dumper):
                          ["entity_id", "name", "comp_id",
                           "ma_model_mode"]) as lp:
             for entity in system.entities:
-                if entity.is_polymeric():
+                if entity.is_polymeric() or entity.is_branched():
                     continue
                 lp.write(entity_id=entity._id, name=entity.description,
                          comp_id=entity.sequence[0].id,
@@ -996,8 +996,11 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntitySrcSynDumper, ihm.dumper._StructRefDumper,
         _TargetRefDBDumper,
         ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
-        ihm.dumper._EntityPolySeqDumper, ihm.dumper._StructAsymDumper,
+        ihm.dumper._EntityPolySeqDumper, ihm.dumper._EntityBranchListDumper,
+        ihm.dumper._EntityBranchDumper, ihm.dumper._StructAsymDumper,
         ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
+        ihm.dumper._BranchSchemeDumper, ihm.dumper._BranchDescriptorDumper,
+        ihm.dumper._BranchLinkDumper,
         _DataDumper, _DataGroupDumper, _DataRefDBDumper,
         _TargetEntityDumper, _TemplateTransformDumper, _AlignmentDumper,
         _ProtocolDumper, _ModelDumper, _AssociatedDumper, _FeatureDumper,

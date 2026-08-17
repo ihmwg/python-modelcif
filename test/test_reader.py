@@ -2100,6 +2100,22 @@ A 1 4 9A 48A ? .
         self.assertIsNone(asym.residue(3).ins_code)
         self.assertEqual(asym.orig_auth_seq_id_map, {2: 12, 3: 24, 4: '48A'})
 
+    def test_branched(self):
+        """Test read of branched entities"""
+        # Tests for individual dumpers are already present in python-ihm;
+        # here we just test to make sure they are being called by read()
+        incif = utils.get_input_file_name(TOPDIR, 'mini_branched.cif')
+        with open(incif) as fh:
+            s, = modelcif.reader.read(fh)
+        e, = s.entities
+        a, = s.asym_units
+        self.assertEqual(a.auth_seq_id_map,
+                         {1: (51, None), 2: (52, None), 3: (53, None)})
+        bd1, = e.branch_descriptors
+        self.assertEqual(bd1.text, 'bar')
+        lnk1, = e.branch_links
+        self.assertEqual(lnk1.atom_id1, 'CA')
+
 
 if __name__ == '__main__':
     unittest.main()
