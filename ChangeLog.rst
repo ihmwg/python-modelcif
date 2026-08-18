@@ -1,3 +1,10 @@
+1.8 - 2026-08-17
+================
+  - Basic support for oligosaccharides is now provided, using python-ihm
+    classes to describe saccharide chemical components
+    (:class:`ihm.SaccharideChemComp` and subclasses) and to annotate
+    the linkage between components (:class:`ihm.BranchLink`).
+
 1.7 - 2026-04-10
 ================
   - The new classes :class:`modelcif.reference.InsertionSeqDif`
