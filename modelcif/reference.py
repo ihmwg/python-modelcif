@@ -29,6 +29,8 @@ class TargetReference(ihm.reference.Sequence):
        :param int align_end: Ending index of the sequence in the database.
               Deprecated; use :attr:`alignments` instead.
        :param str isoform: Sequence isoform, if applicable.
+              Deprecated; isoform information (e.g. "Q14669-2") should be
+              included in the ``accession`` parameter.
        :param str ncbi_taxonomy_id: Taxonomy identifier provided by NCBI.
        :param str organism_scientific: Scientific name of the organism.
        :param sequence_version_date: Versioning date, e.g. for UniProtKB
