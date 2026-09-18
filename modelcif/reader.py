@@ -456,6 +456,7 @@ class _EnumerationMapper:
     def get(self, name, other_det):
         """Get the Python class that matches the given name
            and other_details"""
+        orig_name = name
         name = name.upper()
         typ = self._map.get(name)
         if typ:
@@ -465,7 +466,8 @@ class _EnumerationMapper:
         if name != self._other_name:
             class ExtraType(self._base_class):
                 other_details = None
-            setattr(ExtraType, self._attr, name)
+            # Use original name (preserving case)
+            setattr(ExtraType, self._attr, orig_name)
             self._map[name] = ExtraType
             return ExtraType
         # If name is "Other" then treat other_details as the key

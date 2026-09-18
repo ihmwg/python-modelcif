@@ -155,10 +155,14 @@ _ma_software_group.parameter_group_id
         # Check get of an unhandled value
         miss = m.get('MIS', None)
         self.assertEqual(miss.name, 'MIS')
-        self.assertIsNone(unp.other_details)
+        self.assertIsNone(miss.other_details)
         # We should get the same class each time (case insensitive)
         miss2 = m.get('mis', None)
         self.assertIs(miss, miss2)
+        # Case of unhandled values should be preserved
+        mixed = m.get('MiXeD', None)
+        self.assertEqual(mixed.name, 'MiXeD')
+        self.assertIsNone(mixed.other_details)
         # Check get of a custom "other" value
         custom = m.get('other', "custom type 1")
         self.assertEqual(custom.name, 'Other')
