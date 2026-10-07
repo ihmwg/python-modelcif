@@ -165,6 +165,16 @@ class _EntityNonPolyDumper(Dumper):
                          ma_model_mode=self._ma_model_mode_map.get(entity))
 
 
+class _PolySeqSchemeDumper(ihm.dumper._PolySeqSchemeDumper):
+    # python-ihm's dumper outputs ihm_model_id_list to support
+    # heterogeneous model composition. ModelCIF doesn't support this,
+    # so exclude that data item
+    _keywords = ["asym_id", "entity_id", "seq_id", "mon_id",
+                 "pdb_seq_num", "auth_seq_num", "pdb_mon_id",
+                 "auth_mon_id", "pdb_strand_id",
+                 "pdb_ins_code"]
+
+
 class _TargetEntityDumper(Dumper):
     def dump(self, system, writer):
         with writer.loop(
@@ -998,7 +1008,7 @@ class ModelCIFVariant(Variant):
         ihm.dumper._EntityPolyDumper, _EntityNonPolyDumper,
         ihm.dumper._EntityPolySeqDumper, ihm.dumper._EntityBranchListDumper,
         ihm.dumper._EntityBranchDumper, ihm.dumper._StructAsymDumper,
-        ihm.dumper._PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
+        _PolySeqSchemeDumper, ihm.dumper._NonPolySchemeDumper,
         ihm.dumper._BranchSchemeDumper, ihm.dumper._BranchDescriptorDumper,
         ihm.dumper._BranchLinkDumper,
         _DataDumper, _DataGroupDumper, _DataRefDBDumper,

@@ -664,6 +664,7 @@ C
         asmb = modelcif.Assembly((asym,))
         asmb._id = 2
         model1 = modelcif.model.HomologyModel(assembly=asmb, name='test model')
+        model1._id = 1
         model1._data_id = 42
         model1._atoms = [modelcif.model.Atom(asym_unit=asym, seq_id=1,
                                              atom_id='C', type_symbol='C',
@@ -673,7 +674,9 @@ C
         # Add at least one model, since the PolySeqSchemeDumper checks all
         # models' not_modeled_residue_ranges member when writing the table
         system.model_groups.append(mg)
-        dumper = ihm.dumper._PolySeqSchemeDumper()
+        # modelcif's dumper differs from python-ihm's in that it does output
+        # the ihm_model_id_list data item
+        dumper = modelcif.dumper._PolySeqSchemeDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
 loop_
