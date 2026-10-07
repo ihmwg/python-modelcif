@@ -674,9 +674,7 @@ C
         # Add at least one model, since the PolySeqSchemeDumper checks all
         # models' not_modeled_residue_ranges member when writing the table
         system.model_groups.append(mg)
-        # modelcif's dumper differs from python-ihm's in that it does not
-        # output the ihm_model_id_list data item
-        dumper = modelcif.dumper._PolySeqSchemeDumper()
+        dumper = ihm.dumper._PolySeqSchemeDumper()
         out = _get_dumper_output(dumper, system)
         self.assertEqual(out, """#
 loop_
